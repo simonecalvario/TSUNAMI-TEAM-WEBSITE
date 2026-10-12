@@ -1,1 +1,351 @@
 
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="theme-color" content="#071923">
+
+  <meta name="description" content="TSUNAMI TEAM — Travel, friendship and shared experiences. Be liquid.">
+
+  <title>TSUNAMI TEAM — Be liquid</title>
+
+  <style>
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+
+      margin: 0;
+
+      background: #071923;
+
+      color: #f4f8f8;
+
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+      line-height: 1.7;
+
+    }
+
+    header {
+
+      padding: 24px 7%;
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      border-bottom: 1px solid #23404a;
+
+    }
+
+    .brand { font-weight: 800; letter-spacing: 3px; }
+
+    .brand span { color: #39d6c3; }
+
+    nav a {
+
+      color: #f4f8f8;
+
+      text-decoration: none;
+
+      margin-left: 18px;
+
+      font-size: 13px;
+
+    }
+
+    .hero {
+
+      min-height: 75vh;
+
+      padding: 90px 8%;
+
+      display: flex;
+
+      flex-direction: column;
+
+      justify-content: center;
+
+      background: radial-gradient(ellipse at 85% 35%, #14505a 0%, #071923 60%);
+
+    }
+
+    .eyebrow {
+
+      color: #39d6c3;
+
+      letter-spacing: 4px;
+
+      font-size: 12px;
+
+      font-weight: 700;
+
+    }
+
+    h1 {
+
+      font-size: clamp(48px, 10vw, 92px);
+
+      line-height: 1.03;
+
+      letter-spacing: -3px;
+
+      margin: 22px 0;
+
+    }
+
+    h1 span { color: #39d6c3; }
+
+    .hero p { max-width: 560px; color: #c2d3d8; font-size: 18px; }
+
+    .cta {
+
+      display: inline-block;
+
+      width: fit-content;
+
+      margin-top: 24px;
+
+      padding: 13px 23px;
+
+      border-radius: 4px;
+
+      background: #39d6c3;
+
+      color: #071923;
+
+      text-decoration: none;
+
+      font-weight: 800;
+
+    }
+
+    section { padding: 75px 8%; }
+
+    h2 { font-size: clamp(30px, 6vw, 48px); line-height: 1.2; }
+
+    .muted { color: #b5c7cd; max-width: 680px; }
+
+    .grid {
+
+      display: grid;
+
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+
+      gap: 18px;
+
+      margin-top: 32px;
+
+    }
+
+    .item {
+
+      padding: 24px;
+
+      border: 1px solid #28434c;
+
+      border-radius: 8px;
+
+      background: #0b222d;
+
+    }
+
+    .item h3 { color: #39d6c3; }
+
+    .manifesto {
+
+      background: #0b222d;
+
+      border-left: 3px solid #39d6c3;
+
+      padding: 24px;
+
+      max-width: 760px;
+
+    }
+
+    footer {
+
+      padding: 30px 8%;
+
+      border-top: 1px solid #23404a;
+
+      color: #b5c7cd;
+
+      font-size: 13px;
+
+    }
+
+    @media (max-width: 520px) {
+
+      header { align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+
+      nav a { margin-left: 0; margin-right: 14px; }
+
+      .hero { min-height: 65vh; padding-top: 65px; }
+
+      h1 { letter-spacing: -2px; }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <header>
+
+    <div class="brand">TSUNAMI <span>TEAM</span></div>
+
+    <nav>
+
+      <a href="#about">Our vision</a>
+
+      <a href="#journeys">Journeys</a>
+
+      <a href="#join">Join us</a>
+
+    </nav>
+
+  </header>
+
+  <main>
+
+    <section class="hero">
+
+      <div class="eyebrow">TRAVEL · FRIENDSHIP · FREEDOM</div>
+
+      <h1>BE<br><span>LIQUID.</span></h1>
+
+      <p>
+
+        You can be strong as a rock, free as the air,
+
+        or fluid as water. What matters is moving forward
+
+        together, embracing change and sharing the journey.
+
+      </p>
+
+      <a class="cta" href="#about">Discover our vision ↘</a>
+
+    </section>
+
+    <section id="about">
+
+      <div class="eyebrow">WHO WE ARE</div>
+
+      <h2>More than a team.<br>A way of living.</h2>
+
+      <p class="muted">
+
+        We believe the best experiences are the ones we share.
+
+        Different cities, different paths, one community.
+
+        We travel to discover the world and build friendships
+
+        that go far beyond the journey.
+
+      </p>
+
+      <div class="manifesto">
+
+        <strong>BE LIQUID.</strong><br>
+
+        Stay strong, stay free, stay open to change.
+
+        Never stop moving. Never stop connecting.
+
+      </div>
+
+    </section>
+
+    <section id="journeys">
+
+      <div class="eyebrow">THE EXPERIENCE</div>
+
+      <h2>Different places.<br>One shared wave.</h2>
+
+      <p class="muted">
+
+        Every destination is an opportunity to create memories,
+
+        meet people and experience something new.
+
+      </p>
+
+      <div class="grid">
+
+        <div class="item">
+
+          <h3>Explore</h3>
+
+          <p>Discover new places, cultures and perspectives.</p>
+
+        </div>
+
+        <div class="item">
+
+          <h3>Connect</h3>
+
+          <p>Turn shared adventures into lasting friendships.</p>
+
+        </div>
+
+        <div class="item">
+
+          <h3>Be liquid</h3>
+
+          <p>Adapt, evolve and enjoy the journey together.</p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <section id="join">
+
+      <div class="eyebrow">YOUR JOURNEY STARTS HERE</div>
+
+      <h2>Join the wave.</h2>
+
+      <p class="muted">
+
+        Have a journey in mind or want to know more about
+
+        TSUNAMI TEAM? Get in touch and let's connect.
+
+      </p>
+
+      <a class="cta" href="mailto:">Contact the team ↗</a>
+
+    </section>
+
+  </main>
+
+  <footer>
+
+    TSUNAMI TEAM · BE LIQUID.<br>
+
+    © 2026 TSUNAMI TEAM
+
+  </footer>
+
+</body>
+
+</html>
