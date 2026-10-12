@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -245,6 +244,46 @@
       color: var(--grey);
     }
 
+    .founder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .founder-card {
+      background: var(--dark);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .founder-card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      display: block;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .founder-card h3 {
+      margin-bottom: 6px;
+    }
+
+    .founder-card .callsign {
+      color: var(--yellow);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .founder-card .desc {
+      color: var(--grey);
+      font-size: 0.95rem;
+    }
+
     .statute-intro {
       max-width: 780px;
       color: var(--grey);
@@ -357,6 +396,7 @@
         <div class="nav-links">
           <a href="#philosophy">Philosophy</a>
           <a href="#experiences">Experiences</a>
+          <a href="#founders">Founders</a>
           <a href="#statute">Our Statute</a>
           <a href="#join">Join Us</a>
         </div>
@@ -499,6 +539,115 @@
       </div>
     </section>
 
+    <!-- FOUNDERS -->
+
+    <section id="founders">
+      <div class="container">
+        <div class="section-label">Our roots</div>
+
+        <h2>Tsunami Team <span>the Originals</span></h2>
+
+        <p class="intro">
+          The people who founded TSUNAMI TEAM.
+        </p>
+
+        <div class="founder-grid">
+
+          <article class="founder-card">
+            <img src="assets/images/founders/simone.jpg" alt="Simone — Founder">
+            <h3>Simone</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/biagio.jpg" alt="Biagio — Founder">
+            <h3>Biagio</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/rinaldo.jpg" alt="Rinaldo — Founder">
+            <h3>Rinaldo</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/donato.jpg" alt="Donato — Founder">
+            <h3>Donato</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/carlos.jpg" alt="Carlos — Founder">
+            <h3>Carlos</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/marcos.jpg" alt="Marcos — Founder">
+            <h3>Marcos</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/saskia.jpg" alt="Saskia — Founder">
+            <h3>Saskia</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/tessa.jpg" alt="Tessa — Founder">
+            <h3>Tessa</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/salvatore.jpg" alt="Salvatore — Founder">
+            <h3>Salvatore</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/antonio.jpg" alt="Antonio — Founder">
+            <h3>Antonio</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/pietro.jpg" alt="Pietro — Founder">
+            <h3>Pietro</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/francesco.jpg" alt="Francesco — Founder">
+            <h3>Francesco</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/massimo.jpg" alt="Massimo — Founder">
+            <h3>Massimo</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
     <!-- THE COMPLETE STATUTE -->
 
     <section id="statute">
@@ -592,6 +741,17 @@
       <p>Freedom, friendship and shared experiences.</p>
     </div>
   </footer>
+
+  <script>
+    window.addEventListener('load', function () {
+      if (!location.hash) {
+        const home = document.getElementById('home');
+        if (home) {
+          home.scrollIntoView({ behavior: 'auto', block: 'start' });
+        }
+      }
+    });
+  </script>
 
 </body>
 </html>
