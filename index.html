@@ -780,16 +780,18 @@
       }).addTo(map);
 
       function sizeForZoom(zoom) {
-        const s = Math.round(baseSize * Math.pow(zoomScale, zoom - initialZoom));
+        const rawScale = Math.pow(zoomScale, zoom - initialZoom);
+        const lowZoomBias = zoom <= initialZoom ? 0.62 : 1;
+        const s = Math.round(baseSize * rawScale * lowZoomBias);
         return Math.max(minSize, Math.min(maxSize, s));
       }
 
       function createIcon(iconUrl, size) {
         return L.icon({
           iconUrl,
-          iconSize: [size, Math.round(size * 1.35)],
-          iconAnchor: [Math.round(size / 2), Math.round(size * 1.25)],
-          popupAnchor: [0, -Math.round(size * 1.15)]
+          iconSize: [size, Math.round(size * 1.25)],
+          iconAnchor: [Math.round(size / 2), Math.round(size * 1.15)],
+          popupAnchor: [0, -Math.round(size * 1.05)]
         });
       }
 
