@@ -41,7 +41,7 @@
 
     .custom-pin { display: block; line-height: 0; }
     .custom-pin svg { display: block; width: 100%; height: auto; transform-origin: 50% 85%; transition: transform 200ms ease; }
-    .custom-pin.enlarged svg { transform: scale(2.4); }
+    .custom-pin.enlarged svg { transform: scale(1.6); }
 
     .meetings-popup .leaflet-popup-content-wrapper, .meetings-popup .leaflet-popup-content { border-radius: 12px; background: #101010; color: #fff; }
     .meetings-popup a { color: #101010; }
@@ -102,7 +102,7 @@
       <div class="container">
         <div class="section-label">Meetings</div>
         <h2 id="meetings-heading">Tsunami <span>Meetings</span></h2>
-        <p class="intro">Map of our meetings. The pin style is now working with inline SVG so it will behave correctly before you swap in transparent PNG files.</p>
+        <p class="intro">Pin size now scales gently with zoom: small at default view, slightly larger when zoomed, and enlarged only on click.</p>
         <div id="world-map"></div>
       </div>
     </section>
@@ -144,6 +144,9 @@
 
       const initialZoom = 3;
       const baseSize = 40;
+      const minSize = 18;
+      const maxSize = 64;
+      const zoomScale = 1.06;
 
       const map = L.map('world-map', { zoomControl: true }).setView([38, 14], initialZoom);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -152,7 +155,8 @@
       }).addTo(map);
 
       function sizeForZoom(zoom) {
-        return Math.round(baseSize * Math.pow(1.18, zoom - initialZoom));
+        const s = Math.round(baseSize * Math.pow(zoomScale, zoom - initialZoom));
+        return Math.max(minSize, Math.min(maxSize, s));
       }
 
       function pinSvg(color) {
