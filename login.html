@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login | TSUNAMI TEAM</title>
+  <style>
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0b0b0b;color:#f5f5f5;display:flex;align-items:center;justify-content:center;min-height:100vh}
+    .card{width:min(420px,90vw);background:#111;border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:30px 22px;box-shadow:0 10px 35px rgba(0,0,0,.35)}
+    h1{margin:0 0 12px;font-size:1.8rem;color:#f5d21b;text-align:center}
+    label{display:block;margin-bottom:12px;font-size:0.95rem;color:#d8d8d8}
+    input{width:100%;box-sizing:border-box;padding:12px 14px;margin-top:6px;background:#0d0d0d;border:1px solid rgba(255,255,255,0.16);border-radius:8px;color:#fff;font-size:1rem}
+    button{width:100%;padding:12px 16px;margin-top:18px;border:0;border-radius:8px;background:#f5d21b;color:#101010;font-weight:900;font-size:1rem;cursor:pointer}
+    .error{display:none;margin-top:12px;color:#ff9a9a;font-size:0.9rem;min-height:20px}
+    .small{text-align:center;margin-top:14px;font-size:0.78rem;color:#adadad}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>TSUNAMI TEAM</h1>
+    <label>
+      Username
+      <input id="user" type="text" autocomplete="username" />
+    </label>
+    <label>
+      Password
+      <input id="pass" type="password" autocomplete="current-password" />
+    </label>
+    <div id="error" class="error"></div>
+    <button id="loginBtn">Accedi</button>
+    <div class="small">Accesso riservato</div>
+  </div>
+
+  <script>
+    const AUTH_USER = 'tsunamiteam';
+    const AUTH_PASS = 'beliquid2023';
+
+    const loginBtn = document.getElementById('loginBtn');
+    const errorBox = document.getElementById('error');
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+
+    function login() {
+      const user = document.getElementById('user').value.trim();
+      const pass = document.getElementById('pass').value;
+
+      if (user === AUTH_USER && pass === AUTH_PASS) {
+        const expiresAt = Date.now() + 1000 * 60 * 60 * 24; // 24h
+        localStorage.setItem('tt_auth', JSON.stringify({
+          user,
+          exp: expiresAt
+        }));
+        location.href = '/';
+        return;
+      }
+
+      showError('Credenziali errate');
+    }
+
+    loginBtn.addEventListener('click', login);
+
+    document.getElementById('user').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') login();
+    });
+
+    document.getElementById('pass').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') login();
+    });
+  </script>
+</body>
+</html>
