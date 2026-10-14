@@ -380,6 +380,78 @@
       letter-spacing: 2px;
     }
 
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 11, 11, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .auth-overlay.visible {
+      display: flex;
+    }
+
+    .auth-card {
+      width: min(420px, 100%);
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 28px 22px;
+      box-shadow: 0 18px 48px rgba(0,0,0,0.4);
+    }
+
+    .auth-card h2 {
+      margin: 0 0 18px;
+      font-size: 1.8rem;
+      color: var(--yellow);
+      text-align: center;
+    }
+
+    .auth-card label {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      color: #d8d8d8;
+    }
+
+    .auth-card input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 14px;
+      margin-top: 6px;
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .auth-card button {
+      width: 100%;
+      padding: 12px 16px;
+      margin-top: 14px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--yellow);
+      color: var(--black);
+      font-weight: 900;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .auth-error {
+      display: none;
+      margin-top: 12px;
+      color: #ff9a9a;
+      font-size: 0.9rem;
+      min-height: 20px;
+      text-align: center;
+    }
+
     @media (max-width: 700px) {
       nav {
         padding: 15px 0;
@@ -426,17 +498,77 @@
 </head>
 
 <body>
+  <div id="authOverlay" class="auth-overlay">
+    <div class="auth-card">
+      <h2>TSUNAMI TEAM</h2>
+      <label>
+        Username
+        <input id="authUser" type="text" autocomplete="username" />
+      </label>
+      <label>
+        Password
+        <input id="authPass" type="password" autocomplete="current-password" />
+      </label>
+      <div id="authError" class="auth-error"></div>
+      <button id="authSubmit">Accedi</button>
+    </div>
+  </div>
+
   <script>
-    // Simple client-side auth check: redirects to /login.html if no valid token.
-    (function(){
-      try {
-        const raw = localStorage.getItem('tt_auth');
-        if (!raw) { location.href = '/login.html'; return; }
-        const data = JSON.parse(raw);
-        if (!data || !data.exp || Date.now() > data.exp) { localStorage.removeItem('tt_auth'); location.href = '/login.html'; return; }
-      } catch (e) {
-        location.href = '/login.html';
+    (function () {
+      const AUTH_USER = 'tsunamiteam';
+      const AUTH_PASS = 'beliquid2023';
+      const overlay = document.getElementById('authOverlay');
+      const authUser = document.getElementById('authUser');
+      const authPass = document.getElementById('authPass');
+      const authError = document.getElementById('authError');
+      const authSubmit = document.getElementById('authSubmit');
+
+      function showAuth() {
+        overlay.classList.add('visible');
       }
+
+      function hideAuth() {
+        overlay.classList.remove('visible');
+      }
+
+      function validateToken() {
+        try {
+          const raw = localStorage.getItem('tt_auth');
+          if (!raw) return false;
+          const data = JSON.parse(raw);
+          if (!data || !data.exp) return false;
+          return Date.now() <= data.exp;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function login() {
+        const user = authUser.value.trim();
+        const pass = authPass.value;
+        if (user === AUTH_USER && pass === AUTH_PASS) {
+          localStorage.setItem('tt_auth', JSON.stringify({ user, exp: Date.now() + 86400000 }));
+          hideAuth();
+          return;
+        }
+        authError.textContent = 'Credenziali errate';
+        authError.style.display = 'block';
+      }
+
+      if (!validateToken()) {
+        showAuth();
+      } else {
+        hideAuth();
+      }
+
+      authSubmit.addEventListener('click', login);
+      authUser.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') login();
+      });
+      authPass.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') login();
+      });
     })();
   </script>
 
@@ -452,6 +584,7 @@
           <a href="#meetings">Meetings</a>
           <a href="#statute">Our Statute</a>
           <a href="#join">Join Us</a>
+          <a href="/logout.html">Logout</a>
         </div>
       </nav>
     </div>
@@ -508,4 +641,373 @@
             <p>
               Like water, we can adapt to different situations and
               different people. We can change our shape without
-{
+              losing who we are.
+            </p>
+          </article>
+
+          <article class="philosophy-card">
+            <h3>Connection</h3>
+            <p>
+              The strongest bond is not the one that holds people back,
+              but the one that keeps them connected, wherever life
+              takes them.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="experiences" id="experiences">
+      <div class="container">
+        <div class="section-label">One spirit, many adventures</div>
+
+        <h2>Made of <span>experiences.</span></h2>
+
+        <p class="intro">
+          We are not defined by one place, one activity or one way
+          of living. We are defined by the experiences we share,
+          the stories we collect and the people who make those
+          moments worth remembering.
+        </p>
+
+        <div class="experience-list">
+          <article class="experience-item">
+            <h3>Explore</h3>
+            <p>
+              Discover new places, follow new paths and stay curious
+              about what lies beyond the familiar.
+            </p>
+          </article>
+
+          <article class="experience-item">
+            <h3>Experience</h3>
+            <p>
+              Embrace the unexpected. Every adventure adds something
+              to the person you are becoming.
+            </p>
+          </article>
+
+          <article class="experience-item">
+            <h3>Share</h3>
+            <p>
+              Some moments become unforgettable because there is
+              someone beside you with whom you can share them.
+            </p>
+          </article>
+
+          <article class="experience-item">
+            <h3>Reconnect</h3>
+            <p>
+              Everyone is free to follow their own journey.
+              The connection remains, ready to bring us together again.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="founders">
+      <div class="container">
+        <div class="section-label">Our roots</div>
+
+        <h2>Tsunami Team <span>the Originals</span></h2>
+
+        <p class="intro">
+          The people who founded TSUNAMI TEAM.
+        </p>
+
+        <div class="founder-grid">
+          <article class="founder-card">
+            <img src="assets/images/founders/antonio.jpg" alt="Antonio — Founder">
+            <h3>Antonio</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/biagio.jpg" alt="Biagio — Founder">
+            <h3>Biagio</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/carlos.jpg" alt="Carlos — Founder">
+            <h3>Carlos</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/donato.jpg" alt="Donato — Founder">
+            <h3>Donato</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/francesco.jpg" alt="Francesco — Founder">
+            <h3>Francesco</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/marcos.jpg" alt="Marcos — Founder">
+            <h3>Marcos</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/massimo.jpg" alt="Massimo — Founder">
+            <h3>Massimo</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/pietro.jpg" alt="Pietro — Founder">
+            <h3>Pietro</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/rinaldo.jpg" alt="Rinaldo — Founder">
+            <h3>Rinaldo</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/salvatore.jpg" alt="Salvatore — Founder">
+            <h3>Salvatore</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/saskia.jpg" alt="Saskia — Founder">
+            <h3>Saskia</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/simone.jpg" alt="Simone — Founder">
+            <h3>Simone</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+
+          <article class="founder-card">
+            <img src="assets/images/founders/tessa.jpg" alt="Tessa — Founder">
+            <h3>Tessa</h3>
+            <p class="callsign">Call sign: —</p>
+            <p class="desc">Description to be added.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="meetings" aria-labelledby="meetings-heading">
+      <div class="container">
+        <div class="section-label">Meetings</div>
+        <h2 id="meetings-heading">Tsunami <span>Meetings</span></h2>
+        <p class="intro">Map of our meetings: click the pins to explore the gallery of each trip.</p>
+        <div id="world-map"></div>
+      </div>
+    </section>
+
+    <section id="statute">
+      <div class="container">
+        <div class="section-label">Our founding words</div>
+
+        <h2>The <span>Statute.</span></h2>
+
+        <p class="statute-intro">
+          This is the philosophy behind TSUNAMI TEAM:
+          three ways of being, and a choice to remain free
+          without losing the connection with one another.
+        </p>
+
+        <article class="statute">
+          <p>
+            You could be solid, strong as a rock, compact and impenetrable,
+            surely you will be the toughest and the hardest, but only until
+            you remain steady in your place, otherwise you will crumble
+            becoming a punch of sand, losing your certainties like dust
+            in the wind.
+          </p>
+
+          <p>
+            You could be air, free as a bird, light and fast, surely you
+            will enjoy all the amazing experiences that you could have
+            in your thousands trips, but when you’ll turn back your eyes,
+            you won’t find anyone but yourself, and when, at the end of
+            the day, you’ll rest, there will be no one to share with your
+            excited feelings and, if you try to phone someone, maybe he
+            will be busy, like you were since few hours before.
+            And you will be alone, like a wonderful star in the dark space.
+          </p>
+
+          <p>
+            So you could be liquid, clear as water, adaptable and
+            incompressible at the same time, calm and quiet like a crystal
+            mountain lake or stormy and powerful like a tsunami, surely
+            you could enjoy your experiences, you could have your space
+            and making your own adventures with anyone you want, you won’t
+            break any chains, there are none. You could also be yourself
+            with yourself, but the most important thing is that you could
+            be yourself also staying with the others, they will adapt on
+            you and you on them and, at the same time, you won’t lose each
+            other, there will be always a connection, a link, no matter
+            how strong and big, but you know that it will be. And you will
+            be part of something bigger than you, which will lead you to
+            be yourself and greater than yourself. YOU will be US.
+          </p>
+
+          <p class="closing">
+            Friendship is liquid, so choose your liquid and be it.
+            TSUNAMI TEAM
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="join" id="join">
+      <div class="container">
+        <div class="section-label">The connection is yours</div>
+
+        <h2>Choose your liquid.<br><span>Be it.</span></h2>
+
+        <p class="intro">
+          Be solid when you need strength. Be air when you need freedom.
+          Be liquid when you want to experience life while staying
+          connected with others. There is no single path to follow,
+          only the freedom to be yourself.
+        </p>
+
+        <a class="button" href="#statute">
+          Read our statute
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <strong>TSUNAMI TEAM</strong>
+      <p>Friendship is liquid.</p>
+      <p>Freedom, friendship and shared experiences.</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    (function () {
+      const cities = [
+        { name: 'Barcelona', coords: [41.3851, 2.1734], url: '/barcelona.html', icon: 'assets/images/pins/barcelona.png' },
+        { name: 'Doha', coords: [25.2854, 51.5310], url: '/doha.html', icon: 'assets/images/pins/doha.png' },
+        { name: 'Munich', coords: [48.1351, 11.5820], url: '/munich.html', icon: 'assets/images/pins/munich.png' }
+      ];
+
+      const initialZoom = 3;
+      const baseSize = 40;
+      const minSize = 18;
+      const maxSize = 64;
+      const zoomScale = 1.06;
+
+      const map = L.map('world-map', { zoomControl: true }).setView([38, 14], initialZoom);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      function sizeForZoom(zoom) {
+        const rawScale = Math.pow(zoomScale, zoom - initialZoom);
+        const lowZoomBias = zoom <= initialZoom ? 0.62 : 1;
+        const s = Math.round(baseSize * rawScale * lowZoomBias);
+        return Math.max(minSize, Math.min(maxSize, s));
+      }
+
+      function createIcon(iconUrl, size) {
+        return L.icon({
+          iconUrl,
+          iconSize: [size, Math.round(size * 1.25)],
+          iconAnchor: [Math.round(size / 2), Math.round(size * 1.15)],
+          popupAnchor: [0, -Math.round(size * 1.05)]
+        });
+      }
+
+      cities.forEach(city => {
+        const marker = L.marker(city.coords, { icon: createIcon(city.icon, sizeForZoom(map.getZoom())), keyboard: true }).addTo(map);
+
+        const popupHtml = `
+          <div style="text-align:center; min-width:170px;">
+            <strong style="display:block; margin-bottom:8px;">${city.name}</strong>
+            <a href="${city.url}" style="display:inline-block; margin-top:6px; padding:8px 12px; background:#f5d21b; color:#101010; border-radius:6px; font-weight:700; text-decoration:none;">Go to the Gallery</a>
+          </div>
+        `;
+
+        marker.bindPopup(popupHtml, {
+          closeButton: true,
+          className: 'meetings-popup'
+        });
+
+        marker.on('click', function () {
+          marker.openPopup();
+          const el = marker._icon;
+          if (el) {
+            el.classList.add('enlarged');
+            setTimeout(() => el.classList.remove('enlarged'), 500);
+          }
+        });
+
+        marker.on('popupopen', function () {
+          const el = marker._icon;
+          if (el) el.classList.add('enlarged');
+        });
+
+        marker.on('popupclose', function () {
+          const el = marker._icon;
+          if (el) el.classList.remove('enlarged');
+        });
+      });
+
+      map.on('zoomend', function () {
+        const newSize = sizeForZoom(map.getZoom());
+        cities.forEach(city => {
+          map.eachLayer(layer => {
+            if (layer instanceof L.Marker && layer.getLatLng && layer.getLatLng().lat === city.coords[0] && layer.getLatLng().lng === city.coords[1]) {
+              layer.setIcon(createIcon(city.icon, newSize));
+            }
+          });
+        });
+      });
+
+      setTimeout(() => {
+        document.querySelectorAll('.leaflet-marker-icon').forEach(el => {
+          el.setAttribute('tabindex', '0');
+          el.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') el.click();
+          });
+        });
+      }, 400);
+    })();
+  </script>
+
+  <script>
+    window.addEventListener('load', function () {
+      if (!location.hash) {
+        const home = document.getElementById('home');
+        if (home) {
+          home.scrollIntoView({ behavior: 'auto', block: 'start' });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
