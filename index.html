@@ -27,13 +27,14 @@
 
   <style>
     :root {
-      --black: #101010;
-      --dark: #181818;
+      --black: #060d1c;
+      --dark: #0b1730;
+      --blue: #27b8ff;
       --yellow: #f5d21b;
       --orange: #ff7a18;
       --white: #f5f5f5;
       --grey: #b7b7b7;
-      --line: rgba(255,255,255,0.14);
+      --line: rgba(140,200,255,0.16);
     }
 
     * {
@@ -68,9 +69,17 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      background: rgba(16,16,16,0.96);
-      border-bottom: 1px solid var(--line);
-      backdrop-filter: blur(12px);
+      background: rgba(6,13,28,0.35);
+      border-bottom: 1px solid transparent;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    header.scrolled {
+      background: rgba(6,13,28,0.92);
+      border-bottom-color: var(--line);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
     }
 
     nav {
@@ -96,8 +105,33 @@
       font-size: 0.85rem;
     }
 
-    .nav-links a:hover {
+    .nav-links a {
+      position: relative;
+      padding: 4px 0;
+      transition: color 0.25s ease;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--yellow);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
       color: var(--yellow);
+    }
+
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+      transform: scaleX(1);
     }
 
     .hero {
@@ -105,18 +139,68 @@
       display: flex;
       align-items: center;
       text-align: center;
-      padding: 70px 0;
+      padding: 70px 0 190px;
+      position: relative;
+      overflow: hidden;
       background:
-        radial-gradient(
-          ellipse at top,
-          rgba(245,210,27,0.13),
-          transparent 60%
-        ),
-        var(--black);
+        radial-gradient(ellipse at 50% 0%, rgba(245,210,27,0.16), transparent 55%),
+        radial-gradient(ellipse at 15% 85%, rgba(39,184,255,0.22), transparent 55%),
+        radial-gradient(ellipse at 90% 60%, rgba(39,184,255,0.12), transparent 50%),
+        linear-gradient(180deg, #0a1f45 0%, var(--black) 100%);
     }
 
     .hero-content {
       width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Animated waves at the bottom of the hero */
+    .waves {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 170px;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .waves svg {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 200%;
+      height: 100%;
+      animation: wave-slide linear infinite;
+    }
+
+    .waves .w1 { fill: rgba(39,184,255,0.16); animation-duration: 26s; }
+    .waves .w2 { fill: rgba(39,184,255,0.26); animation-duration: 17s; animation-direction: reverse; }
+    .waves .w3 { fill: var(--black); animation-duration: 11s; }
+
+    @keyframes wave-slide {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* Floating bubbles (created by script) */
+    .bubble {
+      position: absolute;
+      bottom: -30px;
+      border-radius: 50%;
+      border: 1px solid rgba(160,220,255,0.45);
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), rgba(39,184,255,0.06));
+      z-index: 0;
+      pointer-events: none;
+      animation: bubble-rise linear infinite;
+    }
+
+    @keyframes bubble-rise {
+      0%   { transform: translateY(0) translateX(0); opacity: 0; }
+      10%  { opacity: 0.9; }
+      100% { transform: translateY(-95vh) translateX(25px); opacity: 0; }
     }
 
     .logo {
@@ -174,7 +258,44 @@
 
     section {
       padding: 90px 0;
-      border-top: 1px solid var(--line);
+      position: relative;
+    }
+
+    section:not(.hero)::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 0;
+      right: 0;
+      height: 12px;
+      z-index: 2;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='12' viewBox='0 0 160 12'%3E%3Cpath d='M0 6 Q40 0 80 6 T160 6' fill='none' stroke='%2327b8ff' stroke-width='2' stroke-opacity='0.55'/%3E%3C/svg%3E");
+      background-repeat: repeat-x;
+      animation: line-drift 9s linear infinite;
+    }
+
+    @keyframes line-drift {
+      from { background-position-x: 0; }
+      to   { background-position-x: 160px; }
+    }
+
+    /* Reveal on scroll (classes added by script only) */
+    .reveal {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .waves svg, .bubble, section:not(.hero)::before { animation: none; }
+      .reveal { opacity: 1; transform: none; transition: none; }
+      html { scroll-behavior: auto; }
     }
 
     .section-label {
@@ -309,7 +430,7 @@
       height: 520px;
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 8px;
-      background: #0b0b0b;
+      background: #07142a;
     }
 
     .leaflet-marker-icon {
@@ -434,7 +555,11 @@
 
       .hero {
         min-height: auto;
-        padding: 65px 0 80px;
+        padding: 65px 0 140px;
+      }
+
+      .waves {
+        height: 110px;
       }
 
       h1 {
@@ -502,6 +627,12 @@
         <a class="button" href="#philosophy">
           Discover our philosophy
         </a>
+      </div>
+
+      <div class="waves" aria-hidden="true">
+        <svg class="w1" viewBox="0 0 2880 200" preserveAspectRatio="none"><path d="M0 70 Q 90 36 180 70 T 360 70 T 540 70 T 720 70 T 900 70 T 1080 70 T 1260 70 T 1440 70 T 1620 70 T 1800 70 T 1980 70 T 2160 70 T 2340 70 T 2520 70 T 2700 70 T 2880 70 L 2880 200 L 0 200 Z"/></svg>
+        <svg class="w2" viewBox="0 0 2880 200" preserveAspectRatio="none"><path d="M0 100 Q 90 72 180 100 T 360 100 T 540 100 T 720 100 T 900 100 T 1080 100 T 1260 100 T 1440 100 T 1620 100 T 1800 100 T 1980 100 T 2160 100 T 2340 100 T 2520 100 T 2700 100 T 2880 100 L 2880 200 L 0 200 Z"/></svg>
+        <svg class="w3" viewBox="0 0 2880 200" preserveAspectRatio="none"><path d="M0 135 Q 90 113 180 135 T 360 135 T 540 135 T 720 135 T 900 135 T 1080 135 T 1260 135 T 1440 135 T 1620 135 T 1800 135 T 1980 135 T 2160 135 T 2340 135 T 2520 135 T 2700 135 T 2880 135 L 2880 200 L 0 200 Z"/></svg>
       </div>
     </section>
 
@@ -914,6 +1045,63 @@
         }
       }
     });
+  </script>
+  <script>
+    (function () {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Header becomes solid after scrolling
+      const header = document.querySelector('header');
+      function onScroll() { header.classList.toggle('scrolled', window.scrollY > 30); }
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      // Highlight the menu link of the section being viewed
+      const links = Array.from(document.querySelectorAll('.nav-links a[href^="#"]'));
+      if ('IntersectionObserver' in window) {
+        const spy = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              links.forEach(function (a) {
+                a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id);
+              });
+            }
+          });
+        }, { rootMargin: '-40% 0px -55% 0px' });
+        links.forEach(function (a) {
+          const sec = document.querySelector(a.getAttribute('href'));
+          if (sec) spy.observe(sec);
+        });
+
+        // Fade-in sections on scroll
+        if (!reduce) {
+          const reveal = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting) { e.target.classList.add('in'); reveal.unobserve(e.target); }
+            });
+          }, { threshold: 0.06 });
+          document.querySelectorAll('section:not(.hero) > .container').forEach(function (el) {
+            el.classList.add('reveal');
+            reveal.observe(el);
+          });
+        }
+      }
+
+      // Floating bubbles in the hero
+      const hero = document.querySelector('.hero');
+      if (hero && !reduce) {
+        for (let i = 0; i < 14; i++) {
+          const b = document.createElement('span');
+          const size = 6 + Math.random() * 18;
+          b.className = 'bubble';
+          b.style.width = b.style.height = size + 'px';
+          b.style.left = (Math.random() * 100) + '%';
+          b.style.animationDuration = (9 + Math.random() * 10) + 's';
+          b.style.animationDelay = (-Math.random() * 14) + 's';
+          hero.appendChild(b);
+        }
+      }
+    })();
   </script>
 </body>
 </html>
