@@ -11,20 +11,6 @@
   <meta name="theme-color" content="#101010">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <script>
-    // Redirect to login if not authenticated. Runs early to prevent access to content.
-    (function(){
-      try {
-        const raw = localStorage.getItem('tt_auth');
-        if (!raw) { location.href = '/login.html'; return; }
-        const data = JSON.parse(raw);
-        if (!data || !data.exp || Date.now() > data.exp) { localStorage.removeItem('tt_auth'); location.href = '/login.html'; return; }
-      } catch (e) {
-        location.href = '/login.html';
-      }
-    })();
-  </script>
-
   <style>
     :root {
       --black: #060d1c;
@@ -603,7 +589,7 @@
           <a href="#meetings">Meetings</a>
           <a href="#statute">Our Statute</a>
           <a href="#join">Join Us</a>
-          <a href="/logout.html">Logout</a>
+          <a href="/cdn-cgi/access/logout">Logout</a>
         </div>
       </nav>
     </div>
