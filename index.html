@@ -2301,19 +2301,28 @@
       }
       /* ---------------- BIRTHDAYS ---------------- */
       async function bdayInit() {
-        const rows = (await get('birthdays?select=*')) || [];
+        const raw = await get('birthdays?select=*');
+        const rows = raw || [];
         const mine = rows.find(r => r.email === email);
+        const MO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         if (mine) { $('bd-d').value = mine.day; $('bd-m').value = mine.month; }
+        if (raw === null) $('bd-msg').textContent = 'Birthdays are not available yet (database table or permissions missing).';
+        else if (mine) $('bd-msg').textContent = '✓ Saved: ' + mine.day + ' ' + MO[mine.month - 1];
+        else if (!$('bd-msg').textContent) $('bd-msg').textContent = 'Not set yet.';
         $('bd-save').onclick = async function () {
           if (!email) return;
           const body = { email: email, nickname: nick || 'A member', day: +$('bd-d').value, month: +$('bd-m').value };
-          const r = await fetch(R + 'birthdays?on_conflict=email', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, HJ), body: JSON.stringify(body) });
-          $('bd-msg').textContent = r.ok ? 'Saved 🎂' : 'Could not save (table missing?)';
-          if (r.ok) bdayInit();
+          let ok = false, err = '';
+          try {
+            const r = await fetch(R + 'birthdays?on_conflict=email', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, HJ), body: JSON.stringify(body) });
+            ok = r.ok; if (!ok) err = await r.text();
+          } catch (e) { err = String(e); }
+          if (ok) { $('bd-msg').textContent = ''; await bdayInit(); }
+          else $('bd-msg').textContent = 'Could not save: ' + err.slice(0, 120);
         };
         $('bd-del').onclick = async function () {
           await fetch(R + 'birthdays?email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H });
-          $('bd-msg').textContent = 'Removed.'; bdayInit();
+          $('bd-msg').textContent = ''; bdayInit();
         };
         const now = new Date(); now.setHours(0, 0, 0, 0);
         const out = [];
