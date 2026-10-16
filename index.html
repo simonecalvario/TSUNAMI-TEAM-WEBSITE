@@ -468,6 +468,39 @@
       color: var(--white); background: transparent; border: 1px solid var(--line); border-radius: 4px;
     }
     .vote-del:hover { color: var(--orange); border-color: var(--orange); }
+
+    /* ---- Date vote calendar ---- */
+    .when-box { margin: 48px 0 28px; }
+    .when-box h3 { color: var(--yellow); margin-bottom: 8px; }
+    .cal { max-width: 460px; margin-top: 16px; padding: 14px; background: var(--dark); border: 1px solid var(--line); border-radius: 12px; }
+    .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .cal-head strong { font-size: 1.05rem; text-transform: capitalize; }
+    .cal-nav { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--white); font-size: 1.2rem; cursor: pointer; }
+    .cal-nav:disabled { opacity: .3; cursor: default; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-dow { text-align: center; font-size: .72rem; color: var(--grey); padding: 4px 0; }
+    .cal-day {
+      position: relative; aspect-ratio: 1; border-radius: 8px; border: 1px solid transparent; cursor: pointer;
+      background: rgba(255,255,255,0.04); color: var(--white); font-size: .95rem; font-family: inherit; padding: 0;
+      display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent;
+    }
+    .cal-day.past { opacity: .25; cursor: default; }
+    .cal-day.h1 { background: rgba(39,184,255,0.22); }
+    .cal-day.h2 { background: rgba(39,184,255,0.42); }
+    .cal-day.h3 { background: rgba(39,184,255,0.62); color: #04101f; font-weight: 700; }
+    .cal-day.mine { border-color: var(--yellow); box-shadow: inset 0 0 0 1px var(--yellow); }
+    .cal-day.mine::after { content: ''; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); }
+    .cal-day small { position: absolute; bottom: 2px; left: 0; right: 0; text-align: center; font-size: .6rem; opacity: .85; }
+    .cal-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; font-size: .8rem; color: var(--grey); }
+    .cal-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+    .when-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 16px 0 6px; }
+    .when-actions button.button { border: 0; cursor: pointer; font-size: .95rem; }
+    .when-actions button.button:disabled { opacity: .45; cursor: default; }
+    .when-len { margin: 22px 0 10px; color: var(--grey); }
+    .when-len select { padding: 8px 10px; background: var(--dark); color: var(--white); border: 1px solid var(--line); border-radius: 6px; font-size: 1rem; }
+    #when-best { list-style: none; max-width: 520px; }
+    #when-best li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.035); }
+    #when-best b { color: var(--yellow); white-space: nowrap; }
     .vpin {
       width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center;
       justify-content: center; font-weight: 900; color: #101010; background: var(--blue);
@@ -924,6 +957,30 @@
           <p id="vote-mine"></p>
           <h3>Ranking</h3>
           <ol id="vote-rank"></ol>
+        </div>
+
+        <div class="when-box">
+          <h3>When? Vote the dates for the next Tsunami Meeting</h3>
+          <p class="vote-hint" style="margin-top:0">Tap every day you could be there, then save. The bluer a day, the more members are free. You can change it anytime.</p>
+          <div class="cal">
+            <div class="cal-head">
+              <button class="cal-nav" id="cal-prev" aria-label="Previous month">‹</button>
+              <strong id="cal-title"></strong>
+              <button class="cal-nav" id="cal-next" aria-label="Next month">›</button>
+            </div>
+            <div class="cal-grid" id="cal-dows"></div>
+            <div class="cal-grid" id="cal-grid"></div>
+            <div class="cal-legend"><span><i style="background:rgba(39,184,255,.25)"></i>few</span><span><i style="background:rgba(39,184,255,.62)"></i>many</span><span><i style="border:1px solid var(--yellow)"></i>my days</span></div>
+          </div>
+          <div class="when-actions">
+            <button class="button" id="when-save" disabled>Save my dates</button>
+            <button class="vote-del" id="when-clear" style="margin:0">Clear my selection</button>
+          </div>
+          <p id="when-msg" class="vote-hint" style="margin-top:4px"></p>
+          <div class="when-len">Best period for a meeting of
+            <select id="when-n"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>7</option></select> days
+          </div>
+          <ol id="when-best"></ol>
         </div>
       </div>
     </section>
@@ -1629,6 +1686,126 @@
       });
 
       load();
+    })();
+  </script>
+  <script>
+    (function () {
+      const SB = 'https://dykofnyhwusghfowfxbi.supabase.co/rest/v1/meeting_days';
+      const KEY = 'sb_publishable_BDU9_W78RXyMw0GGQlVBkg_GepwIoDr';
+      const H = { apikey: KEY, 'Content-Type': 'application/json' };
+      const $ = id => document.getElementById(id);
+      if (!$('cal-grid')) return;
+      const pad = n => (n < 10 ? '0' : '') + n;
+      const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const todayIso = iso(today);
+      const MAXM = 18;
+      let view = new Date(today.getFullYear(), today.getMonth(), 1);
+      let email = null, rows = [], saved = new Set(), sel = new Set(), count = {}, voters = {};
+
+      fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' })
+        .then(r => r.ok ? r.json() : {})
+        .then(j => { if (j && j.email) { email = j.email.toLowerCase(); } load(); })
+        .catch(function () { load(); });
+
+      async function load() {
+        try {
+          const r = await fetch(SB + '?select=email,day&day=gte.' + todayIso + '&limit=10000', { headers: H });
+          if (!r.ok) throw 0;
+          rows = await r.json();
+          $('when-msg').textContent = '';
+        } catch (e) { rows = []; $('when-msg').textContent = 'Calendar not available yet (database table missing).'; }
+        count = {}; voters = {}; saved = new Set();
+        rows.forEach(x => {
+          count[x.day] = (count[x.day] || 0) + 1;
+          (voters[x.email] = voters[x.email] || new Set()).add(x.day);
+          if (x.email === email) saved.add(x.day);
+        });
+        sel = new Set(saved);
+        draw(); best();
+      }
+
+      function dirty() {
+        if (sel.size !== saved.size) return true;
+        for (const d of sel) if (!saved.has(d)) return true;
+        return false;
+      }
+
+      function draw() {
+        const y = view.getFullYear(), m = view.getMonth();
+        $('cal-title').textContent = view.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+        const max = Math.max(1, ...Object.values(count));
+        const first = (new Date(y, m, 1).getDay() + 6) % 7;
+        const dim = new Date(y, m + 1, 0).getDate();
+        let h = '';
+        for (let i = 0; i < first; i++) h += '<span></span>';
+        for (let d = 1; d <= dim; d++) {
+          const k = y + '-' + pad(m + 1) + '-' + pad(d);
+          const n = count[k] || 0;
+          const level = n ? Math.min(3, Math.ceil(n / max * 3)) : 0;
+          const past = k < todayIso;
+          h += '<button class="cal-day' + (past ? ' past' : '') + (level ? ' h' + level : '') + (sel.has(k) ? ' mine' : '') + '" data-d="' + k + '"' + (past ? ' disabled' : '') + '>' + d + (n ? '<small>' + n + '</small>' : '') + '</button>';
+        }
+        $('cal-grid').innerHTML = h;
+        const diff = (y - today.getFullYear()) * 12 + m - today.getMonth();
+        $('cal-prev').disabled = diff <= 0;
+        $('cal-next').disabled = diff >= MAXM;
+        $('when-save').disabled = !dirty() || !email;
+      }
+
+      function best() {
+        const N = +$('when-n').value;
+        const all = Object.values(voters);
+        const res = [];
+        for (let i = 0; i < 540; i++) {
+          const s = new Date(today); s.setDate(s.getDate() + i);
+          const days = []; for (let j = 0; j < N; j++) { const t = new Date(s); t.setDate(t.getDate() + j); days.push(iso(t)); }
+          const n = all.filter(set => days.every(d => set.has(d))).length;
+          if (n) res.push({ start: s, end: new Date(s.getTime() + (N - 1) * 864e5), n: n });
+        }
+        res.sort((a, b) => b.n - a.n || a.start - b.start);
+        const picked = [];
+        for (const r of res) { if (picked.every(p => Math.abs(p.start - r.start) >= N * 864e5)) picked.push(r); if (picked.length === 3) break; }
+        const f = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        $('when-best').innerHTML = picked.length
+          ? picked.map(r => '<li><span>' + f(r.start) + ' → ' + f(r.end) + ' ' + r.end.getFullYear() + '</span><b>' + r.n + (r.n > 1 ? ' members' : ' member') + '</b></li>').join('')
+          : '<li>No common dates yet. Add yours!</li>';
+      }
+
+      $('cal-grid').addEventListener('click', function (e) {
+        const b = e.target.closest('.cal-day'); if (!b || b.disabled) return;
+        const d = b.dataset.d;
+        sel.has(d) ? sel.delete(d) : sel.add(d);
+        b.classList.toggle('mine', sel.has(d));
+        $('when-save').disabled = !dirty() || !email;
+        $('when-msg').textContent = '';
+      });
+      $('cal-prev').onclick = function () { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); draw(); };
+      $('cal-next').onclick = function () { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); draw(); };
+      $('when-n').onchange = best;
+      $('when-clear').onclick = function () { sel = new Set(); draw(); $('when-msg').textContent = 'Selection cleared. Press Save to confirm.'; };
+
+      $('when-save').onclick = async function () {
+        if (!email) return;
+        $('when-save').disabled = true; $('when-msg').textContent = 'Saving…';
+        const add = [...sel].filter(d => !saved.has(d)), del = [...saved].filter(d => !sel.has(d));
+        try {
+          if (add.length) {
+            const r = await fetch(SB + '?on_conflict=email,day', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, H), body: JSON.stringify(add.map(d => ({ email: email, day: d }))) });
+            if (!r.ok) throw 0;
+          }
+          if (del.length) {
+            const r = await fetch(SB + '?email=eq.' + encodeURIComponent(email) + '&day=in.(' + del.join(',') + ')', { method: 'DELETE', headers: H });
+            if (!r.ok) throw 0;
+          }
+          await load();
+          $('when-msg').textContent = 'Saved. Thank you!';
+        } catch (e) { $('when-msg').textContent = 'Sorry, your dates could not be saved. Please try again.'; $('when-save').disabled = false; }
+      };
+
+      const dw = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      $('cal-dows').innerHTML = dw.map(x => '<span class="cal-dow">' + x + '</span>').join('');
+      draw();
     })();
   </script>
 </body>
