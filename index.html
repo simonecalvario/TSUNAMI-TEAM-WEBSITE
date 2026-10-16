@@ -501,6 +501,20 @@
     #when-best { list-style: none; max-width: 520px; }
     #when-best li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.035); }
     #when-best b { color: var(--yellow); white-space: nowrap; }
+
+    /* ---- Countdown ---- */
+    .countdown { margin: 8px 0 36px; padding: 22px 18px; text-align: center; border: 1px solid var(--line); border-radius: 14px;
+      background: linear-gradient(160deg, rgba(39,184,255,0.16), rgba(245,210,27,0.07)); }
+    .countdown h3 { color: var(--yellow); font-size: .85rem; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 14px; }
+    .cd-nums { display: flex; justify-content: center; gap: 10px; }
+    .cd-nums div { min-width: 64px; padding: 10px 6px; border-radius: 10px; background: rgba(6,13,28,0.7); border: 1px solid var(--line); }
+    .cd-nums b { display: block; font-size: 1.9rem; line-height: 1.1; color: var(--white); font-variant-numeric: tabular-nums; }
+    .cd-nums span { font-size: .7rem; color: var(--grey); text-transform: uppercase; letter-spacing: .08em; }
+    .cd-nums .cd-days b { color: var(--yellow); font-size: 2.3rem; }
+    .cd-info { margin-top: 14px; color: var(--grey); }
+    .cd-info strong { color: var(--white); }
+    .cd-msg { font-size: 1.15rem; color: var(--white); }
+    @media (max-width: 420px) { .cd-nums { gap: 6px; } .cd-nums div { min-width: 0; flex: 1; } .cd-nums b { font-size: 1.5rem; } .cd-nums .cd-days b { font-size: 1.9rem; } }
     .vpin {
       width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center;
       justify-content: center; font-weight: 900; color: #101010; background: var(--blue);
@@ -942,6 +956,12 @@
         <div class="section-label">Meetings</div>
         <h2 id="meetings-heading">Tsunami <span>Meetings</span></h2>
         <p class="intro">Map of our meetings: click the pins to explore the gallery of each trip.</p>
+
+
+        <div class="countdown" id="countdown" aria-live="polite">
+          <h3>Next Tsunami Meeting</h3>
+          <div id="cd-body"><p class="cd-msg">Vote the dates below: the countdown starts as soon as most of the team agrees.</p></div>
+        </div>
 
         <div class="vote-box">
           <h3>Where to next? Vote for the next Tsunami Meeting</h3>
@@ -1722,7 +1742,7 @@
           if (x.email === email) saved.add(x.day);
         });
         sel = new Set(saved);
-        draw(); best();
+        draw(); best(); countdown();
       }
 
       function dirty() {
@@ -1771,6 +1791,50 @@
           ? picked.map(r => '<li><span>' + f(r.start) + ' → ' + f(r.end) + ' ' + r.end.getFullYear() + '</span><b>' + r.n + (r.n > 1 ? ' members' : ' member') + '</b></li>').join('')
           : '<li>No common dates yet. Add yours!</li>';
       }
+
+
+      // ---- Countdown synced with the period chosen by the majority ----
+      let target = null, cdCity = '';
+      async function countdown() {
+        try {
+          const r = await fetch('https://dykofnyhwusghfowfxbi.supabase.co/rest/v1/meeting_votes?select=city,country', { headers: H });
+          const vs = r.ok ? await r.json() : [];
+          const g = {}; vs.forEach(v => { const k = v.city + (v.country ? ', ' + v.country : ''); g[k] = (g[k] || 0) + 1; });
+          cdCity = Object.entries(g).sort((a, b) => b[1] - a[1])[0];
+          cdCity = cdCity ? cdCity[0] : '';
+        } catch (e) { cdCity = ''; }
+        const V = Object.keys(voters).length;
+        target = null;
+        if (V >= 2) {
+          const need = Math.floor(V / 2) + 1;
+          const days = Object.keys(count).filter(d => count[d] >= need).sort();
+          const runs = []; let cur = null;
+          days.forEach(d => {
+            const t = new Date(d + 'T00:00:00');
+            if (cur && t - cur.last === 864e5) { cur.last = t; cur.sum += count[d]; }
+            else { cur = { first: t, last: t, sum: count[d] }; runs.push(cur); }
+          });
+          runs.sort((a, b) => b.sum - a.sum || a.first - b.first);
+          if (runs[0]) target = runs[0];
+        }
+        tick();
+      }
+      function tick() {
+        const box = $('cd-body'); if (!box) return;
+        if (!target) { box.innerHTML = '<p class="cd-msg">Vote the dates below: the countdown starts as soon as most of the team agrees.</p>'; return; }
+        const f = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+        const range = target.first.getTime() === target.last.getTime() ? f(target.first) : f(target.first) + ' → ' + f(target.last) + ' ' + target.last.getFullYear();
+        const info = '<p class="cd-info"><strong>' + range + '</strong>' + (cdCity ? ' · <strong>' + cdCity.replace(/[&<>"]/g, '') + '</strong>' : '') + '<br>The period chosen by the majority</p>';
+        const now = new Date(), end = new Date(target.last.getTime() + 864e5);
+        if (now >= end) { box.innerHTML = '<p class="cd-msg">The meeting is over. Time to choose the next one!</p>'; return; }
+        if (now >= target.first) { box.innerHTML = '<p class="cd-msg">🌊 It is happening NOW! Enjoy the Tsunami Meeting!</p>' + info; return; }
+        let ms = target.first - now;
+        const d = Math.floor(ms / 864e5); ms -= d * 864e5;
+        const h = Math.floor(ms / 36e5); ms -= h * 36e5;
+        const m = Math.floor(ms / 6e4), sec = Math.floor((ms - m * 6e4) / 1e3);
+        box.innerHTML = '<div class="cd-nums"><div class="cd-days"><b>' + d + '</b><span>days</span></div><div><b>' + pad(h) + '</b><span>hours</span></div><div><b>' + pad(m) + '</b><span>min</span></div><div><b>' + pad(sec) + '</b><span>sec</span></div></div>' + info;
+      }
+      setInterval(tick, 1000);
 
       $('cal-grid').addEventListener('click', function (e) {
         const b = e.target.closest('.cal-day'); if (!b || b.disabled) return;
