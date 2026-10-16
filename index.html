@@ -605,6 +605,9 @@
     .album-up { margin: 14px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: var(--grey); font-size: .9rem; }
     .album-up input[type=file] { max-width: 100%; color: var(--grey); }
     .album-up .button { border: 0; cursor: pointer; font-size: .9rem; padding: 10px 16px; }
+    .pin-tip { display: flex; gap: 12px; align-items: flex-start; margin: 0 0 14px; padding: 14px 16px; border: 1px solid var(--line); border-left: 4px solid var(--yellow); border-radius: 10px; background: rgba(39,184,255,0.08); color: var(--grey); font-size: .95rem; }
+    .pin-tip span { font-size: 1.4rem; line-height: 1.2; }
+    .pin-tip strong { color: var(--white); }
     .vpin {
       width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center;
       justify-content: center; font-weight: 900; color: #101010; background: var(--blue);
@@ -1050,7 +1053,7 @@
       <div class="container">
         <div class="section-label">Meetings</div>
         <h2 id="meetings-heading">Tsunami <span>Meetings</span></h2>
-        <p class="intro">Map of our meetings: click the pins to explore the gallery of each trip, and add your own photos.</p>
+        <p class="intro">Map of our meetings: click the pins to explore the gallery of each trip.</p>
 
 
         <div class="countdown" id="countdown" aria-live="polite">
@@ -1065,6 +1068,7 @@
           <p class="vote-hint">Or click any place on the map. One vote each, you can change it anytime.</p>
         </div>
 
+        <div class="pin-tip"><span>📸</span><p><strong>Click a pin on the map to open the gallery of that Tsunami Meeting.</strong> There you can relive the trip and add your own photos of your Tsunami experiences.</p></div>
         <div id="world-map"></div>
 
         <div class="vote-panel">
