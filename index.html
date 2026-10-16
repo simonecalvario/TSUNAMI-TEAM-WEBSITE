@@ -2132,9 +2132,9 @@
       const $ = id => document.getElementById(id);
       const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
       const MEETINGS = [
-        { key: 'barcelona', name: 'Barcelona', icon: '🇪🇸' },
-        { key: 'doha', name: 'Doha', icon: '🇶🇦' },
-        { key: 'munich', name: 'Munich', icon: '🇩🇪' }
+        { key: 'doha', name: 'Doha', icon: '🇶🇦', year: 2023 },
+        { key: 'barcelona', name: 'Barcelona', icon: '🇪🇸', year: 2024 },
+        { key: 'munich', name: 'Munich', icon: '🇩🇪', year: 2026 }
       ];
       async function get(q) { try { const r = await fetch(R + q, { headers: H }); return r.ok ? await r.json() : null; } catch (e) { return null; } }
       let email = null, nick = null, nicks = [];
@@ -2242,7 +2242,7 @@
       function renderStamps() {
         $('stamps').innerHTML = MEETINGS.map(m => {
           const on = att.some(a => a.email === email && a.meeting === m.key);
-          return '<button class="stamp' + (on ? ' on' : '') + '" data-k="' + m.key + '"><img src="assets/images/pins/' + m.key + '.png" alt="' + m.name + ' pin"><b>' + m.icon + ' ' + m.name + '</b><span>' + (on ? 'Stamped ✓' : 'Tap to stamp') + '</span></button>';
+          return '<button class="stamp' + (on ? ' on' : '') + '" data-k="' + m.key + '"><img src="assets/images/pins/' + m.key + '.png" alt="' + m.name + ' pin"><b>' + m.icon + ' ' + m.name + ' <em style="font-style:normal;color:var(--yellow)">' + m.year + '</em></b><span>' + (on ? 'Stamped ✓' : 'Tap to stamp') + '</span></button>';
         }).join('');
       }
       function renderBadges() {
