@@ -493,6 +493,25 @@
     .blog-del { margin-top: 14px; padding: 5px 12px; cursor: pointer; font-size: 0.85rem; color: var(--white); background: transparent; border: 1px solid var(--line); border-radius: 4px; }
     .blog-del:hover { color: var(--orange); border-color: var(--orange); }
 
+    .blog-nick { color: var(--grey); }
+    .blog-nick strong { color: var(--yellow); }
+    .blog-nick input { width: 100%; max-width: 360px; padding: 11px 14px; font: inherit; color: var(--white); background: var(--dark); border: 1px solid var(--line); border-radius: 8px; margin: 8px 8px 8px 0; }
+    .blog-nick button { padding: 10px 16px; cursor: pointer; color: #101010; background: var(--yellow); border: 0; border-radius: 4px; font-weight: 700; }
+    .blog-nick small { display: block; font-size: 0.82rem; }
+    .blog-search { width: 100%; max-width: 720px; padding: 11px 16px; font: inherit; color: var(--white); background: var(--dark); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 22px; }
+    .b-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .b-actions button, .c-form button { padding: 6px 12px; cursor: pointer; font-size: 0.85rem; color: var(--white); background: transparent; border: 1px solid var(--line); border-radius: 4px; }
+    .b-actions button:hover { border-color: var(--yellow); color: var(--yellow); }
+    .b-actions .on { background: var(--yellow); color: #101010; border-color: var(--yellow); }
+    .comments { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .comment { margin-top: 14px; }
+    .c-children { margin-left: 14px; padding-left: 12px; border-left: 2px solid var(--line); }
+    .comment blockquote { margin: 6px 0; padding: 6px 12px; border-left: 3px solid var(--yellow); color: var(--grey); font-size: 0.9rem; background: rgba(255,255,255,0.04); }
+    .c-form { margin-top: 18px; display: grid; gap: 8px; }
+    .c-form textarea { width: 100%; padding: 10px 14px; font: inherit; color: var(--white); background: #07142a; border: 1px solid var(--line); border-radius: 6px; resize: vertical; }
+    .c-ctx { color: var(--yellow); font-size: 0.85rem; }
+    .c-form button { justify-self: start; }
+
     .statute-intro {
       max-width: 780px;
       color: var(--grey);
@@ -907,7 +926,7 @@
         <p class="intro">Share stories, photos and memories with the team. Every authorized member can write.</p>
 
         <form class="blog-form" id="blog-form">
-          <input id="blog-author" type="text" maxlength="40" placeholder="Your name or call sign" required>
+          <div id="blog-nick" class="blog-nick">Checking your account…</div>
           <input id="blog-title" type="text" maxlength="120" placeholder="Title" required>
           <textarea id="blog-body" rows="5" maxlength="5000" placeholder="Write your story…" required></textarea>
           <label class="blog-file">Add a photo (optional) <input id="blog-photo" type="file" accept="image/*"></label>
@@ -915,6 +934,7 @@
           <p id="blog-msg"></p>
         </form>
 
+        <input id="blog-search" class="blog-search" type="search" placeholder="Search posts…">
         <div id="blog-list"></div>
       </div>
     </section>
@@ -1324,15 +1344,15 @@
       const JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5a29mbnlod3VzZ2hmb3dmeGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjUwOTQsImV4cCI6MjEwNzY0MTA5NH0.wLS75UXlm2evHg1mlvjvrlJASDP9KRaE_b8fhnJ8htI';
       const H = { apikey: JWT, Authorization: 'Bearer ' + JWT };
       const HJ = Object.assign({ 'Content-Type': 'application/json' }, H);
+      const R = BASE + '/rest/v1/';
       const $ = id => document.getElementById(id);
       const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-      let email = null;
+      let nick = null, email = null, posts = [], comments = [], reacts = [], ctx = {}, drafts = {}, limit = 30;
 
-      try { $('blog-author').value = localStorage.getItem('tt_author') || ''; } catch (e) {}
 
       fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' })
         .then(r => r.ok ? r.json() : {})
-        .then(j => { if (j && j.email) { email = j.email.toLowerCase(); load(); } })
+        .then(j => { if (j && j.email) { email = j.email.toLowerCase(); loadNick(); load(); } })
         .catch(function () {});
 
       function who() {
@@ -1340,8 +1360,50 @@
         try { email = localStorage.getItem('tt_email') || ''; } catch (e) {}
         if (!email) email = (window.prompt('Your email:') || '').trim().toLowerCase();
         try { if (email) localStorage.setItem('tt_email', email); } catch (e) {}
+        if (email && !nick) loadNick();
         return email;
       }
+
+      function myName() {
+        if (!nick) $('blog-msg').textContent = 'Choose your nickname first (see the form at the top of the blog).';
+        return nick;
+      }
+
+      async function loadNick() {
+        try {
+          const r = await fetch(R + 'nicknames?select=nickname&email=eq.' + encodeURIComponent(email), { headers: H });
+          const j = r.ok ? await r.json() : [];
+          nick = j.length ? j[0].nickname : null;
+        } catch (e) { nick = null; }
+        renderNick();
+      }
+
+      function renderNick() {
+        $('blog-nick').innerHTML = nick
+          ? 'Posting as <strong>' + esc(nick) + '</strong>'
+          : '<strong>Choose your nickname</strong> (3 to 24 characters)<br>' +
+            '<input id="nick-in" type="text" maxlength="24" placeholder="Your nickname"> <button type="button" id="nick-save">Save nickname</button>' +
+            '<small>It will be linked to your email and cannot be changed later.</small>';
+      }
+
+      $('blog-nick').addEventListener('click', async function (e) {
+        if (e.target.id !== 'nick-save') return;
+        if (!who()) return;
+        const n = $('nick-in').value.trim();
+        if (n.length < 3 || n.length > 24 || !/^[\p{L}\p{N} ._'-]+$/u.test(n)) {
+          $('blog-msg').textContent = 'Use 3 to 24 letters, numbers, spaces or . _ - characters.';
+          return;
+        }
+        if (!confirm('Your nickname will be "' + n + '" and cannot be changed later. Continue?')) return;
+        try {
+          const r = await fetch(R + 'nicknames', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, HJ), body: JSON.stringify({ email: email, nickname: n }) });
+          if (!r.ok) throw new Error('fail');
+          $('blog-msg').textContent = 'Nickname saved.';
+        } catch (err) {
+          $('blog-msg').textContent = 'That nickname is already taken, or you already have one. Try another.';
+        }
+        loadNick();
+      });
 
       function shrink(file) {
         return new Promise(function (ok, fail) {
@@ -1359,34 +1421,136 @@
         });
       }
 
+      const get = async p => { const r = await fetch(R + p, { headers: H }); return r.ok ? r.json() : []; };
+
       async function load() {
         try {
-          const r = await fetch(BASE + '/rest/v1/posts?select=*&order=created_at.desc&limit=30', { headers: H });
-          const posts = r.ok ? await r.json() : [];
-          $('blog-list').innerHTML = posts.length ? posts.map(p =>
-            '<article class="blog-post"><h3>' + esc(p.title) + '</h3>' +
+          const a = await Promise.all([
+            get('posts?select=*&order=created_at.desc&limit=' + limit),
+            get('comments?select=*&order=created_at.asc'),
+            get('reactions?select=*')
+          ]);
+          posts = a[0]; comments = a[1]; reacts = a[2];
+        } catch (e) { posts = []; }
+        render();
+      }
+
+      const cnt = (t, v) => reacts.filter(x => x.target === t && x.value === v).length;
+      const mine = t => reacts.find(x => x.target === t && x.email === email);
+      function rbtns(t) {
+        const m = mine(t);
+        return '<button class="react' + (m && m.value === 1 ? ' on' : '') + '" data-t="' + t + '" data-v="1">👍 ' + cnt(t, 1) + '</button>' +
+               '<button class="react' + (m && m.value === -1 ? ' on' : '') + '" data-t="' + t + '" data-v="-1">👎 ' + cnt(t, -1) + '</button>';
+      }
+
+      function commentHtml(c) {
+        const kids = comments.filter(x => x.parent_id === c.id);
+        return '<div class="comment"><div class="blog-meta">' + esc(c.author) + ' · ' + new Date(c.created_at).toLocaleDateString() + '</div>' +
+          (c.quote_text ? '<blockquote><strong>' + esc(c.quote_author || '') + '</strong>: ' + esc(c.quote_text) + '</blockquote>' : '') +
+          '<div class="blog-text">' + esc(c.body) + '</div>' +
+          '<div class="b-actions">' + rbtns('c' + c.id) +
+          '<button class="reply" data-p="' + c.post_id + '" data-c="' + c.id + '">↩ Reply</button>' +
+          '<button class="quote" data-p="' + c.post_id + '" data-c="' + c.id + '">❝ Quote</button>' +
+          (email && c.email === email ? '<button class="cdel" data-c="' + c.id + '">Delete</button>' : '') +
+          '</div>' + (kids.length ? '<div class="c-children">' + kids.map(commentHtml).join('') + '</div>' : '') + '</div>';
+      }
+
+      function render() {
+        document.querySelectorAll('.c-form textarea').forEach(t => { drafts[t.closest('.c-form').dataset.post] = t.value; });
+        const q = $('blog-search').value.trim().toLowerCase();
+        const list = posts.filter(p => !q || (p.title + ' ' + p.body + ' ' + p.author).toLowerCase().indexOf(q) > -1);
+        $('blog-list').innerHTML = (list.length ? list.map(p => {
+          const cs = comments.filter(c => c.post_id === p.id);
+          const x = ctx[p.id] || {};
+          return '<article class="blog-post"><h3>' + esc(p.title) + '</h3>' +
             '<div class="blog-meta">' + esc(p.author) + ' · ' + new Date(p.created_at).toLocaleDateString() + '</div>' +
             (p.image_url ? '<img src="' + esc(p.image_url) + '" alt="" loading="lazy">' : '') +
             '<div class="blog-text">' + esc(p.body) + '</div>' +
-            (email && p.email === email ? '<button class="blog-del" data-id="' + p.id + '">Delete my post</button>' : '') +
-            '</article>').join('') : '<p class="intro">No posts yet. Write the first one!</p>';
-        } catch (e) { $('blog-list').innerHTML = '<p class="intro">Posts are not available right now.</p>'; }
+            '<div class="b-actions">' + rbtns('p' + p.id) +
+            '<button class="reply" data-p="' + p.id + '">💬 Comment (' + cs.length + ')</button>' +
+            '<button class="quote" data-p="' + p.id + '">❝ Quote</button>' +
+            (email && p.email === email ? '<button class="blog-del" data-id="' + p.id + '">Delete</button>' : '') + '</div>' +
+            '<div class="comments">' + cs.filter(c => !c.parent_id).map(commentHtml).join('') +
+            '<form class="c-form" data-post="' + p.id + '"><div class="c-ctx">' + esc(x.label || '') + '</div>' +
+            '<textarea rows="2" maxlength="2000" placeholder="Write a comment…" required></textarea><button type="submit">Send</button></form></div></article>';
+        }).join('') : '<p class="intro">No posts found.</p>') +
+          (posts.length >= limit ? '<button class="blog-del" id="blog-more">Show older posts</button>' : '');
+        document.querySelectorAll('.c-form textarea').forEach(t => { t.value = drafts[t.closest('.c-form').dataset.post] || ''; });
+      }
+
+      async function react(t, v) {
+        if (!who()) return;
+        const m = mine(t);
+        reacts = reacts.filter(x => !(x.target === t && x.email === email));
+        if (!m || m.value !== v) reacts.push({ target: t, email: email, value: v });
+        render();
+        try {
+          const r = (m && m.value === v)
+            ? await fetch(R + 'reactions?target=eq.' + encodeURIComponent(t) + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H })
+            : await fetch(R + 'reactions?on_conflict=target,email', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, HJ), body: JSON.stringify({ target: t, email: email, value: v }) });
+          if (!r.ok) throw new Error('fail');
+        } catch (e) { load(); }
+      }
+
+      function focusForm(p) {
+        const f = document.querySelector('.c-form[data-post="' + p + '"]');
+        if (f) { f.querySelector('textarea').focus(); f.scrollIntoView({ block: 'center' }); }
       }
 
       $('blog-list').addEventListener('click', async function (e) {
-        const b = e.target.closest('.blog-del');
-        if (!b || !confirm('Delete this post?')) return;
-        try {
-          const r = await fetch(BASE + '/rest/v1/posts?id=eq.' + b.dataset.id + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H });
-          if (!r.ok) throw new Error('fail');
-        } catch (err) { $('blog-msg').textContent = 'Could not delete the post.'; }
-        load();
+        const b = e.target.closest('button');
+        if (!b) return;
+        if (b.id === 'blog-more') { limit += 30; load(); return; }
+        if (b.classList.contains('react')) { react(b.dataset.t, +b.dataset.v); return; }
+        if (b.classList.contains('reply') || b.classList.contains('quote')) {
+          const p = +b.dataset.p, c = b.dataset.c ? +b.dataset.c : null;
+          const src = c ? comments.find(x => x.id === c) : posts.find(x => x.id === p);
+          if (!src) return;
+          const isQ = b.classList.contains('quote');
+          ctx[p] = { parent: c, quote: isQ ? { a: src.author, t: src.body.slice(0, 200) } : null,
+                     label: (isQ ? '❝ Quoting ' : '↩ Replying to ') + src.author };
+          render();
+          focusForm(p);
+          return;
+        }
+        if (b.classList.contains('cdel') || b.classList.contains('blog-del')) {
+          if (!who() || !confirm('Delete this?')) return;
+          const isC = b.classList.contains('cdel');
+          try {
+            const r = await fetch(R + (isC ? 'comments?id=eq.' + b.dataset.c : 'posts?id=eq.' + b.dataset.id) + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H });
+            if (!r.ok) throw new Error('fail');
+          } catch (err) { $('blog-msg').textContent = 'Could not delete.'; }
+          load();
+        }
       });
+
+      $('blog-list').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const f = e.target.closest('.c-form');
+        const p = +f.dataset.post, text = f.querySelector('textarea').value.trim();
+        if (!text || !who()) return;
+        const author = myName();
+        if (!author) return;
+        const x = ctx[p] || {};
+        try {
+          const r = await fetch(R + 'comments', {
+            method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, HJ),
+            body: JSON.stringify({ post_id: p, parent_id: x.parent || null, email: email, author: author, body: text,
+                                   quote_author: x.quote ? x.quote.a : null, quote_text: x.quote ? x.quote.t : null })
+          });
+          if (!r.ok) throw new Error('fail');
+          drafts[p] = ''; delete ctx[p];
+          load();
+        } catch (err) { $('blog-msg').textContent = 'Could not send the comment.'; }
+      });
+
+      $('blog-search').addEventListener('input', render);
 
       $('blog-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         const msg = $('blog-msg'), btn = $('blog-send');
         if (!who()) return;
+        if (!nick) { msg.textContent = 'Choose your nickname first.'; return; }
         btn.disabled = true;
         msg.textContent = 'Publishing…';
         try {
@@ -1399,20 +1563,16 @@
             if (!up.ok) throw new Error('upload');
             image = BASE + '/storage/v1/object/public/blog-images/' + path;
           }
-          const author = $('blog-author').value.trim();
-          try { localStorage.setItem('tt_author', author); } catch (x) {}
-          const r = await fetch(BASE + '/rest/v1/posts', {
-            method: 'POST',
-            headers: Object.assign({ Prefer: 'return=minimal' }, HJ),
+          const author = nick;
+          const r = await fetch(R + 'posts', {
+            method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, HJ),
             body: JSON.stringify({ email: email, author: author, title: $('blog-title').value.trim(), body: $('blog-body').value.trim(), image_url: image })
           });
           if (!r.ok) throw new Error('save');
           $('blog-title').value = ''; $('blog-body').value = ''; $('blog-photo').value = '';
           msg.textContent = 'Published!';
           load();
-        } catch (err) {
-          msg.textContent = 'Sorry, something went wrong. Please try again.';
-        }
+        } catch (err) { msg.textContent = 'Sorry, something went wrong. Please try again.'; }
         btn.disabled = false;
       });
 
