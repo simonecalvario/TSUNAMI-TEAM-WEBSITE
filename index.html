@@ -8,7 +8,13 @@
 
   <meta name="description" content="TSUNAMI TEAM — Friendship is liquid. A community built on freedom, friendship, adaptability and shared experiences.">
 
-  <meta name="theme-color" content="#101010">
+  <meta name="theme-color" content="#060d1c">
+  <link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Tsunami">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
@@ -543,6 +549,62 @@
     #mem-lb { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center; background: rgba(2,6,16,.92); padding: 16px; cursor: zoom-out; }
     #mem-lb.open { display: flex; }
     #mem-lb img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+
+    /* ---- Bell, birthdays ---- */
+    .bell-wrap { position: relative; }
+    #bell { background: none; border: 0; color: var(--white); font-size: 1.15rem; cursor: pointer; position: relative; padding: 4px 6px; }
+    #bell i { position: absolute; top: -2px; right: -2px; min-width: 17px; height: 17px; border-radius: 9px; background: var(--orange); color: #101010; font: 700 .68rem/17px sans-serif; text-align: center; font-style: normal; display: none; }
+    #bell.has i { display: block; }
+    #bell-panel { display: none; position: absolute; right: 0; top: 36px; width: min(320px, 86vw); max-height: 60vh; overflow: auto; background: var(--dark); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 40px rgba(0,0,0,.5); z-index: 50; }
+    #bell-panel.open { display: block; }
+    #bell-panel a { display: block; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: .88rem; color: var(--grey); }
+    #bell-panel a b { color: var(--white); }
+    #bell-panel a.new { background: rgba(39,184,255,.12); }
+    #bell-panel p { padding: 14px; color: var(--grey); font-size: .88rem; }
+    #bday { display: none; text-align: center; padding: 9px 14px; font-size: .92rem; color: #101010; font-weight: 700; background: linear-gradient(90deg, var(--yellow), var(--orange)); }
+    #bday.show { display: block; }
+
+    /* ---- Chat ---- */
+    #lagoon { padding: 80px 0; }
+    .chat { max-width: 720px; margin-top: 24px; border: 1px solid var(--line); border-radius: 14px; background: var(--dark); overflow: hidden; }
+    #chat-list { height: 420px; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; overscroll-behavior: contain; }
+    .msg { max-width: 82%; padding: 8px 12px; border-radius: 14px; background: rgba(255,255,255,.07); align-self: flex-start; word-break: break-word; white-space: pre-wrap; }
+    .msg.me { align-self: flex-end; background: rgba(39,184,255,.28); }
+    .msg small { display: block; font-size: .7rem; color: var(--grey); margin-bottom: 2px; }
+    .msg small b { color: var(--yellow); }
+    .msg .x { background: none; border: 0; color: var(--grey); cursor: pointer; font-size: .75rem; margin-left: 6px; }
+    .chat-day { align-self: center; font-size: .7rem; color: var(--grey); }
+    #chat-form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
+    #chat-in { flex: 1; min-width: 0; padding: 12px 14px; font: inherit; color: var(--white); background: var(--black); border: 1px solid var(--line); border-radius: 22px; }
+    #chat-form .button { border: 0; cursor: pointer; padding: 10px 18px; font-size: .95rem; }
+    #chat-note { padding: 12px 14px; color: var(--grey); font-size: .9rem; border-top: 1px solid var(--line); }
+    #chat-note a { color: var(--yellow); }
+
+    /* ---- Passport & albums ---- */
+    #passport { padding: 80px 0; background: linear-gradient(160deg, rgba(245,210,27,0.06), transparent 55%); }
+    #passport h3.sub { color: var(--yellow); margin: 34px 0 12px; }
+    .stamps { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; max-width: 720px; }
+    .stamp { padding: 16px 10px; text-align: center; border: 2px dashed var(--line); border-radius: 14px; background: transparent; color: var(--grey); cursor: pointer; font: inherit; transition: transform .2s; }
+    .stamp b { display: block; font-size: 1.05rem; color: var(--white); }
+    .stamp em { font-style: normal; font-size: 1.6rem; display: block; margin-bottom: 4px; filter: grayscale(1); opacity: .5; }
+    .stamp.on { border: 2px solid var(--yellow); background: rgba(245,210,27,.1); transform: rotate(-2deg); }
+    .stamp.on em { filter: none; opacity: 1; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .badge { padding: 6px 12px; border-radius: 999px; font-size: .85rem; background: rgba(39,184,255,.18); border: 1px solid var(--line); color: var(--white); }
+    .crew { list-style: none; max-width: 520px; }
+    .crew li { display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.035); }
+    .crew b { color: var(--yellow); }
+    .bday-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--grey); }
+    .bday-form select { padding: 9px 10px; background: var(--dark); color: var(--white); border: 1px solid var(--line); border-radius: 6px; font-size: 1rem; }
+    .bday-form .button { border: 0; cursor: pointer; font-size: .9rem; padding: 10px 16px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 16px; }
+    .chip { padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--white); cursor: pointer; font: inherit; font-size: .9rem; }
+    .chip.on { background: var(--blue); color: #04101f; font-weight: 700; border-color: var(--blue); }
+    .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+    .album-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; cursor: zoom-in; background: #07142a; }
+    .album-up { margin: 14px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: var(--grey); font-size: .9rem; }
+    .album-up input[type=file] { max-width: 100%; color: var(--grey); }
+    .album-up .button { border: 0; cursor: pointer; font-size: .9rem; padding: 10px 16px; }
     .vpin {
       width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center;
       justify-content: center; font-weight: 900; color: #101010; background: var(--blue);
@@ -745,13 +807,17 @@
           <a href="#meetings">Meetings</a>
           <a href="#memorabilia">Memorabilia</a>
           <a href="#blog">Blog</a>
+          <a href="#lagoon">Lagoon</a>
+          <a href="#passport">Passport</a>
           <a href="#statute">Our Statute</a>
           <a href="#join">Join Us</a>
+          <span class="bell-wrap"><button id="bell" type="button" aria-label="Notifications">🔔<i></i></button><div id="bell-panel"></div></span>
           <a href="/cdn-cgi/access/logout">Logout</a>
         </div>
       </nav>
     </div>
   </header>
+  <div id="bday" role="status"></div>
 
   <main>
     <section class="hero" id="home">
@@ -1079,6 +1145,54 @@
         <input id="blog-search" class="blog-search" type="search" placeholder="Search posts…">
         <div id="blog-list"></div>
         <div id="toast" role="status"></div>
+      </div>
+    </section>
+
+    <section id="lagoon" aria-labelledby="lagoon-heading">
+      <div class="container">
+        <div class="section-label">Always connected</div>
+        <h2 id="lagoon-heading">The <span>Lagoon</span></h2>
+        <p class="intro">Our live chat. Say hi, share a thought, plan the next wave.</p>
+        <div class="chat">
+          <div id="chat-list"></div>
+          <div id="chat-note">Loading…</div>
+          <form id="chat-form" style="display:none">
+            <input id="chat-in" type="text" maxlength="500" placeholder="Write a message…" autocomplete="off">
+            <button class="button" type="submit">Send</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="passport" aria-labelledby="pass-heading">
+      <div class="container">
+        <div class="section-label">Our journeys</div>
+        <h2 id="pass-heading">Tsunami <span>Passport</span></h2>
+        <p class="intro">Collect a stamp for every Tsunami Meeting you lived. Tap a stamp to add or remove it.</p>
+
+        <div class="stamps" id="stamps"></div>
+        <div class="badges" id="badges"></div>
+
+        <h3 class="sub">The crew</h3>
+        <ul class="crew" id="crew"></ul>
+
+        <h3 class="sub">Meeting albums</h3>
+        <div class="chips" id="album-chips"></div>
+        <div class="album-up">
+          <input id="album-file" type="file" accept="image/*" multiple>
+          <button class="button" id="album-send" type="button">Add photos</button>
+          <span id="album-msg"></span>
+        </div>
+        <div class="album-grid" id="album-grid"></div>
+
+        <h3 class="sub">My birthday</h3>
+        <p class="vote-hint" style="margin-top:0">Optional: the team will celebrate with you on the home page. Only day and month are shown.</p>
+        <div class="bday-form">
+          <select id="bd-d"></select><select id="bd-m"></select>
+          <button class="button" id="bd-save" type="button">Save</button>
+          <button class="vote-del" id="bd-del" type="button" style="margin:0">Remove</button>
+          <span id="bd-msg"></span>
+        </div>
       </div>
     </section>
 
@@ -2010,6 +2124,235 @@
       });
 
       load();
+    })();
+  </script>
+  <script>
+    (function () {
+      const BASE = 'https://dykofnyhwusghfowfxbi.supabase.co';
+      const JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5a29mbnlod3VzZ2hmb3dmeGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjUwOTQsImV4cCI6MjEwNzY0MTA5NH0.wLS75UXlm2evHg1mlvjvrlJASDP9KRaE_b8fhnJ8htI';
+      const H = { apikey: JWT, Authorization: 'Bearer ' + JWT };
+      const HJ = Object.assign({ 'Content-Type': 'application/json' }, H);
+      const R = BASE + '/rest/v1/';
+      const $ = id => document.getElementById(id);
+      const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      const MEETINGS = [
+        { key: 'barcelona', name: 'Barcelona', icon: '🇪🇸' },
+        { key: 'doha', name: 'Doha', icon: '🇶🇦' },
+        { key: 'munich', name: 'Munich', icon: '🇩🇪' }
+      ];
+      async function get(q) { try { const r = await fetch(R + q, { headers: H }); return r.ok ? await r.json() : null; } catch (e) { return null; } }
+      let email = null, nick = null, nicks = [];
+
+      function shrink(file) {
+        return new Promise(function (ok, fail) {
+          const img = new Image();
+          img.onload = function () {
+            const k = Math.min(1, 1280 / Math.max(img.width, img.height));
+            const c = document.createElement('canvas');
+            c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+            c.toBlob(b => b ? ok(b) : fail(), 'image/jpeg', 0.82);
+          };
+          img.onerror = fail; img.src = URL.createObjectURL(file);
+        });
+      }
+
+      async function init() {
+        try {
+          const r = await fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' });
+          const j = r.ok ? await r.json() : {};
+          if (j && j.email) email = j.email.toLowerCase();
+        } catch (e) {}
+        nicks = (await get('nicknames?select=email,nickname')) || [];
+        const m = nicks.find(x => x.email === email); nick = m ? m.nickname : null;
+        chatInit(); passInit(); bdayInit(); bellInit();
+      }
+
+      /* ---------------- CHAT ---------------- */
+      let lastId = 0, chatBroken = false, near = true;
+      function chatInit() {
+        const note = $('chat-note'), form = $('chat-form'), list = $('chat-list');
+        if (!email) { note.textContent = 'Could not identify your account. Reload the page.'; return; }
+        if (!nick) { note.innerHTML = 'To chat, first choose your nickname in the <a href="#blog">Blog</a> section.'; }
+        else { note.style.display = 'none'; form.style.display = 'flex'; }
+        list.addEventListener('scroll', function () { near = list.scrollHeight - list.scrollTop - list.clientHeight < 80; });
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const t = $('chat-in').value.trim(); if (!t || !nick) return;
+          $('chat-in').value = '';
+          try {
+            const r = await fetch(R + 'chat_messages', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, HJ), body: JSON.stringify({ email: email, nickname: nick, body: t }) });
+            if (!r.ok) throw 0;
+            near = true; poll();
+          } catch (err) { note.style.display = 'block'; note.textContent = 'Message not sent. Please try again.'; }
+        });
+        list.addEventListener('click', async function (e) {
+          const id = e.target.dataset.x;
+          if (id) { await fetch(R + 'chat_messages?id=eq.' + id + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H }); lastId = 0; list.innerHTML = ''; poll(); }
+        });
+        poll(); setInterval(function () { if (!document.hidden) poll(); }, 4000);
+      }
+      let lastDay = '';
+      async function poll() {
+        const list = $('chat-list');
+        const q = lastId ? 'chat_messages?select=*&id=gt.' + lastId + '&order=id.asc' : 'chat_messages?select=*&order=id.desc&limit=80';
+        const rows = await get(q);
+        if (rows === null) { if (!chatBroken) { chatBroken = true; $('chat-note').style.display = 'block'; $('chat-note').textContent = 'Chat is not available yet (database table missing).'; } return; }
+        if (!lastId) { rows.reverse(); lastDay = ''; }
+        if (!rows.length) { if (!lastId && !list.children.length) list.innerHTML = '<div class="chat-day">No messages yet. Say hi 👋</div>'; return; }
+        if (!lastId) list.innerHTML = '';
+        const frag = rows.map(m => {
+          const d = new Date(m.created_at), ds = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          let out = '';
+          if (ds !== lastDay) { lastDay = ds; out += '<div class="chat-day">' + ds + '</div>'; }
+          const me = m.email === email;
+          out += '<div class="msg' + (me ? ' me' : '') + '"><small><b>' + esc(m.nickname) + '</b> · ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + (me ? '<button class="x" data-x="' + m.id + '" title="Delete">✕</button>' : '') + '</small>' + esc(m.body) + '</div>';
+          lastId = Math.max(lastId, m.id);
+          return out;
+        }).join('');
+        list.insertAdjacentHTML('beforeend', frag);
+        if (near || list.children.length === rows.length) list.scrollTop = list.scrollHeight;
+      }
+
+      /* ---------------- PASSPORT + ALBUMS ---------------- */
+      let att = [], photos = [], album = MEETINGS[0].key, counts = { posts: 0, mem: 0, photos: 0 };
+      async function passInit() {
+        const mo = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        $('bd-d').innerHTML = Array.from({ length: 31 }, (_, i) => '<option>' + (i + 1) + '</option>').join('');
+        $('bd-m').innerHTML = mo.map((x, i) => '<option value="' + (i + 1) + '">' + x + '</option>').join('');
+        $('album-chips').innerHTML = MEETINGS.map(m => '<button class="chip" data-k="' + m.key + '">' + m.icon + ' ' + m.name + '</button>').join('');
+        $('album-chips').addEventListener('click', function (e) { const k = e.target.dataset.k; if (k) { album = k; renderAlbum(); } });
+        $('stamps').addEventListener('click', async function (e) {
+          const b = e.target.closest('.stamp'); if (!b || !email) return;
+          const k = b.dataset.k, has = att.some(a => a.email === email && a.meeting === k);
+          b.disabled = true;
+          try {
+            if (has) await fetch(R + 'attendance?email=eq.' + encodeURIComponent(email) + '&meeting=eq.' + k, { method: 'DELETE', headers: H });
+            else await fetch(R + 'attendance?on_conflict=email,meeting', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, HJ), body: JSON.stringify({ email: email, meeting: k }) });
+          } catch (err) {}
+          loadPass();
+        });
+        $('album-send').onclick = uploadPhotos;
+        $('album-grid').addEventListener('click', function (e) {
+          if (e.target.tagName === 'IMG') { const lb = $('mem-lb'); if (lb) { lb.querySelector('img').src = e.target.src; lb.classList.add('open'); } }
+        });
+        loadPass();
+      }
+      async function loadPass() {
+        const a = await Promise.all([
+          get('attendance?select=email,meeting'), get('meeting_photos?select=*&order=created_at.desc'),
+          get('posts?select=id&email=eq.' + encodeURIComponent(email || '-')), get('memorabilia?select=id&email=eq.' + encodeURIComponent(email || '-'))
+        ]);
+        att = a[0]; photos = a[1] || [];
+        if (att === null) { $('stamps').innerHTML = '<p class="vote-hint">Passport is not available yet (database table missing).</p>'; att = []; }
+        else renderStamps();
+        counts = { posts: (a[2] || []).length, mem: (a[3] || []).length, photos: photos.filter(p => p.email === email).length };
+        renderBadges(); renderCrew(); renderAlbum();
+      }
+      function renderStamps() {
+        $('stamps').innerHTML = MEETINGS.map(m => {
+          const on = att.some(a => a.email === email && a.meeting === m.key);
+          return '<button class="stamp' + (on ? ' on' : '') + '" data-k="' + m.key + '"><em>' + m.icon + '</em><b>' + m.name + '</b>' + (on ? 'Stamped ✓' : 'Tap to stamp') + '</button>';
+        }).join('');
+      }
+      function renderBadges() {
+        const mine = att.filter(a => a.email === email).length, b = [];
+        if (mine >= 1) b.push('🌊 First Wave');
+        if (mine >= 2) b.push('🌀 Rising Tide');
+        if (mine >= MEETINGS.length) b.push('🌪️ Full Tsunami');
+        if (counts.posts) b.push('✍️ Storyteller');
+        if (counts.photos) b.push('📸 Photographer');
+        if (counts.mem) b.push('🎽 Memory Keeper');
+        $('badges').innerHTML = b.length ? b.map(x => '<span class="badge">' + x + '</span>').join('') : '<span class="vote-hint">No badges yet. Collect your first stamp!</span>';
+      }
+      function renderCrew() {
+        const by = {};
+        att.forEach(a => { by[a.email] = (by[a.email] || 0) + 1; });
+        const rows = Object.entries(by).map(([e, n]) => ({ n: n, nick: (nicks.find(x => x.email === e) || {}).nickname || 'A member' })).sort((a, b) => b.n - a.n);
+        $('crew').innerHTML = rows.length ? rows.map(r => '<li><span>' + esc(r.nick) + '</span><b>' + r.n + (r.n === 1 ? ' stamp' : ' stamps') + '</b></li>').join('') : '<li>No stamps yet.</li>';
+      }
+      function renderAlbum() {
+        document.querySelectorAll('#album-chips .chip').forEach(c => c.classList.toggle('on', c.dataset.k === album));
+        const ph = photos.filter(p => p.meeting === album);
+        $('album-grid').innerHTML = ph.length ? ph.map(p => '<img src="' + esc(p.image_url) + '" alt="Album photo" loading="lazy">').join('') : '<p class="vote-hint">No photos for this meeting yet.</p>';
+      }
+      async function uploadPhotos() {
+        const files = Array.from($('album-file').files), msg = $('album-msg');
+        if (!files.length || !email) { msg.textContent = 'Choose at least one photo.'; return; }
+        $('album-send').disabled = true;
+        try {
+          for (let i = 0; i < files.length; i++) {
+            msg.textContent = 'Uploading ' + (i + 1) + '/' + files.length + '…';
+            const blob = await shrink(files[i]);
+            const path = 'album-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
+            const up = await fetch(BASE + '/storage/v1/object/blog-images/' + path, { method: 'POST', headers: Object.assign({ 'Content-Type': 'image/jpeg' }, H), body: blob });
+            if (!up.ok) throw 0;
+            const r = await fetch(R + 'meeting_photos', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, HJ), body: JSON.stringify({ email: email, meeting: album, image_url: BASE + '/storage/v1/object/public/blog-images/' + path }) });
+            if (!r.ok) throw 0;
+          }
+          $('album-file').value = ''; msg.textContent = 'Done!'; loadPass();
+        } catch (e) { msg.textContent = 'Sorry, upload failed. Please try again.'; }
+        $('album-send').disabled = false;
+      }
+
+      /* ---------------- BIRTHDAYS ---------------- */
+      async function bdayInit() {
+        const rows = (await get('birthdays?select=*')) || [];
+        const mine = rows.find(r => r.email === email);
+        if (mine) { $('bd-d').value = mine.day; $('bd-m').value = mine.month; }
+        $('bd-save').onclick = async function () {
+          if (!email) return;
+          const body = { email: email, nickname: nick || 'A member', day: +$('bd-d').value, month: +$('bd-m').value };
+          const r = await fetch(R + 'birthdays?on_conflict=email', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, HJ), body: JSON.stringify(body) });
+          $('bd-msg').textContent = r.ok ? 'Saved 🎂' : 'Could not save (table missing?)';
+          if (r.ok) bdayInit();
+        };
+        $('bd-del').onclick = async function () {
+          await fetch(R + 'birthdays?email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H });
+          $('bd-msg').textContent = 'Removed.'; bdayInit();
+        };
+        const now = new Date(); now.setHours(0, 0, 0, 0);
+        const out = [];
+        rows.forEach(r => {
+          let d = new Date(now.getFullYear(), r.month - 1, r.day);
+          if (d < now) d = new Date(now.getFullYear() + 1, r.month - 1, r.day);
+          const diff = Math.round((d - now) / 864e5);
+          if (diff <= 7) out.push({ diff: diff, who: r.nickname });
+        });
+        out.sort((a, b) => a.diff - b.diff);
+        const el = $('bday');
+        if (!out.length) { el.classList.remove('show'); return; }
+        el.textContent = out.slice(0, 3).map(o => o.diff === 0 ? '🎂 Today is ' + o.who + '’s birthday! Send your wishes in the Lagoon' : '🎈 ' + o.who + '’s birthday in ' + o.diff + (o.diff === 1 ? ' day' : ' days')).join('  ·  ');
+        el.classList.add('show');
+      }
+
+      /* ---------------- NOTIFICATIONS ---------------- */
+      async function bellInit() {
+        const btn = $('bell'), panel = $('bell-panel');
+        if (!btn || !email) return;
+        const KEY = 'tt_seen_' + email;
+        let seen = 0; try { seen = +localStorage.getItem(KEY) || 0; } catch (e) {}
+        async function check() {
+          const cs = await get('comments?select=id,post_id,parent_id,email,author,created_at&order=created_at.desc&limit=300');
+          const ps = await get('posts?select=id,title,email&email=eq.' + encodeURIComponent(email));
+          if (!cs) return;
+          const myC = new Set(cs.filter(c => c.email === email).map(c => c.id)), myP = new Set((ps || []).map(p => p.id));
+          const title = {}; (ps || []).forEach(p => title[p.id] = p.title);
+          const items = cs.filter(c => c.email !== email && ((c.parent_id && myC.has(c.parent_id)) || (!c.parent_id && myP.has(c.post_id)))).slice(0, 15);
+          const unread = items.filter(c => new Date(c.created_at).getTime() > seen).length;
+          btn.classList.toggle('has', unread > 0); btn.querySelector('i').textContent = unread > 9 ? '9+' : unread;
+          panel.innerHTML = items.length ? items.map(c => '<a href="#blog" class="' + (new Date(c.created_at).getTime() > seen ? 'new' : '') + '"><b>' + esc(c.author) + '</b> ' + (c.parent_id ? 'replied to your comment' : 'commented on your post “' + esc(title[c.post_id] || '') + '”') + '<br><small>' + new Date(c.created_at).toLocaleDateString('en-GB') + '</small></a>').join('') : '<p>No notifications yet. Replies to your posts and comments will appear here.</p>';
+        }
+        btn.onclick = function (e) {
+          e.stopPropagation(); panel.classList.toggle('open');
+          if (!panel.classList.contains('open')) { try { localStorage.setItem(KEY, Date.now()); seen = Date.now(); } catch (x) {} btn.classList.remove('has'); }
+        };
+        document.addEventListener('click', function (e) { if (!e.target.closest('.bell-wrap') && panel.classList.contains('open')) { panel.classList.remove('open'); try { localStorage.setItem(KEY, Date.now()); seen = Date.now(); } catch (x) {} btn.classList.remove('has'); } });
+        panel.addEventListener('click', function () { panel.classList.remove('open'); });
+        check(); setInterval(check, 60000);
+      }
+
+      init();
     })();
   </script>
 </body>
