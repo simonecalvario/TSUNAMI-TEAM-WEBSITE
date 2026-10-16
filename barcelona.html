@@ -1,48 +1,125 @@
 <!doctype html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Barcelona — Gallery</title>
+  <meta name="theme-color" content="#060d1c">
+  <title>Barcelona | Tsunami Gallery</title>
   <style>
-    body {
-      background: #0b0b0b;
-      color: #f5f5f5;
-      font-family: Arial, Helvetica, sans-serif;
-      padding: 28px;
-      line-height: 1.7;
-    }
-    a.back {
-      color: #f5d21b;
-      text-decoration: none;
-      font-weight: 700;
-      display: inline-block;
-      margin-bottom: 18px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      margin-top: 28px;
-    }
-    .grid img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
+    :root { --black:#060d1c; --dark:#0b1730; --blue:#27b8ff; --yellow:#f5d21b; --orange:#ff7a18; --white:#f5f5f5; --grey:#b7b7b7; --line:rgba(140,200,255,0.16); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: radial-gradient(circle at 20% 0%, #0d2347, var(--black) 55%) fixed; color: var(--white); font-family: Arial, Helvetica, sans-serif; padding: 24px 16px 60px; line-height: 1.6; min-height: 100vh; }
+    .wrap { max-width: 1000px; margin: 0 auto; }
+    a.back { color: var(--yellow); text-decoration: none; font-weight: 700; display: inline-block; margin-bottom: 18px; }
+    .label { color: var(--orange); text-transform: uppercase; letter-spacing: .16em; font-size: .78rem; font-weight: 700; }
+    h1 { font-size: clamp(1.9rem, 6vw, 3rem); margin: 4px 0 8px; }
+    h1 span { color: var(--yellow); }
+    p.intro { color: var(--grey); max-width: 620px; }
+    .up { margin: 22px 0 26px; padding: 14px; background: var(--dark); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: var(--grey); font-size: .92rem; }
+    .up input[type=file] { max-width: 100%; color: var(--grey); }
+    .btn { border: 0; cursor: pointer; padding: 11px 18px; font-size: .95rem; font-weight: 700; background: var(--yellow); color: #101010; border-radius: 6px; text-transform: uppercase; letter-spacing: .04em; }
+    .btn:disabled { opacity: .5; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .cell { position: relative; }
+    .cell img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); cursor: zoom-in; background: #07142a; display: block; }
+    .cell button { position: absolute; top: 6px; right: 6px; background: rgba(6,13,28,.8); color: var(--white); border: 1px solid var(--line); border-radius: 50%; width: 28px; height: 28px; cursor: pointer; }
+    .empty { color: var(--grey); }
+    #lb { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(2,6,16,.94); padding: 14px; cursor: zoom-out; }
+    #lb.open { display: flex; }
+    #lb img { max-width: 100%; max-height: 100%; border-radius: 8px; }
   </style>
 </head>
 <body>
-  <a class="back" href="/">← Torna al sito</a>
-  <h1>Barcelona — Photo &amp; Video Gallery</h1>
-  <p>Qui inserisci foto e video del viaggio a Barcelona.</p>
+  <div class="wrap">
+    <a class="back" href="/#meetings">← Back to the site</a>
+    <div class="label">Tsunami Meeting</div>
+    <h1>Barcelona <span>Gallery</span></h1>
+    <p class="intro">Every photo is a piece of our story. Add yours and relive the trip together.</p>
 
-  <div class="grid">
-    <img src="assets/images/pins/barcelona.png" alt="Barcelona pin placeholder">
-    <img src="assets/images/pins/barcelona.png" alt="Barcelona placeholder image 2">
-    <img src="assets/images/pins/barcelona.png" alt="Barcelona placeholder image 3">
+    <div class="up">
+      <input id="f" type="file" accept="image/*" multiple>
+      <button class="btn" id="go" type="button">Add photos</button>
+      <span id="msg"></span>
+    </div>
+
+    <div class="grid" id="grid"></div>
   </div>
+  <div id="lb"><img alt=""></div>
+
+  <script>
+    (function () {
+      const KEY_M = 'barcelona';
+      const BASE = 'https://dykofnyhwusghfowfxbi.supabase.co';
+      const JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5a29mbnlod3VzZ2hmb3dmeGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjUwOTQsImV4cCI6MjEwNzY0MTA5NH0.wLS75UXlm2evHg1mlvjvrlJASDP9KRaE_b8fhnJ8htI';
+      const H = { apikey: JWT, Authorization: 'Bearer ' + JWT };
+      const HJ = Object.assign({ 'Content-Type': 'application/json' }, H);
+      const T = BASE + '/rest/v1/meeting_photos';
+      const $ = id => document.getElementById(id);
+      const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      let email = null, photos = [];
+
+      fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' })
+        .then(r => r.ok ? r.json() : {})
+        .then(j => { if (j && j.email) email = j.email.toLowerCase(); render(); })
+        .catch(function () {});
+
+      function shrink(file) {
+        return new Promise(function (ok, fail) {
+          const img = new Image();
+          img.onload = function () {
+            const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+            const c = document.createElement('canvas');
+            c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+            c.toBlob(b => b ? ok(b) : fail(), 'image/jpeg', 0.82);
+          };
+          img.onerror = fail; img.src = URL.createObjectURL(file);
+        });
+      }
+
+      async function load() {
+        try {
+          const r = await fetch(T + '?select=*&meeting=eq.' + KEY_M + '&order=created_at.desc', { headers: H });
+          if (!r.ok) throw 0;
+          photos = await r.json();
+        } catch (e) { photos = null; }
+        render();
+      }
+      function render() {
+        const g = $('grid');
+        if (photos === null) { g.innerHTML = '<p class="empty">The gallery is not available yet (database table missing).</p>'; return; }
+        g.innerHTML = photos.length ? photos.map(p => '<div class="cell"><img src="' + esc(p.image_url) + '" alt="Photo" loading="lazy">' + (p.email === email ? '<button data-del="' + esc(p.id) + '" title="Delete">✕</button>' : '') + '</div>').join('') : '<p class="empty">No photos yet. Be the first to add one!</p>';
+      }
+      $('grid').addEventListener('click', async function (e) {
+        if (e.target.tagName === 'IMG') { $('lb').querySelector('img').src = e.target.src; $('lb').classList.add('open'); return; }
+        const id = e.target.dataset.del;
+        if (id && confirm('Delete this photo?')) {
+          await fetch(T + '?id=eq.' + encodeURIComponent(id) + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H });
+          load();
+        }
+      });
+      $('lb').onclick = function () { this.classList.remove('open'); };
+      $('go').onclick = async function () {
+        const files = Array.from($('f').files), msg = $('msg');
+        if (!files.length) { msg.textContent = 'Choose at least one photo.'; return; }
+        if (!email) { msg.textContent = 'Could not identify your account. Reload the page.'; return; }
+        $('go').disabled = true;
+        try {
+          for (let i = 0; i < files.length; i++) {
+            msg.textContent = 'Uploading ' + (i + 1) + '/' + files.length + '…';
+            const blob = await shrink(files[i]);
+            const path = 'album-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
+            const up = await fetch(BASE + '/storage/v1/object/blog-images/' + path, { method: 'POST', headers: Object.assign({ 'Content-Type': 'image/jpeg' }, H), body: blob });
+            if (!up.ok) throw 0;
+            const r = await fetch(T, { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, HJ), body: JSON.stringify({ email: email, meeting: KEY_M, image_url: BASE + '/storage/v1/object/public/blog-images/' + path }) });
+            if (!r.ok) throw 0;
+          }
+          $('f').value = ''; msg.textContent = 'Done!'; load();
+        } catch (err) { msg.textContent = 'Sorry, upload failed. Please try again.'; }
+        $('go').disabled = false;
+      };
+      load();
+    })();
+  </script>
 </body>
 </html>
