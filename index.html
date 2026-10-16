@@ -592,7 +592,10 @@
     .stamp.on img { filter: drop-shadow(0 4px 14px rgba(245,210,27,.45)); opacity: 1; transform: rotate(-3deg) scale(1.05); }
     .stamp.on span { color: var(--yellow); }
     .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-    .badge { padding: 6px 12px; border-radius: 999px; font-size: .85rem; background: rgba(39,184,255,.18); border: 1px solid var(--line); color: var(--white); }
+    .badge { cursor: pointer; font: inherit; font-size: .85rem; padding: 6px 12px; border-radius: 999px; font-size: .85rem; background: rgba(39,184,255,.18); border: 1px solid var(--line); color: var(--white); }
+    .badge.sel { background: var(--yellow); color: #101010; border-color: var(--yellow); font-weight: 700; }
+    .badge-info { display: none; width: 100%; margin-top: 6px; padding: 12px 14px; border-radius: 10px; background: var(--dark); border: 1px solid var(--line); border-left: 4px solid var(--yellow); color: var(--grey); font-size: .93rem; }
+    .badge-info strong { color: var(--white); }
     .crew { list-style: none; max-width: 520px; }
     .crew li { display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.035); }
     .crew b { color: var(--yellow); }
@@ -2283,15 +2286,36 @@
           return '<button class="stamp' + (on ? ' on' : '') + '" data-k="' + m.key + '"><img src="assets/images/pins/' + m.key + '.png" alt="' + m.name + ' pin"><b>' + m.icon + ' ' + m.name + ' <em style="font-style:normal;color:var(--yellow)">' + m.year + '</em></b><span>' + (on ? 'Stamped ✓' : 'Tap to stamp') + '</span></button>';
         }).join('');
       }
+      const BADGE_INFO = {
+        first: ['🌊 First Wave', 'You collected your first stamp: you took part in a Tsunami Meeting.'],
+        rising: ['🌀 Rising Tide', 'You collected 2 stamps: you lived at least 2 Tsunami Meetings.'],
+        full: ['🌪️ Full Tsunami', 'You collected the stamp of every Tsunami Meeting so far. You were always there!'],
+        story: ['✍️ Storyteller', 'You published at least one post on the Team Blog.'],
+        photo: ['📸 Photographer', 'You added at least one photo to a meeting gallery.'],
+        memory: ['🎽 Memory Keeper', 'You added at least one piece to the Tsunami Memorabilia.']
+      };
       function renderBadges() {
-        const mine = att.filter(a => a.email === email).length, b = [];
-        if (mine >= 1) b.push('🌊 First Wave');
-        if (mine >= 2) b.push('🌀 Rising Tide');
-        if (mine >= MEETINGS.length) b.push('🌪️ Full Tsunami');
-        if (counts.posts) b.push('✍️ Storyteller');
-        if (counts.photos) b.push('📸 Photographer');
-        if (counts.mem) b.push('🎽 Memory Keeper');
-        $('badges').innerHTML = b.length ? b.map(x => '<span class="badge">' + x + '</span>').join('') : '<span class="vote-hint">No badges yet. Collect your first stamp!</span>';
+        const mine = att.filter(a => a.email === email).length, j = [], act = [];
+        if (mine >= 1) j.push('first');
+        if (mine >= 2) j.push('rising');
+        if (mine >= MEETINGS.length) j.push('full');
+        if (counts.posts) act.push('story');
+        if (counts.photos) act.push('photo');
+        if (counts.mem) act.push('memory');
+        const row = (t, a) => a.length ? '<div class="vote-hint" style="width:100%;margin:6px 0 0">' + t + '</div>' + a.map(k => '<button type="button" class="badge" data-b="' + k + '">' + BADGE_INFO[k][0] + '</button>').join('') : '';
+        $('badges').innerHTML = (row('Journey badges (one for each stamp)', j) + row('Activity badges', act)) || '<span class="vote-hint">No badges yet. Collect your first stamp!</span>';
+        if (j.length + act.length) $('badges').insertAdjacentHTML('beforeend', '<div class="vote-hint" style="width:100%;margin:6px 0 0">Tap a badge to see why you earned it.</div><div id="badge-info" class="badge-info"></div>');
+        if (!$('badges').dataset.bound) {
+          $('badges').dataset.bound = '1';
+          $('badges').addEventListener('click', function (e) {
+            const k = e.target.dataset.b; if (!k) return;
+            const box = $('badge-info'), open = box.dataset.k === k && box.style.display === 'block';
+            document.querySelectorAll('#badges .badge').forEach(x => x.classList.toggle('sel', !open && x.dataset.b === k));
+            box.dataset.k = open ? '' : k;
+            box.style.display = open ? 'none' : 'block';
+            box.innerHTML = '<strong>' + BADGE_INFO[k][0] + '</strong><br>' + BADGE_INFO[k][1];
+          });
+        }
       }
       function renderCrew() {
         const by = {};
