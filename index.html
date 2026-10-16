@@ -583,12 +583,13 @@
     /* ---- Passport & albums ---- */
     #passport { padding: 80px 0; background: linear-gradient(160deg, rgba(245,210,27,0.06), transparent 55%); }
     #passport h3.sub { color: var(--yellow); margin: 34px 0 12px; }
-    .stamps { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; max-width: 720px; }
-    .stamp { padding: 16px 10px; text-align: center; border: 2px dashed var(--line); border-radius: 14px; background: transparent; color: var(--grey); cursor: pointer; font: inherit; transition: transform .2s; }
+    .stamps { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; max-width: 720px; }
+    .stamp { padding: 6px 4px 10px; text-align: center; border: 0; border-radius: 14px; background: transparent; color: var(--grey); cursor: pointer; font: inherit; transition: transform .25s; -webkit-tap-highlight-color: transparent; }
+    .stamp img { display: block; width: 100%; max-width: 120px; aspect-ratio: 1; object-fit: contain; margin: 0 auto 6px; filter: grayscale(1) brightness(.55); opacity: .55; transition: filter .3s, opacity .3s, transform .3s; }
     .stamp b { display: block; font-size: 1.05rem; color: var(--white); }
-    .stamp em { font-style: normal; font-size: 1.6rem; display: block; margin-bottom: 4px; filter: grayscale(1); opacity: .5; }
-    .stamp.on { border: 2px solid var(--yellow); background: rgba(245,210,27,.1); transform: rotate(-2deg); }
-    .stamp.on em { filter: none; opacity: 1; }
+    .stamp span { font-size: .8rem; }
+    .stamp.on img { filter: drop-shadow(0 4px 14px rgba(245,210,27,.45)); opacity: 1; transform: rotate(-3deg) scale(1.05); }
+    .stamp.on span { color: var(--yellow); }
     .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
     .badge { padding: 6px 12px; border-radius: 999px; font-size: .85rem; background: rgba(39,184,255,.18); border: 1px solid var(--line); color: var(--white); }
     .crew { list-style: none; max-width: 520px; }
@@ -2241,7 +2242,7 @@
       function renderStamps() {
         $('stamps').innerHTML = MEETINGS.map(m => {
           const on = att.some(a => a.email === email && a.meeting === m.key);
-          return '<button class="stamp' + (on ? ' on' : '') + '" data-k="' + m.key + '"><em>' + m.icon + '</em><b>' + m.name + '</b>' + (on ? 'Stamped ✓' : 'Tap to stamp') + '</button>';
+          return '<button class="stamp' + (on ? ' on' : '') + '" data-k="' + m.key + '"><img src="assets/images/pins/' + m.key + '.png" alt="' + m.name + ' pin"><b>' + m.icon + ' ' + m.name + '</b><span>' + (on ? 'Stamped ✓' : 'Tap to stamp') + '</span></button>';
         }).join('');
       }
       function renderBadges() {
