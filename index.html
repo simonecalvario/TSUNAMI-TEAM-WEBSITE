@@ -1203,6 +1203,9 @@
           <button class="vote-del" id="bd-del" type="button" style="margin:0">Remove</button>
           <span id="bd-msg"></span>
         </div>
+
+        <h3 class="sub">Team birthdays</h3>
+        <ul class="crew" id="bd-list"><li>Loading…</li></ul>
       </div>
     </section>
 
@@ -2333,11 +2336,18 @@
         };
         const now = new Date(); now.setHours(0, 0, 0, 0);
         const out = [];
+        const nameOf = r => (nicks.find(x => x.email === r.email) || {}).nickname || r.nickname || 'A member';
+        const all = rows.map(r => {
+          let d = new Date(now.getFullYear(), r.month - 1, r.day);
+          if (d < now) d = new Date(now.getFullYear() + 1, r.month - 1, r.day);
+          return { diff: Math.round((d - now) / 864e5), r: r };
+        }).sort((a, b) => a.diff - b.diff);
+        $('bd-list').innerHTML = all.length ? all.map(o => '<li><span>' + esc(nameOf(o.r)) + (o.r.email === email ? ' (you)' : '') + '</span><b>' + o.r.day + ' ' + MO[o.r.month - 1] + (o.diff === 0 ? ' 🎂' : '') + '</b></li>').join('') : '<li>No birthdays saved yet.</li>';
         rows.forEach(r => {
           let d = new Date(now.getFullYear(), r.month - 1, r.day);
           if (d < now) d = new Date(now.getFullYear() + 1, r.month - 1, r.day);
           const diff = Math.round((d - now) / 864e5);
-          if (diff <= 7) out.push({ diff: diff, who: r.nickname });
+          if (diff <= 7) out.push({ diff: diff, who: nameOf(r) });
         });
         out.sort((a, b) => a.diff - b.diff);
         const el = $('bday');
