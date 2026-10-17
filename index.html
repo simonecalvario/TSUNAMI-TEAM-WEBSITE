@@ -430,6 +430,8 @@
       will-change: transform;
     }
 
+    .tt-pin { background: none; border: 0; overflow: visible; }
+    .pin-n { position: absolute; top: -6px; right: -9px; min-width: 20px; height: 20px; padding: 0 5px; box-sizing: border-box; border-radius: 10px; background: var(--orange); color: #101010; border: 2px solid #060d1c; font: 800 .72rem/16px sans-serif; text-align: center; }
     .leaflet-marker-icon.enlarged {
       transform: scale(1.6);
       z-index: 9999 !important;
@@ -1364,9 +1366,9 @@
   <script>
     (function () {
       const cities = [
-        { name: 'Barcelona', coords: [41.3851, 2.1734], url: '/barcelona.html', icon: 'assets/images/pins/barcelona.png' },
-        { name: 'Doha', coords: [25.2854, 51.5310], url: '/doha.html', icon: 'assets/images/pins/doha.png' },
-        { name: 'Munich', coords: [48.1351, 11.5820], url: '/munich.html', icon: 'assets/images/pins/munich.png' }
+        { name: 'Barcelona', coords: [41.3851, 2.1734], key: 'barcelona', url: '/barcelona.html', icon: 'assets/images/pins/barcelona.png' },
+        { name: 'Doha', coords: [25.2854, 51.5310], key: 'doha', url: '/doha.html', icon: 'assets/images/pins/doha.png' },
+        { name: 'Munich', coords: [48.1351, 11.5820], key: 'munich', url: '/munich.html', icon: 'assets/images/pins/munich.png' }
       ];
 
       const initialZoom = 3;
@@ -1390,17 +1392,26 @@
         return Math.max(minSize, Math.min(maxSize, s));
       }
 
-      function createIcon(iconUrl, size) {
-        return L.icon({
-          iconUrl,
-          iconSize: [size, Math.round(size * 1.25)],
+      const pinCounts = {};
+      const markers = {};
+      function createIcon(iconUrl, size, n) {
+        const h = Math.round(size * 1.25);
+        return L.divIcon({
+          className: 'tt-pin',
+          html: '<img src="' + iconUrl + '" alt="" style="width:100%;height:100%;display:block">' + (n > 0 ? '<span class="pin-n">' + n + '</span>' : ''),
+          iconSize: [size, h],
           iconAnchor: [Math.round(size / 2), Math.round(size * 1.15)],
           popupAnchor: [0, -Math.round(size * 1.05)]
         });
       }
+      function refreshPins() {
+        const sz = sizeForZoom(map.getZoom());
+        cities.forEach(c => { if (markers[c.key]) markers[c.key].setIcon(createIcon(c.icon, sz, pinCounts[c.key] || 0)); });
+      }
 
       cities.forEach(city => {
-        const marker = L.marker(city.coords, { icon: createIcon(city.icon, sizeForZoom(map.getZoom())), keyboard: true }).addTo(map);
+        const marker = L.marker(city.coords, { icon: createIcon(city.icon, sizeForZoom(map.getZoom()), 0), keyboard: true }).addTo(map);
+        markers[city.key] = marker;
 
         const popupHtml = `
           <div style="text-align:center; min-width:170px;">
@@ -1434,16 +1445,12 @@
         });
       });
 
-      map.on('zoomend', function () {
-        const newSize = sizeForZoom(map.getZoom());
-        cities.forEach(city => {
-          const marker = map.eachLayer(layer => {
-            if (layer instanceof L.Marker && layer.getLatLng && layer.getLatLng().lat === city.coords[0] && layer.getLatLng().lng === city.coords[1]) {
-              layer.setIcon(createIcon(city.icon, newSize));
-            }
-          });
-        });
-      });
+      map.on('zoomend', refreshPins);
+
+      fetch('https://dykofnyhwusghfowfxbi.supabase.co/rest/v1/meeting_photos?select=meeting', { headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5a29mbnlod3VzZ2hmb3dmeGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjUwOTQsImV4cCI6MjEwNzY0MTA5NH0.wLS75UXlm2evHg1mlvjvrlJASDP9KRaE_b8fhnJ8htI', Authorization: 'Bearer ' + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5a29mbnlod3VzZ2hmb3dmeGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjUwOTQsImV4cCI6MjEwNzY0MTA5NH0.wLS75UXlm2evHg1mlvjvrlJASDP9KRaE_b8fhnJ8htI' } })
+        .then(r => r.ok ? r.json() : [])
+        .then(rows => { rows.forEach(x => { pinCounts[x.meeting] = (pinCounts[x.meeting] || 0) + 1; }); refreshPins(); })
+        .catch(function () {});
 
       setTimeout(() => {
         document.querySelectorAll('.leaflet-marker-icon').forEach(el => {
