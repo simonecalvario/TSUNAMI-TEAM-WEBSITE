@@ -580,6 +580,21 @@
     #chat-form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
     #chat-in { flex: 1; min-width: 0; padding: 12px 14px; font: inherit; color: var(--white); background: var(--black); border: 1px solid var(--line); border-radius: 22px; }
     #chat-form .button { border: 0; cursor: pointer; padding: 10px 18px; font-size: .95rem; }
+    .msg { position: relative; }
+    .msg small .re { background: none; border: 0; color: var(--grey); cursor: pointer; font-size: .85rem; margin-left: 8px; padding: 0 2px; }
+    .msg small b[data-m] { cursor: pointer; }
+    .msg .quote { display: block; margin: 2px 0 6px; padding: 5px 8px; border-left: 3px solid var(--yellow); border-radius: 4px; background: rgba(0,0,0,.25); font-size: .8rem; color: var(--grey); cursor: pointer; white-space: normal; overflow: hidden; text-overflow: ellipsis; }
+    .msg .quote b { color: var(--yellow); }
+    .msg .mention { color: var(--yellow); font-weight: 700; }
+    .msg.tome { box-shadow: 0 0 0 1.5px var(--yellow); }
+    .msg.flash { animation: flash 1.4s ease; }
+    @keyframes flash { 0%,60% { background: rgba(245,210,27,.35); } }
+    #chat-reply { display: none; align-items: center; gap: 8px; padding: 8px 14px; border-top: 1px solid var(--line); font-size: .85rem; color: var(--grey); }
+    #chat-reply span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #chat-reply b { color: var(--yellow); }
+    #chat-reply button { background: none; border: 0; color: var(--grey); font-size: 1.1rem; cursor: pointer; padding: 2px 6px; }
+    #chat-sug { display: none; flex-wrap: wrap; gap: 6px; padding: 8px 10px 0; border-top: 1px solid var(--line); }
+    #chat-sug button { padding: 6px 12px; font: inherit; font-size: .85rem; color: var(--yellow); background: rgba(245,210,27,.1); border: 1px solid rgba(245,210,27,.4); border-radius: 16px; cursor: pointer; }
     #chat-note { padding: 12px 14px; color: var(--grey); font-size: .9rem; border-top: 1px solid var(--line); }
     #chat-note a { color: var(--yellow); }
 
@@ -1213,6 +1228,8 @@
         <div class="chat">
           <div id="chat-list"></div>
           <div id="chat-note">Loading…</div>
+          <div id="chat-reply"><span></span><button type="button" id="chat-reply-x" aria-label="Cancel reply">✕</button></div>
+          <div id="chat-sug"></div>
           <form id="chat-form" style="display:none">
             <input id="chat-in" type="text" maxlength="500" placeholder="Write a message…" autocomplete="off">
             <button class="button" type="submit">Send</button>
@@ -2254,44 +2271,99 @@
       }
 
       /* ---------------- CHAT ---------------- */
-      let lastId = 0, chatBroken = false, near = true;
+      let lastId = 0, chatBroken = false, near = true, replyTo = null, byId = {}, nicksAt = Date.now();
+      const escRe = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      function mentionRe() {
+        const names = Array.from(new Set(nicks.map(x => x.nickname))).filter(Boolean).sort((a, b) => b.length - a.length);
+        return names.length ? new RegExp('@(' + names.map(escRe).join('|') + ')(?![\\p{L}\\p{N}])', 'giu') : null;
+      }
+      function fmt(t) {
+        const re = mentionRe(); let out = esc(t);
+        if (re) out = out.replace(re, '<span class="mention">@$1</span>');
+        return out;
+      }
+      function mentionsMe(m) {
+        if (!nick) return false;
+        const re = new RegExp('@' + escRe(nick) + '(?![\\p{L}\\p{N}])', 'iu');
+        const orig = m.reply_to ? byId[m.reply_to] : null;
+        return re.test(m.body) || !!(orig && orig.email === email);
+      }
+      function setReply(m) {
+        replyTo = m;
+        const bar = $('chat-reply');
+        if (!m) { bar.style.display = 'none'; return; }
+        bar.style.display = 'flex';
+        bar.querySelector('span').innerHTML = 'Replying to <b>' + esc(m.nickname) + '</b>: ' + esc(m.body.slice(0, 70));
+        $('chat-in').focus();
+      }
+      function suggest() {
+        const inp = $('chat-in'), box = $('chat-sug');
+        const before = inp.value.slice(0, inp.selectionStart || inp.value.length);
+        const mt = before.match(/(?:^|\s)@([^@\s][^@]{0,23}|)$/u);
+        if (!mt) { box.style.display = 'none'; return; }
+        const q = mt[1].toLowerCase();
+        const names = Array.from(new Set(nicks.map(x => x.nickname))).filter(n => n && n !== nick && n.toLowerCase().indexOf(q) === 0).slice(0, 8);
+        if (!names.length) { box.style.display = 'none'; return; }
+        box.innerHTML = names.map(n => '<button type="button" data-n="' + esc(n) + '">@' + esc(n) + '</button>').join('');
+        box.style.display = 'flex';
+      }
+      function insertMention(n) {
+        const inp = $('chat-in');
+        const pos = inp.selectionStart || inp.value.length;
+        const before = inp.value.slice(0, pos).replace(/@[^@]{0,24}$/u, '');
+        inp.value = before + '@' + n + ' ' + inp.value.slice(pos);
+        $('chat-sug').style.display = 'none'; inp.focus();
+      }
       function chatInit() {
         const note = $('chat-note'), form = $('chat-form'), list = $('chat-list');
         if (!email) { note.textContent = 'Could not identify your account. Reload the page.'; return; }
         if (!nick) { note.innerHTML = 'To chat, first choose your call sign. <a href="#" onclick="openCallsignGate();return false;">Choose now</a>'; }
         else { note.style.display = 'none'; form.style.display = 'flex'; }
         list.addEventListener('scroll', function () { near = list.scrollHeight - list.scrollTop - list.clientHeight < 80; });
+        $('chat-in').addEventListener('input', suggest);
+        $('chat-sug').addEventListener('click', function (e) { const n = e.target.dataset.n; if (n) insertMention(n); });
+        $('chat-reply-x').addEventListener('click', function () { setReply(null); });
         form.addEventListener('submit', async function (e) {
           e.preventDefault();
           const t = $('chat-in').value.trim(); if (!t || !nick) return;
-          $('chat-in').value = '';
+          const body = { email: email, nickname: nick, body: t };
+          if (replyTo) body.reply_to = replyTo.id;
+          $('chat-in').value = ''; $('chat-sug').style.display = 'none';
           try {
-            const r = await fetch(R + 'chat_messages', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, HJ), body: JSON.stringify({ email: email, nickname: nick, body: t }) });
+            const r = await fetch(R + 'chat_messages', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, HJ), body: JSON.stringify(body) });
             if (!r.ok) throw 0;
-            near = true; poll();
-          } catch (err) { note.style.display = 'block'; note.textContent = 'Message not sent. Please try again.'; }
+            setReply(null); near = true; poll();
+          } catch (err) { $('chat-in').value = t; note.style.display = 'block'; note.textContent = replyTo ? 'Reply not sent. The database may still need the reply column (see instructions).' : 'Message not sent. Please try again.'; }
         });
         list.addEventListener('click', async function (e) {
           const id = e.target.dataset.x;
-          if (id) { await fetch(R + 'chat_messages?id=eq.' + id + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H }); lastId = 0; list.innerHTML = ''; poll(); }
+          if (id) { await fetch(R + 'chat_messages?id=eq.' + id + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H }); lastId = 0; byId = {}; list.innerHTML = ''; poll(); return; }
+          if (e.target.dataset.re) { const m = byId[e.target.dataset.re]; if (m && nick) setReply(m); return; }
+          if (e.target.dataset.m && nick) { const inp = $('chat-in'); inp.value = (inp.value + ' @' + e.target.dataset.m + ' ').trimStart(); inp.focus(); return; }
+          const q = e.target.closest('.quote');
+          if (q) { const el = list.querySelector('[data-id="' + q.dataset.q + '"]'); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); } }
         });
         poll(); setInterval(function () { if (!document.hidden) poll(); }, 4000);
       }
       let lastDay = '';
       async function poll() {
         const list = $('chat-list');
+        if (Date.now() - nicksAt > 60000) { nicksAt = Date.now(); const n = await get('nicknames?select=email,nickname'); if (n) nicks = n; }
         const q = lastId ? 'chat_messages?select=*&id=gt.' + lastId + '&order=id.asc' : 'chat_messages?select=*&order=id.desc&limit=80';
         const rows = await get(q);
         if (rows === null) { if (!chatBroken) { chatBroken = true; $('chat-note').style.display = 'block'; $('chat-note').textContent = 'Chat is not available yet (database table missing).'; } return; }
-        if (!lastId) { rows.reverse(); lastDay = ''; }
+        if (!lastId) { rows.reverse(); lastDay = ''; byId = {}; }
         if (!rows.length) { if (!lastId && !list.children.length) list.innerHTML = '<div class="chat-day">No messages yet. Say hi 👋</div>'; return; }
         if (!lastId) list.innerHTML = '';
+        rows.forEach(m => { byId[m.id] = m; });
         const frag = rows.map(m => {
           const d = new Date(m.created_at), ds = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
           let out = '';
           if (ds !== lastDay) { lastDay = ds; out += '<div class="chat-day">' + ds + '</div>'; }
           const me = m.email === email;
-          out += '<div class="msg' + (me ? ' me' : '') + '"><small><b>' + esc(m.nickname) + '</b> · ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + (me ? '<button class="x" data-x="' + m.id + '" title="Delete">✕</button>' : '') + '</small>' + esc(m.body) + '</div>';
+          const orig = m.reply_to ? byId[m.reply_to] : null;
+          const quote = m.reply_to ? '<span class="quote" data-q="' + m.reply_to + '">' + (orig ? '↩ <b>' + esc(orig.nickname) + '</b> ' + esc(orig.body.slice(0, 80)) : '↩ original message') + '</span>' : '';
+          out += '<div class="msg' + (me ? ' me' : '') + (!me && mentionsMe(m) ? ' tome' : '') + '" data-id="' + m.id + '"><small><b data-m="' + esc(m.nickname) + '">' + esc(m.nickname) + '</b> · ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '<button class="re" data-re="' + m.id + '" title="Reply">↩</button>' + (me ? '<button class="x" data-x="' + m.id + '" title="Delete">✕</button>' : '') + '</small>' + quote + fmt(m.body) + '</div>';
           lastId = Math.max(lastId, m.id);
           return out;
         }).join('');
@@ -2428,12 +2500,19 @@
           const cs = await get('comments?select=id,post_id,parent_id,email,author,created_at&order=created_at.desc&limit=300');
           const ps = await get('posts?select=id,title,email&email=eq.' + encodeURIComponent(email));
           if (!cs) return;
+          const chat = (await get('chat_messages?select=*&order=id.desc&limit=100')) || [];
+          const chatById = {}; chat.forEach(m => chatById[m.id] = m);
+          const mre = nick ? new RegExp('@' + nick.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'iu') : null;
+          const chatItems = chat.filter(m => m.email !== email && ((mre && mre.test(m.body)) || (m.reply_to && chatById[m.reply_to] && chatById[m.reply_to].email === email))).slice(0, 10);
           const myC = new Set(cs.filter(c => c.email === email).map(c => c.id)), myP = new Set((ps || []).map(p => p.id));
           const title = {}; (ps || []).forEach(p => title[p.id] = p.title);
           const items = cs.filter(c => c.email !== email && ((c.parent_id && myC.has(c.parent_id)) || (!c.parent_id && myP.has(c.post_id)))).slice(0, 15);
-          const unread = items.filter(c => new Date(c.created_at).getTime() > seen).length;
+          const all = items.map(c => ({ t: new Date(c.created_at).getTime(), href: '#blog', who: c.author, txt: c.parent_id ? 'replied to your comment' : 'commented on your post “' + (title[c.post_id] || '') + '”', at: c.created_at }))
+            .concat(chatItems.map(m => ({ t: new Date(m.created_at).getTime(), href: '#lagoon', who: m.nickname, txt: (mre && mre.test(m.body)) ? 'mentioned you in the Lagoon' : 'replied to you in the Lagoon', at: m.created_at })))
+            .sort((x, y) => y.t - x.t).slice(0, 15);
+          const unread = all.filter(c => c.t > seen).length;
           btn.classList.toggle('has', unread > 0); btn.querySelector('i').textContent = unread > 9 ? '9+' : unread;
-          panel.innerHTML = items.length ? items.map(c => '<a href="#blog" class="' + (new Date(c.created_at).getTime() > seen ? 'new' : '') + '"><b>' + esc(c.author) + '</b> ' + (c.parent_id ? 'replied to your comment' : 'commented on your post “' + esc(title[c.post_id] || '') + '”') + '<br><small>' + new Date(c.created_at).toLocaleDateString('en-GB') + '</small></a>').join('') : '<p>No notifications yet. Replies to your posts and comments will appear here.</p>';
+          panel.innerHTML = all.length ? all.map(c => '<a href="' + c.href + '" class="' + (c.t > seen ? 'new' : '') + '"><b>' + esc(c.who) + '</b> ' + esc(c.txt) + '<br><small>' + new Date(c.at).toLocaleDateString('en-GB') + '</small></a>').join('') : '<p>No notifications yet. Replies and mentions will appear here.</p>';
         }
         btn.onclick = function (e) {
           e.stopPropagation(); panel.classList.toggle('open');
