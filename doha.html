@@ -23,6 +23,8 @@
     .cell { position: relative; }
     .cell img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); cursor: zoom-in; background: #07142a; display: block; }
     .cell button { position: absolute; top: 6px; right: 6px; background: rgba(6,13,28,.8); color: var(--white); border: 1px solid var(--line); border-radius: 50%; width: 28px; height: 28px; cursor: pointer; }
+    .by { margin-top: 5px; font-size: .8rem; color: var(--grey); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .by b { color: var(--yellow); }
     .empty { color: var(--grey); }
     #lb { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(2,6,16,.94); padding: 14px; cursor: zoom-out; }
     #lb.open { display: flex; }
@@ -56,7 +58,7 @@
       const T = BASE + '/rest/v1/meeting_photos';
       const $ = id => document.getElementById(id);
       const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-      let email = null, photos = [];
+      let email = null, photos = [], nicks = {};
 
       fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' })
         .then(r => r.ok ? r.json() : {})
@@ -82,13 +84,14 @@
           const r = await fetch(T + '?select=*&meeting=eq.' + KEY_M + '&order=created_at.desc', { headers: H });
           if (!r.ok) throw 0;
           photos = await r.json();
+          try { const n = await fetch(BASE + '/rest/v1/nicknames?select=email,nickname', { headers: H }); if (n.ok) (await n.json()).forEach(x => { nicks[x.email] = x.nickname; }); } catch (e) {}
         } catch (e) { photos = null; }
         render();
       }
       function render() {
         const g = $('grid');
         if (photos === null) { g.innerHTML = '<p class="empty">The gallery is not available yet (database table missing).</p>'; return; }
-        g.innerHTML = photos.length ? photos.map(p => '<div class="cell"><img src="' + esc(p.image_url) + '" alt="Photo" loading="lazy">' + (p.email === email ? '<button data-del="' + esc(p.id) + '" title="Delete">✕</button>' : '') + '</div>').join('') : '<p class="empty">No photos yet. Be the first to add one!</p>';
+        g.innerHTML = photos.length ? photos.map(p => '<div class="cell"><img src="' + esc(p.image_url) + '" alt="Photo" loading="lazy">' + (p.email === email ? '<button data-del="' + esc(p.id) + '" title="Delete">✕</button>' : '') + '<div class="by">by <b>' + esc(nicks[p.email] || 'a member') + '</b></div></div>').join('') : '<p class="empty">No photos yet. Be the first to add one!</p>';
       }
       $('grid').addEventListener('click', async function (e) {
         if (e.target.tagName === 'IMG') { $('lb').querySelector('img').src = e.target.src; $('lb').classList.add('open'); return; }
