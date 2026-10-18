@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261018-0220">
+<meta name="tt-build" content="20261018-0935">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -472,6 +472,13 @@
       border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.035);
     }
     #vote-rank b { color: var(--yellow); }
+    #vote-rank li { flex-wrap: wrap; }
+    #vote-rank .who { flex-basis: 100%; font-size: .8rem; color: var(--grey); }
+    .when-who { display: grid; gap: 8px; margin-top: 8px; }
+    .when-who div { padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.035); font-size: .88rem; color: var(--grey); }
+    .when-who b { color: var(--yellow); }
+    #when-day { min-height: 1.3em; margin: 6px 0 0; }
+    #when-day b { color: var(--yellow); }
     .vote-del {
       margin-left: 8px; padding: 5px 12px; cursor: pointer; font-size: 0.85rem;
       color: var(--white); background: transparent; border: 1px solid var(--line); border-radius: 4px;
@@ -1162,10 +1169,13 @@
             <button class="vote-del" id="when-clear" style="margin:0">Clear my selection</button>
           </div>
           <p id="when-msg" class="vote-hint" style="margin-top:4px"></p>
+          <p id="when-day" class="vote-hint">Tap a day to see who is free.</p>
           <div class="when-len">Best period for a meeting of
             <select id="when-n"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>7</option></select> days
           </div>
           <ol id="when-best"></ol>
+          <h3 class="sub">Who is free when</h3>
+          <div id="when-who" class="when-who"></div>
         </div>
       </div>
     </section>
@@ -1565,7 +1575,9 @@
       const $ = id => document.getElementById(id);
       const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
       const layer = L.layerGroup().addTo(map);
-      let email = null, votes = [], pending = null, pendMarker = null, found = [];
+      let email = null, votes = [], pending = null, pendMarker = null, found = [], nm = {};
+      const nameOf = e => nm[e] || 'a member';
+      (async function () { try { const r = await fetch(SB.replace('meeting_votes', 'nicknames') + '?select=email,nickname', { headers: H }); if (r.ok) (await r.json()).forEach(x => { nm[x.email] = x.nickname; }); } catch (e) {} render(); })();
 
       fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' })
         .then(r => r.ok ? r.json() : {})
@@ -1585,19 +1597,19 @@
         const g = {};
         votes.forEach(v => {
           const k = (v.city + '|' + (v.country || '')).toLowerCase();
-          const c = g[k] || (g[k] = { city: v.city, country: v.country, lat: v.lat, lng: v.lng, n: 0, mine: false });
-          c.n++;
+          const c = g[k] || (g[k] = { city: v.city, country: v.country, lat: v.lat, lng: v.lng, n: 0, mine: false, who: [] });
+          c.n++; c.who.push(nameOf(v.email));
           if (v.email === email) c.mine = true;
         });
         const arr = Object.values(g).sort((a, b) => b.n - a.n);
         arr.forEach(c => {
           const icon = L.divIcon({ className: '', html: '<div class="vpin' + (c.mine ? ' mine' : '') + '">' + c.n + '</div>', iconSize: [34, 34], iconAnchor: [17, 17] });
           L.marker([c.lat, c.lng], { icon: icon })
-            .bindPopup('<strong>' + esc(c.city) + '</strong><br>' + c.n + (c.n > 1 ? ' votes' : ' vote'))
+            .bindPopup('<strong>' + esc(c.city) + '</strong><br>' + c.n + (c.n > 1 ? ' votes' : ' vote') + '<br><small>' + esc(c.who.join(', ')) + '</small>')
             .addTo(layer);
         });
         $('vote-rank').innerHTML = arr.length
-          ? arr.map(c => '<li><span>' + esc(c.city) + (c.country ? ', ' + esc(c.country) : '') + '</span><b>' + c.n + '</b></li>').join('')
+          ? arr.map(c => '<li><span>' + esc(c.city) + (c.country ? ', ' + esc(c.country) : '') + '</span><b>' + c.n + '</b><small class="who">🗳 ' + esc(c.who.join(', ')) + '</small></li>').join('')
           : '<li>No votes yet. Be the first!</li>';
         const m = votes.find(v => v.email === email);
         $('vote-mine').innerHTML = m
@@ -1968,13 +1980,32 @@
       const H = { apikey: KEY, 'Content-Type': 'application/json' };
       const $ = id => document.getElementById(id);
       if (!$('cal-grid')) return;
+      const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
       const pad = n => (n < 10 ? '0' : '') + n;
       const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const todayIso = iso(today);
       const MAXM = 18;
       let view = new Date(today.getFullYear(), today.getMonth(), 1);
-      let email = null, rows = [], saved = new Set(), sel = new Set(), count = {}, voters = {};
+      let email = null, rows = [], saved = new Set(), sel = new Set(), count = {}, voters = {}, nm = {};
+      const nameOf = e => nm[e] || 'a member';
+      (async function () { try { const r = await fetch(SB.replace('meeting_days', 'nicknames') + '?select=email,nickname', { headers: H }); if (r.ok) (await r.json()).forEach(x => { nm[x.email] = x.nickname; }); } catch (e) {} whoList(); })();
+      const MONS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      function rangesOf(set) {
+        const days = Array.from(set).sort(), out = [];
+        let a = null, b = null;
+        const fmt = d => { const x = d.split('-'); return +x[2] + ' ' + MONS[+x[1] - 1]; };
+        const next = d => { const t = new Date(d + 'T12:00:00'); t.setDate(t.getDate() + 1); return iso(t); };
+        days.forEach(d => { if (a && next(b) === d) { b = d; } else { if (a) out.push(a === b ? fmt(a) : fmt(a) + ' – ' + fmt(b)); a = b = d; } });
+        if (a) out.push(a === b ? fmt(a) : fmt(a) + ' – ' + fmt(b));
+        return out.join(', ');
+      }
+      function whoList() {
+        const el = $('when-who'); if (!el) return;
+        const em = Object.keys(voters);
+        el.innerHTML = em.length ? em.map(e => '<div><b>' + esc(nameOf(e)) + (e === email ? ' (you)' : '') + '</b> · ' + esc(rangesOf(voters[e])) + '</div>').join('') : '<div>Nobody has voted yet.</div>';
+      }
+
 
       fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' })
         .then(r => r.ok ? r.json() : {})
@@ -1995,7 +2026,7 @@
           if (x.email === email) saved.add(x.day);
         });
         sel = new Set(saved);
-        draw(); best(); countdown();
+        draw(); best(); countdown(); whoList();
       }
 
       function dirty() {
@@ -2096,6 +2127,10 @@
         b.classList.toggle('mine', sel.has(d));
         $('when-save').disabled = !dirty() || !email;
         $('when-msg').textContent = '';
+        const who = Object.keys(voters).filter(x => x !== email && voters[x].has(d)).map(nameOf);
+        if (sel.has(d)) who.unshift('you');
+        const x = d.split('-');
+        $('when-day').innerHTML = '<b>' + (+x[2]) + ' ' + MONS[+x[1] - 1] + '</b>: ' + (who.length ? esc(who.join(', ')) : 'nobody yet');
       });
       $('cal-prev').onclick = function () { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); draw(); };
       $('cal-next').onclick = function () { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); draw(); };
