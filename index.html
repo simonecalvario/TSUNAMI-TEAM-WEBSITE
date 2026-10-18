@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261018-0948">
+<meta name="tt-build" content="20261018-1101">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -585,6 +585,40 @@
     #lock button { width: 100%; padding: 15px; border: 0; border-radius: 8px; background: var(--yellow); color: #101010; font: inherit; font-weight: 800; font-size: 1rem; cursor: pointer; }
     #lock a { display: inline-block; margin-top: 18px; color: var(--grey); font-size: .85rem; text-decoration: underline; }
     #lock-msg { min-height: 1.3em; margin: 12px 0 0 !important; font-size: .88rem; }
+    #badges.badges { display: block; }
+    .lvl { padding: 16px; margin-bottom: 8px; border: 1px solid var(--yellow); border-radius: 12px; background: linear-gradient(135deg, rgba(245,210,27,.12), rgba(39,184,255,.08)); }
+    .lvl-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .lvl-ic { font-size: 2.2rem; line-height: 1; }
+    .lvl-top b { display: block; font-size: 1.15rem; color: var(--yellow); }
+    .lvl small, .bcard small { color: var(--grey); font-size: .78rem; }
+    .lvl small { display: block; margin-top: 6px; }
+    .lvl .lvl-hint { margin-top: 8px; }
+    .bar { height: 7px; border-radius: 4px; background: rgba(255,255,255,.1); overflow: hidden; margin: 6px 0 4px; }
+    .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--blue), var(--yellow)); border-radius: 4px; }
+    .bcat { margin: 22px 0 8px; font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); }
+    .bgrid { align-items: start; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .bcard { padding: 12px 10px; text-align: center; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.04); cursor: pointer; }
+    .bcard.got { border-color: rgba(245,210,27,.55); background: rgba(245,210,27,.07); }
+    .bcard.lock .bic { filter: grayscale(1); opacity: .45; }
+    .bcard.lock b { color: var(--grey); }
+    .bic { font-size: 1.9rem; line-height: 1.2; }
+    .bcard b { display: block; font-size: .88rem; margin: 2px 0 4px; }
+    .med { display: flex; justify-content: center; gap: 4px; font-size: .9rem; }
+    .med span { opacity: .25; filter: grayscale(1); }
+    .med span.on { opacity: 1; filter: none; }
+    .bdet { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); text-align: left; font-size: .8rem; color: var(--grey); }
+    .bcard.open .bdet { display: block; }
+    .bdet p { margin: 0 0 6px; }
+    .bdet ul { list-style: none; padding: 0; }
+    .bdet li.ok { color: var(--yellow); }
+    #bdg-pop { position: fixed; inset: 0; z-index: 100001; display: flex; align-items: center; justify-content: center; background: rgba(2,6,16,.88); overflow: hidden; }
+    #bdg-pop .pop { position: relative; z-index: 2; width: min(320px, 86vw); padding: 24px 20px; text-align: center; background: var(--dark); border: 1px solid var(--yellow); border-radius: 16px; }
+    .pop-t { font-size: 1.3rem; font-weight: 800; color: var(--yellow); margin-bottom: 14px; }
+    .pop-b { margin-bottom: 14px; } .pop-b span { display: block; font-size: 3rem; } .pop-b b { display: block; font-size: 1.1rem; } .pop-b small { color: var(--grey); }
+    #bdg-pop button { margin-top: 6px; padding: 12px 28px; border: 0; border-radius: 8px; background: var(--yellow); color: #101010; font: inherit; font-weight: 800; cursor: pointer; }
+    #bdg-pop .cf { position: absolute; top: -10%; z-index: 1; font-style: normal; animation: fall 2.6s linear forwards; }
+    @keyframes fall { to { transform: translateY(115vh) rotate(360deg); opacity: .6; } }
+    .subtabs button { font-size: .8rem !important; padding: 10px 2px !important; }
     #bell-panel .pnote { font-size: .8rem; border-top: 1px solid var(--line); }
     #bell-panel p { padding: 14px; color: var(--grey); font-size: .88rem; }
     #bday { display: none; text-align: center; padding: 9px 14px; font-size: .92rem; color: #101010; font-weight: 700; background: linear-gradient(90deg, var(--yellow), var(--orange)); }
@@ -2351,9 +2385,9 @@
       const $ = id => document.getElementById(id);
       const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
       const MEETINGS = [
-        { key: 'doha', name: 'Doha', icon: '🇶🇦', year: 2023 },
-        { key: 'barcelona', name: 'Barcelona', icon: '🇪🇸', year: 2024 },
-        { key: 'munich', name: 'Munich', icon: '🇩🇪', year: 2026 }
+        { key: 'doha', cc: 'QA', name: 'Doha', icon: '🇶🇦', year: 2023 },
+        { key: 'barcelona', cc: 'ES', name: 'Barcelona', icon: '🇪🇸', year: 2024 },
+        { key: 'munich', cc: 'DE', name: 'Munich', icon: '🇩🇪', year: 2026 }
       ];
       async function get(q) { try { const r = await fetch(R + q, { headers: H }); return r.ok ? await r.json() : null; } catch (e) { return null; } }
       let email = null, nick = null, nicks = [];
@@ -2501,17 +2535,40 @@
           loadPass();
         });
         loadPass();
+        setInterval(function () { if (!document.hidden) loadPass(); }, 180000);
       }
+      let DATA = null, myM = {};
       async function loadPass() {
         const a = await Promise.all([
-          get('attendance?select=email,meeting'), get('meeting_photos?select=*&order=created_at.desc'),
-          get('posts?select=id&email=eq.' + encodeURIComponent(email || '-')), get('memorabilia?select=id&email=eq.' + encodeURIComponent(email || '-'))
+          get('attendance?select=email,meeting'), get('meeting_photos?select=email,meeting'),
+          get('posts?select=id,email'), get('memorabilia?select=id,email,meeting_key,meeting_year'),
+          get('comments?select=id,email&limit=5000'), get('chat_messages?select=id,email,body,created_at,reply_to&order=id.desc&limit=5000'),
+          get('meeting_votes?select=email'), get('meeting_days?select=email,day&limit=10000'),
+          get('birthdays?select=email,day,month'), get('reactions?select=target,email&limit=10000')
         ]);
         att = a[0]; photos = a[1] || [];
         if (att === null) { $('stamps').innerHTML = '<p class="vote-hint">Passport is not available yet (database table missing).</p>'; att = []; }
         else renderStamps();
-        counts = { posts: (a[2] || []).length, mem: (a[3] || []).length, photos: photos.filter(p => p.email === email).length };
-        renderBadges(); renderCrew();
+        DATA = { att: att, photos: photos, posts: a[2] || [], mem: a[3] || [], comments: a[4] || [], chat: a[5] || [], votes: a[6] || [], days: a[7] || [], bd: a[8] || [], reactions: a[9] || [] };
+        if (email) {
+          myM = metricsFor(email, DATA);
+          try {
+            const key = 'tt_bdg_' + email, now = {}; BADGES.forEach(b => { now[b.id] = lvlOf(b, myM); });
+            let prev = null; try { prev = JSON.parse(localStorage.getItem(key)); } catch (x) {}
+            if (prev) {
+              const ups = BADGES.filter(b => now[b.id] > (prev[b.id] || 0)).map(b => ({ b: b, l: now[b.id] }));
+              if (ups.length) {
+                celebrate(ups);
+                let news = []; try { news = JSON.parse(localStorage.getItem('tt_bnews_' + email)) || []; } catch (x) {}
+                ups.forEach(u => news.unshift({ t: Date.now(), txt: u.b.ic + ' ' + u.b.n + (u.b.t.length > 1 ? ' · ' + TN[u.l - 1 + (4 - u.b.t.length)] : '') }));
+                localStorage.setItem('tt_bnews_' + email, JSON.stringify(news.slice(0, 8)));
+              }
+            }
+            localStorage.setItem(key, JSON.stringify(now));
+          } catch (x) {}
+          renderBadges();
+        }
+        renderCrew();
       }
       function renderStamps() {
         $('stamps').innerHTML = MEETINGS.map(m => {
@@ -2519,42 +2576,122 @@
           return '<button class="stamp' + (on ? ' on' : '') + '" data-k="' + m.key + '"><img src="assets/images/pins/' + m.key + '.png" alt="' + m.name + ' pin"><b>' + m.icon + ' ' + m.name + ' <em style="font-style:normal;color:var(--yellow)">' + m.year + '</em></b><span>' + (on ? 'Stamped ✓' : 'Tap to stamp') + '</span></button>';
         }).join('');
       }
-      const BADGE_INFO = {
-        first: ['🌊 First Wave', 'You collected your first stamp: you took part in a Tsunami Meeting.'],
-        rising: ['🌀 Rising Tide', 'You collected 2 stamps: you lived at least 2 Tsunami Meetings.'],
-        full: ['🌪️ Full Tsunami', 'You collected the stamp of every Tsunami Meeting so far. You were always there!'],
-        story: ['✍️ Storyteller', 'You published at least one post on the Team Blog.'],
-        photo: ['📸 Photographer', 'You added at least one photo to a meeting gallery.'],
-        memory: ['🎽 Memory Keeper', 'You added at least one piece to the Tsunami Memorabilia.']
-      };
+      /* ---------------- BADGES / LEVELS ---------------- */
+      const FOUNDERS = ['Toro Loco', 'Biageo', 'Carlitos', 'The Boss', 'Frankie', 'Tronco', 'Jack Hammer', 'Uncle Peter', 'Rino', 'Salvo', 'Alaaf Kia', 'Don Simon', 'Tres Tess'];
+      const TI = ['🥉', '🥈', '🥇', '💎'], TN = ['Bronze', 'Silver', 'Gold', 'Platinum'], TP = [10, 25, 50, 100];
+      const GREET = /(happy\s*b|b-?day|birthday|auguri|compleanno|cumple|feliz|geburtstag|alles gute|herzlichen|gefeliciteerd|verjaardag|joyeux|anniversaire)/i;
+      const CATS = ['Journey', 'Memories', 'Social', 'Rhythm', 'Special'];
+      const BADGES = [
+        { id: 'rider', c: 'Journey', ic: '🌊', n: 'First Wave', m: 'stamps', t: [1, 3, 6, 10], u: 'stamps', d: 'Collect Tsunami Meeting stamps in your Passport.' },
+        { id: 'globe', c: 'Journey', ic: '🌍', n: 'Globetrotter', m: 'countries', t: [3, 5, 8, 12], u: 'countries', d: 'Join Tsunami Meetings in different countries.' },
+        { id: 'full', c: 'Journey', ic: '🌪️', n: 'Full Tsunami', m: 'fullT', t: [1], u: '', d: 'Collect the stamp of every Tsunami Meeting so far. You were always there!' },
+        { id: 'story', c: 'Memories', ic: '✍️', n: 'Storyteller', m: 'posts', t: [1, 5, 15, 30], u: 'posts', d: 'Publish posts on the Team Blog.' },
+        { id: 'photo', c: 'Memories', ic: '📸', n: 'Photographer', m: 'photos', t: [1, 10, 30, 100], u: 'photos', d: 'Add photos to the meeting galleries.' },
+        { id: 'album', c: 'Memories', ic: '🎞️', n: 'Album Master', m: 'galleries', t: [2, 3, 5, 8], u: 'galleries', d: 'Add photos to different meeting galleries.' },
+        { id: 'memory', c: 'Memories', ic: '🎽', n: 'Memory Keeper', m: 'mem', t: [1, 3, 6, 12], u: 'pieces', d: 'Add pieces to the Tsunami Memorabilia.' },
+        { id: 'time', c: 'Memories', ic: '🧭', n: 'Time Traveler', m: 'memMeets', t: [2, 3, 5, 8], u: 'meetings', d: 'Add Memorabilia from different Tsunami Meetings.' },
+        { id: 'chat', c: 'Social', ic: '💬', n: 'Chatterbox', m: 'msgs', t: [10, 100, 500, 2000], u: 'messages', d: 'Write messages in the Lagoon.' },
+        { id: 'conv', c: 'Social', ic: '↩️', n: 'Conversationalist', m: 'replies', t: [5, 25, 100, 300], u: 'replies', d: 'Reply to messages in the Lagoon.' },
+        { id: 'conn', c: 'Social', ic: '📣', n: 'Connector', m: 'mentions', t: [5, 25, 100, 300], u: 'mentions', d: 'Mention other members with @ in the Lagoon.' },
+        { id: 'comm', c: 'Social', ic: '💭', n: 'Commentator', m: 'comments', t: [3, 15, 50, 150], u: 'comments', d: 'Comment on posts in the Blog.' },
+        { id: 'fav', c: 'Social', ic: '❤️', n: 'Crowd Favorite', m: 'likes', t: [5, 25, 100, 300], u: 'reactions', d: 'Receive reactions on your posts and comments.' },
+        { id: 'party', c: 'Social', ic: '🎂', n: 'Party Animal', m: 'wishes', t: [1, 3, 6, 12], u: 'members greeted', d: 'Send birthday wishes in the Lagoon on a member’s birthday.' },
+        { id: 'streak', c: 'Rhythm', ic: '🔥', n: 'On Fire', m: 'streak', t: [3, 7, 14, 30], u: 'days in a row', d: 'Write in the Lagoon on consecutive days.' },
+        { id: 'owl', c: 'Rhythm', ic: '🦉', n: 'Night Owl', m: 'night', t: [1, 10, 50, 150], u: 'night messages', d: 'Write in the Lagoon between midnight and 5 AM.' },
+        { id: 'early', c: 'Rhythm', ic: '🌅', n: 'Early Bird', m: 'early', t: [1, 10, 50, 150], u: 'morning messages', d: 'Write in the Lagoon between 5 and 8 AM.' },
+        { id: 'plan', c: 'Rhythm', ic: '📅', n: 'Planner', m: 'planner', t: [3, 10, 25, 60], u: 'days', d: 'Mark the days you are free in the meeting calendar.' },
+        { id: 'set', c: 'Rhythm', ic: '🧩', n: 'All Set', m: 'profile', t: [3, 4, 5], u: 'of 5 steps', d: 'Complete your profile: call sign, birthday, city vote, free dates, first stamp.' },
+        { id: 'found', c: 'Special', ic: '🏴', n: 'Founder', m: 'founder', t: [1], u: '', secret: true, hint: 'Reserved for the ones who started it all.', d: 'One of the thirteen founders of the Tsunami Team.' },
+        { id: 'lucky', c: 'Special', ic: '🍀', n: 'Lucky Number', m: 'lucky', t: [1], u: '', secret: true, hint: 'Some say the Lagoon rewards perfect timing…', d: 'You wrote in the Lagoon at exactly 13:13.' },
+        { id: 'top', c: 'Special', ic: '🏆', n: 'Completionist', m: 'badges', t: [5, 10, 15, 20], u: 'badges unlocked', d: 'Unlock many different badges.' }
+      ];
+      const LEVELS = [
+        { xp: 0, ic: '🐚', n: 'Rookie' }, { xp: 40, ic: '🏄', n: 'Surfer' }, { xp: 150, ic: '🌊', n: 'Tide Master' },
+        { xp: 400, ic: '⛈️', n: 'Storm Chaser' }, { xp: 900, ic: '🌪️', n: 'Tsunami Legend' }
+      ];
+      const lvlOf = (b, M) => b.t.filter(x => M[b.m] >= x).length;
+      const ptsOf = (b, l) => { let p = 0; for (let i = 0; i < l; i++) p += b.t.length === 1 ? (b.secret ? 50 : 30) : TP[i + (4 - b.t.length)]; return p; };
+      function nickOf(e) { return (nicks.find(x => x.email === e) || {}).nickname || null; }
+
+      function metricsFor(e, D) {
+        const M = {}, nm = nickOf(e);
+        const st = D.att.filter(x => x.email === e);
+        M.stamps = st.length;
+        M.countries = new Set(st.map(x => (MEETINGS.find(k => k.key === x.meeting) || {}).cc).filter(Boolean)).size;
+        M.fullT = MEETINGS.length && MEETINGS.every(k => st.some(x => x.meeting === k.key)) ? 1 : 0;
+        const myP = D.posts.filter(p => p.email === e), myC = D.comments.filter(c => c.email === e);
+        M.posts = myP.length; M.comments = myC.length;
+        const ids = new Set(myP.map(p => 'p' + p.id).concat(myC.map(c => 'c' + c.id)));
+        M.likes = D.reactions.filter(r => r.email !== e && ids.has(r.target)).length;
+        const ph = D.photos.filter(p => p.email === e);
+        M.photos = ph.length; M.galleries = new Set(ph.map(p => p.meeting)).size;
+        const me = D.mem.filter(x => x.email === e);
+        M.mem = me.length; M.memMeets = new Set(me.map(x => x.meeting_key || ('y' + x.meeting_year))).size;
+        const cm = D.chat.filter(x => x.email === e);
+        M.msgs = cm.length; M.replies = cm.filter(x => x.reply_to).length;
+        const re = mentionRe();
+        M.mentions = re ? cm.filter(x => { const f = String(x.body).match(re); return f && f.some(s => s.slice(1).toLowerCase() !== (nm || '').toLowerCase()); }).length : 0;
+        M.night = 0; M.early = 0; M.lucky = 0;
+        const days = new Set(), wish = new Set();
+        cm.forEach(x => {
+          const d = new Date(x.created_at), h = d.getHours();
+          if (h < 5) M.night++; else if (h < 8) M.early++;
+          if (h === 13 && d.getMinutes() === 13) M.lucky = 1;
+          days.add(d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate());
+          if (GREET.test(x.body)) D.bd.forEach(r => { if (r.email !== e && r.day === d.getDate() && r.month === d.getMonth() + 1) wish.add(r.email); });
+        });
+        M.wishes = wish.size;
+        const ts = Array.from(days).map(k => { const p = k.split('-'); return new Date(+p[0], +p[1], +p[2]).getTime(); }).sort((a, b) => a - b);
+        let best = 0, run = 0;
+        ts.forEach((t, i) => { run = i && Math.round((t - ts[i - 1]) / 864e5) === 1 ? run + 1 : 1; if (run > best) best = run; });
+        M.streak = best;
+        M.planner = D.days.filter(x => x.email === e).length;
+        M.profile = 1 + (D.bd.some(x => x.email === e) ? 1 : 0) + (D.votes.some(x => x.email === e) ? 1 : 0) + (M.planner ? 1 : 0) + (M.stamps ? 1 : 0);
+        M.founder = FOUNDERS.indexOf(nm) > -1 ? 1 : 0;
+        M.badges = BADGES.filter(b => b.id !== 'top' && lvlOf(b, M) > 0).length;
+        return M;
+      }
+      function scoreOf(M) {
+        let xp = 0; BADGES.forEach(b => { xp += ptsOf(b, lvlOf(b, M)); });
+        let L = 0; LEVELS.forEach((l, i) => { if (xp >= l.xp) L = i; });
+        return { xp: xp, L: L };
+      }
+
+      function celebrate(ups) {
+        const box = document.createElement('div'); box.id = 'bdg-pop';
+        box.innerHTML = '<div class="pop"><div class="pop-t">🎉 New badge!</div>' + ups.map(u => '<div class="pop-b"><span>' + u.b.ic + '</span><b>' + esc(u.b.n) + '</b><small>' + (u.b.t.length === 1 ? 'Unlocked' : TI[u.l - 1 + (4 - u.b.t.length)] + ' ' + TN[u.l - 1 + (4 - u.b.t.length)]) + '</small></div>').join('') + '<button type="button">Nice!</button></div>';
+        for (let i = 0; i < 26; i++) { const s = document.createElement('i'); s.className = 'cf'; s.textContent = ['🎉', '✨', '🌊', '⭐'][i % 4]; s.style.left = Math.random() * 100 + '%'; s.style.animationDelay = (Math.random() * 1.2) + 's'; s.style.fontSize = (14 + Math.random() * 14) + 'px'; box.appendChild(s); }
+        box.addEventListener('click', function (e) { if (e.target.tagName === 'BUTTON' || e.target === box) box.remove(); });
+        document.body.appendChild(box);
+      }
+
       function renderBadges() {
-        const mine = att.filter(a => a.email === email).length, j = [], act = [];
-        if (mine >= 1) j.push('first');
-        if (mine >= 2) j.push('rising');
-        if (mine >= MEETINGS.length) j.push('full');
-        if (counts.posts) act.push('story');
-        if (counts.photos) act.push('photo');
-        if (counts.mem) act.push('memory');
-        const row = (t, a) => a.length ? '<div class="vote-hint" style="width:100%;margin:6px 0 0">' + t + '</div>' + a.map(k => '<button type="button" class="badge" data-b="' + k + '">' + BADGE_INFO[k][0] + '</button>').join('') : '';
-        $('badges').innerHTML = (row('Journey badges (one for each stamp)', j) + row('Activity badges', act)) || '<span class="vote-hint">No badges yet. Collect your first stamp!</span>';
-        if (j.length + act.length) $('badges').insertAdjacentHTML('beforeend', '<div class="vote-hint" style="width:100%;margin:6px 0 0">Tap a badge to see why you earned it.</div><div id="badge-info" class="badge-info"></div>');
+        const M = myM, sc = scoreOf(M), lv = LEVELS[sc.L], nx = LEVELS[sc.L + 1];
+        const pct = nx ? Math.round((sc.xp - lv.xp) / (nx.xp - lv.xp) * 100) : 100;
+        let h = '<div class="lvl"><div class="lvl-top"><span class="lvl-ic">' + lv.ic + '</span><div><b>' + lv.n + '</b><small>' + sc.xp + ' XP</small></div></div><div class="bar"><i style="width:' + pct + '%"></i></div><small>' + (nx ? (nx.xp - sc.xp) + ' XP to ' + nx.ic + ' ' + nx.n : 'Top level reached. You are a legend!') + '</small><small class="lvl-hint">Every badge level gives XP: 🥉 10 · 🥈 25 · 🥇 50 · 💎 100. Tap a badge for details.</small></div>';
+        CATS.forEach(function (cat) {
+          h += '<h4 class="bcat">' + cat + '</h4><div class="bgrid">';
+          BADGES.filter(b => b.c === cat).forEach(function (b) {
+            const l = lvlOf(b, M), v = M[b.m] || 0, tot = b.t.length, off = 4 - tot, got = l > 0, nextT = b.t[l];
+            const hide = b.secret && !got;
+            const medals = tot === 1 ? '' : '<div class="med">' + b.t.map((x, i) => '<span class="' + (i < l ? 'on' : '') + '">' + TI[i + off] + '</span>').join('') + '</div>';
+            const prog = hide ? '<small>Secret</small>' : (nextT ? '<div class="bar"><i style="width:' + Math.min(100, Math.round(v / nextT * 100)) + '%"></i></div><small>' + Math.min(v, nextT) + '/' + nextT + ' ' + b.u + '</small>' : '<small>✅ Maxed out</small>');
+            let det = hide ? esc(b.hint) : '<p>' + esc(b.d) + '</p>' + (tot === 1 ? '' : '<ul>' + b.t.map((x, i) => '<li class="' + (i < l ? 'ok' : '') + '">' + TI[i + off] + ' ' + TN[i + off] + ': ' + x + ' ' + esc(b.u) + (i < l ? ' ✓' : '') + '</li>').join('') + '</ul>');
+            h += '<div class="bcard' + (got ? ' got' : ' lock') + '" data-b="' + b.id + '"><div class="bic">' + (hide ? '❓' : b.ic) + '</div><b>' + (hide ? 'Secret badge' : esc(b.n)) + '</b>' + medals + prog + '<div class="bdet">' + det + '</div></div>';
+          });
+          h += '</div>';
+        });
+        $('badges').innerHTML = h;
         if (!$('badges').dataset.bound) {
           $('badges').dataset.bound = '1';
-          $('badges').addEventListener('click', function (e) {
-            const k = e.target.dataset.b; if (!k) return;
-            const box = $('badge-info'), open = box.dataset.k === k && box.style.display === 'block';
-            document.querySelectorAll('#badges .badge').forEach(x => x.classList.toggle('sel', !open && x.dataset.b === k));
-            box.dataset.k = open ? '' : k;
-            box.style.display = open ? 'none' : 'block';
-            box.innerHTML = '<strong>' + BADGE_INFO[k][0] + '</strong><br>' + BADGE_INFO[k][1];
-          });
+          $('badges').addEventListener('click', function (e) { const c = e.target.closest('.bcard'); if (c) c.classList.toggle('open'); });
         }
       }
+
       function renderCrew() {
-        const by = {};
-        att.forEach(a => { by[a.email] = (by[a.email] || 0) + 1; });
-        const rows = Object.entries(by).map(([e, n]) => ({ n: n, nick: (nicks.find(x => x.email === e) || {}).nickname || 'A member' })).sort((a, b) => b.n - a.n);
-        $('crew').innerHTML = rows.length ? rows.map(r => '<li><span>' + esc(r.nick) + '</span><b>' + r.n + (r.n === 1 ? ' stamp' : ' stamps') + '</b></li>').join('') : '<li>No stamps yet.</li>';
+        const emails = Array.from(new Set(nicks.map(x => x.email)));
+        const rows = emails.map(e => { const M = metricsFor(e, DATA), s = scoreOf(M); return { e: e, nick: nickOf(e) || 'A member', xp: s.xp, L: s.L, st: M.stamps, b: M.badges }; }).sort((a, b) => b.xp - a.xp || b.st - a.st);
+        $('crew').innerHTML = rows.length ? rows.map((r, i) => '<li><span>' + (i + 1) + '. ' + LEVELS[r.L].ic + ' ' + esc(r.nick) + (r.e === email ? ' (you)' : '') + ' <small style="color:var(--grey)">' + LEVELS[r.L].n + '</small></span><b>' + r.xp + ' XP</b></li>').join('') : '<li>No members yet.</li>';
       }
       /* ---------------- BIRTHDAYS ---------------- */
       async function bdayInit() {
@@ -2658,6 +2795,7 @@
               if (mention || reply) items.push({ t: new Date(m.created_at).getTime(), href: '#lagoon', who: m.nickname, txt: mention ? 'mentioned you in the Lagoon' : 'replied to you in the Lagoon', at: m.created_at });
             });
           }
+          try { (JSON.parse(localStorage.getItem('tt_bnews_' + email)) || []).forEach(n => items.push({ t: n.t, href: '#passport', who: 'New badge', txt: n.txt, at: new Date(n.t).toISOString() })); } catch (x) {}
           items.sort((x, y) => y.t - x.t);
           const list = items.slice(0, 12);
           const todos = [];
@@ -2847,8 +2985,10 @@
     const start = kids.indexOf(document.getElementById('stamps'));
     const crewAt = kids.findIndex(k => k.tagName === 'H3' && /crew/i.test(k.textContent));
     const bdAt = kids.findIndex(k => k.tagName === 'H3' && /birthday/i.test(k.textContent));
+    const badgesAt = kids.indexOf(document.getElementById('badges'));
     makeTabs('passport', [
-      { key: 'st', label: '🛂 Stamps', els: kids.slice(start, crewAt) },
+      { key: 'st', label: '🛂 Stamps', els: kids.slice(start, badgesAt) },
+      { key: 'bg', label: '🏅 Badges', els: [kids[badgesAt]] },
       { key: 'cr', label: '👥 Crew', els: kids.slice(crewAt, bdAt) },
       { key: 'bd', label: '🎂 Birthdays', els: kids.slice(bdAt) }
     ], kids[start - 1]);
