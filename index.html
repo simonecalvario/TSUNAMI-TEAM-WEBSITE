@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261018-0935">
+<meta name="tt-build" content="20261018-0948">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -577,6 +577,14 @@
     #tabbar button { position: relative; }
     .nav-links a { position: relative; }
     .nav-links a .nbadge { top: -8px; right: -12px; }
+    #lock { position: fixed; inset: 0; z-index: 100000; display: none; align-items: center; justify-content: center; padding: 20px; background: #060d1c; text-align: center; }
+    #lock.on { display: flex; }
+    #lock .lbox { max-width: 320px; }
+    #lock .lbrand { color: var(--yellow); font-weight: 900; letter-spacing: 3px; font-size: 1.15rem; margin-bottom: 6px; }
+    #lock p { color: var(--grey); margin-bottom: 22px; }
+    #lock button { width: 100%; padding: 15px; border: 0; border-radius: 8px; background: var(--yellow); color: #101010; font: inherit; font-weight: 800; font-size: 1rem; cursor: pointer; }
+    #lock a { display: inline-block; margin-top: 18px; color: var(--grey); font-size: .85rem; text-decoration: underline; }
+    #lock-msg { min-height: 1.3em; margin: 12px 0 0 !important; font-size: .88rem; }
     #bell-panel .pnote { font-size: .8rem; border-top: 1px solid var(--line); }
     #bell-panel p { padding: 14px; color: var(--grey); font-size: .88rem; }
     #bday { display: none; text-align: center; padding: 9px 14px; font-size: .92rem; color: #101010; font-weight: 700; background: linear-gradient(90deg, var(--yellow), var(--orange)); }
@@ -871,6 +879,68 @@
 </head>
 
 <body>
+<div id="lock" role="dialog" aria-label="Locked"><div class="lbox">
+  <div class="lbrand">TSUNAMI TEAM</div>
+  <p>Locked 🔒<br>Confirm it's you to continue.</p>
+  <button type="button" id="lock-go">🔓 Unlock with Face ID</button>
+  <p id="lock-msg"></p>
+  <a href="/cdn-cgi/access/logout">Log out instead</a>
+</div></div>
+<script>
+(function () {
+  var KEY = 'tt_lock_cred', GRACE = 60000, avail = false, hiddenAt = 0;
+  var el = document.getElementById('lock'), msg = document.getElementById('lock-msg');
+  function enabled() { try { return !!localStorage.getItem(KEY); } catch (e) { return false; } }
+  function rnd(n) { var a = new Uint8Array(n); crypto.getRandomValues(a); return a; }
+  function toB64(buf) { return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))); }
+  function fromB64(t) { return Uint8Array.from(atob(t), function (c) { return c.charCodeAt(0); }); }
+  function lockNow() { if (!enabled()) return; el.classList.add('on'); document.documentElement.style.overflow = 'hidden'; msg.textContent = ''; tryAuto(); }
+  function unlockUI() { el.classList.remove('on'); document.documentElement.style.overflow = ''; msg.textContent = ''; }
+  async function assertId() {
+    await navigator.credentials.get({ publicKey: { challenge: rnd(32), rpId: location.hostname, userVerification: 'required', timeout: 60000,
+      allowCredentials: [{ type: 'public-key', id: fromB64(localStorage.getItem(KEY)), transports: ['internal'] }] } });
+  }
+  async function verify() {
+    try { await assertId(); unlockUI(); return true; }
+    catch (e) { msg.textContent = 'Not recognised. Tap the button to try again.'; return false; }
+  }
+  var autoTried = false;
+  function tryAuto() { if (autoTried) return; autoTried = true; setTimeout(function () { assertId().then(unlockUI).catch(function () {}); }, 250); }
+  document.getElementById('lock-go').addEventListener('click', verify);
+
+  window.ttLock = {
+    _grace: function (n) { GRACE = n; },
+    state: function () { return !avail ? 'unsupported' : (enabled() ? 'on' : 'off'); },
+    toggle: async function () {
+      if (enabled()) {
+        try { await assertId(); localStorage.removeItem(KEY); } catch (e) {}
+        return;
+      }
+      try {
+        var cred = await navigator.credentials.create({ publicKey: {
+          rp: { name: 'Tsunami Team', id: location.hostname },
+          user: { id: rnd(16), name: 'member', displayName: 'Tsunami member' },
+          challenge: rnd(32), timeout: 60000,
+          pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+          authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' }
+        } });
+        localStorage.setItem(KEY, toB64(cred.rawId));
+      } catch (e) {}
+    }
+  };
+  try {
+    if (window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable)
+      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(function (v) { avail = !!v; }).catch(function () {});
+  } catch (e) {}
+  if (enabled()) lockNow();
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    if (enabled() && hiddenAt && Date.now() - hiddenAt > GRACE) { autoTried = false; lockNow(); }
+  });
+  window.addEventListener('pageshow', function (e) { if (e.persisted && enabled()) { autoTried = false; lockNow(); } });
+})();
+</script>
+
   <header>
     <div class="container">
       <nav>
@@ -2606,7 +2676,10 @@
             : ps2 === 'off' ? '<a href="#" data-push="1">🔕 <b>Turn on push notifications</b><br><small>Get an alert when someone mentions or replies to you</small></a>'
             : ps2 === 'install' ? '<p class="pnote">📲 For push notifications: add this site to your Home Screen (Share → Add to Home Screen) and open it from there.</p>'
             : ps2 === 'denied' ? '<p class="pnote">Push notifications are blocked. Allow them in your phone settings for this site.</p>' : '';
-          panel.innerHTML = (html || '<p>All caught up ✅ Nothing to do right now.</p>') + prow;
+          const ls = window.ttLock ? window.ttLock.state() : 'unsupported';
+          const lrow = ls === 'on' ? '<a href="#" data-lock="1">🔒 Face ID lock: <b>ON</b> <small>(tap to turn off)</small></a>'
+            : ls === 'off' ? '<a href="#" data-lock="1">🔓 <b>Turn on Face ID lock</b><br><small>Ask Face ID whenever the app is opened</small></a>' : '';
+          panel.innerHTML = (html || '<p>All caught up ✅ Nothing to do right now.</p>') + prow + lrow;
           // tab badges
           badge('#tabbar [data-v=lagoon], .nav-links > a[href="#lagoon"]', chatNew, chatHot);
           const mt = todos.filter(t => t.href === '#meetings').length, pt = todos.filter(t => t.href === '#passport').length;
@@ -2622,7 +2695,7 @@
           if (!panel.classList.contains('open')) { try { localStorage.setItem(KEY, Date.now()); seen = Date.now(); } catch (x) {} check(); }
         };
         document.addEventListener('click', function (ev) { if (!ev.target.closest('.bell-wrap') && panel.classList.contains('open')) { panel.classList.remove('open'); try { localStorage.setItem(KEY, Date.now()); seen = Date.now(); } catch (x) {} check(); } });
-        panel.addEventListener('click', function (ev) { const pb = ev.target.closest('[data-push]'); if (pb) { ev.preventDefault(); ev.stopPropagation(); if (window.ttPush) window.ttPush.toggle().then(check); return; } panel.classList.remove('open'); try { localStorage.setItem(KEY, Date.now()); seen = Date.now(); } catch (x) {} });
+        panel.addEventListener('click', function (ev) { const lb = ev.target.closest('[data-lock]'); if (lb) { ev.preventDefault(); ev.stopPropagation(); if (window.ttLock) window.ttLock.toggle().then(check); return; } const pb = ev.target.closest('[data-push]'); if (pb) { ev.preventDefault(); ev.stopPropagation(); if (window.ttPush) window.ttPush.toggle().then(check); return; } panel.classList.remove('open'); try { localStorage.setItem(KEY, Date.now()); seen = Date.now(); } catch (x) {} });
         document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
         check(); setInterval(function () { if (!document.hidden) check(); }, 30000);
       }
