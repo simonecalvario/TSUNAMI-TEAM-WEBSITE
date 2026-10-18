@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261018-1101">
+<meta name="tt-build" content="20261018-1120">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -2583,13 +2583,11 @@
       const CATS = ['Journey', 'Memories', 'Social', 'Rhythm', 'Special'];
       const BADGES = [
         { id: 'rider', c: 'Journey', ic: '🌊', n: 'First Wave', m: 'stamps', t: [1, 3, 6, 10], u: 'stamps', d: 'Collect Tsunami Meeting stamps in your Passport.' },
-        { id: 'globe', c: 'Journey', ic: '🌍', n: 'Globetrotter', m: 'countries', t: [3, 5, 8, 12], u: 'countries', d: 'Join Tsunami Meetings in different countries.' },
+        { id: 'globe', c: 'Memories', ic: '🌍', n: 'Globetrotter', m: 'countries', t: [3, 5, 8, 12], u: 'countries', d: 'Publish photos or Memorabilia from Tsunami Meetings held in different countries.' },
         { id: 'full', c: 'Journey', ic: '🌪️', n: 'Full Tsunami', m: 'fullT', t: [1], u: '', d: 'Collect the stamp of every Tsunami Meeting so far. You were always there!' },
         { id: 'story', c: 'Memories', ic: '✍️', n: 'Storyteller', m: 'posts', t: [1, 5, 15, 30], u: 'posts', d: 'Publish posts on the Team Blog.' },
         { id: 'photo', c: 'Memories', ic: '📸', n: 'Photographer', m: 'photos', t: [1, 10, 30, 100], u: 'photos', d: 'Add photos to the meeting galleries.' },
-        { id: 'album', c: 'Memories', ic: '🎞️', n: 'Album Master', m: 'galleries', t: [2, 3, 5, 8], u: 'galleries', d: 'Add photos to different meeting galleries.' },
         { id: 'memory', c: 'Memories', ic: '🎽', n: 'Memory Keeper', m: 'mem', t: [1, 3, 6, 12], u: 'pieces', d: 'Add pieces to the Tsunami Memorabilia.' },
-        { id: 'time', c: 'Memories', ic: '🧭', n: 'Time Traveler', m: 'memMeets', t: [2, 3, 5, 8], u: 'meetings', d: 'Add Memorabilia from different Tsunami Meetings.' },
         { id: 'chat', c: 'Social', ic: '💬', n: 'Chatterbox', m: 'msgs', t: [10, 100, 500, 2000], u: 'messages', d: 'Write messages in the Lagoon.' },
         { id: 'conv', c: 'Social', ic: '↩️', n: 'Conversationalist', m: 'replies', t: [5, 25, 100, 300], u: 'replies', d: 'Reply to messages in the Lagoon.' },
         { id: 'conn', c: 'Social', ic: '📣', n: 'Connector', m: 'mentions', t: [5, 25, 100, 300], u: 'mentions', d: 'Mention other members with @ in the Lagoon.' },
@@ -2601,9 +2599,18 @@
         { id: 'early', c: 'Rhythm', ic: '🌅', n: 'Early Bird', m: 'early', t: [1, 10, 50, 150], u: 'morning messages', d: 'Write in the Lagoon between 5 and 8 AM.' },
         { id: 'plan', c: 'Rhythm', ic: '📅', n: 'Planner', m: 'planner', t: [3, 10, 25, 60], u: 'days', d: 'Mark the days you are free in the meeting calendar.' },
         { id: 'set', c: 'Rhythm', ic: '🧩', n: 'All Set', m: 'profile', t: [3, 4, 5], u: 'of 5 steps', d: 'Complete your profile: call sign, birthday, city vote, free dates, first stamp.' },
+        { id: 'allr', c: 'Rhythm', ic: '🎨', n: 'All-Rounder', m: 'kinds', t: [3, 4, 5], u: 'of 5 activities', d: 'Use the whole site: publish a post, add a photo, add a Memorabilia piece, write in the Lagoon and comment on the Blog.' },
         { id: 'found', c: 'Special', ic: '🏴', n: 'Founder', m: 'founder', t: [1], u: '', secret: true, hint: 'Reserved for the ones who started it all.', d: 'One of the thirteen founders of the Tsunami Team.' },
         { id: 'lucky', c: 'Special', ic: '🍀', n: 'Lucky Number', m: 'lucky', t: [1], u: '', secret: true, hint: 'Some say the Lagoon rewards perfect timing…', d: 'You wrote in the Lagoon at exactly 13:13.' },
-        { id: 'top', c: 'Special', ic: '🏆', n: 'Completionist', m: 'badges', t: [5, 10, 15, 20], u: 'badges unlocked', d: 'Unlock many different badges.' }
+        { id: 'insom', c: 'Special', ic: '🌙', n: 'Insomniac', m: 'nightDays', t: [7], u: '', secret: true, hint: 'The Lagoon never sleeps… and neither do you, apparently.', d: 'You wrote in the Lagoon at night (midnight to 5 AM) on 7 different days.' },
+        { id: 'marat', c: 'Special', ic: '🎙️', n: 'Marathon', m: 'maxDay', t: [50], u: '', secret: true, hint: 'Some days you just can’t stop talking.', d: 'You wrote 50 messages in the Lagoon in a single day.' },
+        { id: 'thread', c: 'Special', ic: '🧵', n: 'Thread Starter', m: 'thread', t: [3], u: '', secret: true, hint: 'Say something that gets the whole crew talking.', d: 'One of your Lagoon messages got replies from 3 different members.' },
+        { id: 'roll', c: 'Special', ic: '📋', n: 'Roll Call', m: 'roll', t: [1], u: '', secret: true, hint: 'Nobody gets left out.', d: 'You mentioned every other member with @ in the Lagoon.' },
+        { id: 'midn', c: 'Special', ic: '🎆', n: 'Midnight Wish', m: 'midn', t: [1], u: '', secret: true, hint: 'The first wish of the day is the best one.', d: 'You wished a member happy birthday in the first minutes of their birthday (00:00–00:15).' },
+        { id: 'salt', c: 'Special', ic: '🧓', n: 'Old Salt', m: 'salt', t: [1], u: '', secret: true, hint: 'Only time can earn this one.', d: 'You have been writing in the Lagoon for over 90 days, with at least 100 messages.' },
+        { id: 'plat', c: 'Special', ic: '💠', n: 'Platinum Touch', m: 'plat', t: [1], u: '', secret: true, hint: 'Reach the very top of a badge.', d: 'You reached the Platinum level on at least one badge.' },
+        { id: 'slam', c: 'Special', ic: '🧙', n: 'Grand Slam', m: 'slam', t: [5], u: '', secret: true, hint: 'Excellence, five times over.', d: 'You reached Gold or better on 5 different badges.' },
+        { id: 'top', c: 'Special', ic: '🏆', n: 'Completionist', m: 'badges', t: [5, 10, 20, 30], u: 'badges unlocked', d: 'Unlock many different badges.' }
       ];
       const LEVELS = [
         { xp: 0, ic: '🐚', n: 'Rookie' }, { xp: 40, ic: '🏄', n: 'Surfer' }, { xp: 150, ic: '🌊', n: 'Tide Master' },
@@ -2617,29 +2624,44 @@
         const M = {}, nm = nickOf(e);
         const st = D.att.filter(x => x.email === e);
         M.stamps = st.length;
-        M.countries = new Set(st.map(x => (MEETINGS.find(k => k.key === x.meeting) || {}).cc).filter(Boolean)).size;
         M.fullT = MEETINGS.length && MEETINGS.every(k => st.some(x => x.meeting === k.key)) ? 1 : 0;
         const myP = D.posts.filter(p => p.email === e), myC = D.comments.filter(c => c.email === e);
         M.posts = myP.length; M.comments = myC.length;
         const ids = new Set(myP.map(p => 'p' + p.id).concat(myC.map(c => 'c' + c.id)));
         M.likes = D.reactions.filter(r => r.email !== e && ids.has(r.target)).length;
         const ph = D.photos.filter(p => p.email === e);
-        M.photos = ph.length; M.galleries = new Set(ph.map(p => p.meeting)).size;
+        M.photos = ph.length;
         const me = D.mem.filter(x => x.email === e);
-        M.mem = me.length; M.memMeets = new Set(me.map(x => x.meeting_key || ('y' + x.meeting_year))).size;
+        M.mem = me.length;
+        const ccs = new Set();
+        ph.forEach(p => { const k = MEETINGS.find(x => x.key === p.meeting); if (k && k.cc) ccs.add(k.cc); });
+        me.forEach(x => { const k = MEETINGS.find(y => y.key === x.meeting_key); if (k && k.cc) ccs.add(k.cc); });
+        M.countries = ccs.size;
         const cm = D.chat.filter(x => x.email === e);
         M.msgs = cm.length; M.replies = cm.filter(x => x.reply_to).length;
         const re = mentionRe();
         M.mentions = re ? cm.filter(x => { const f = String(x.body).match(re); return f && f.some(s => s.slice(1).toLowerCase() !== (nm || '').toLowerCase()); }).length : 0;
-        M.night = 0; M.early = 0; M.lucky = 0;
-        const days = new Set(), wish = new Set();
+        M.night = 0; M.early = 0; M.lucky = 0; M.midn = 0;
+        const days = new Set(), wish = new Set(), nightD = new Set(), perDay = {}, ment = new Set();
         cm.forEach(x => {
-          const d = new Date(x.created_at), h = d.getHours();
-          if (h < 5) M.night++; else if (h < 8) M.early++;
+          const d = new Date(x.created_at), h = d.getHours(), dk = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+          if (h < 5) { M.night++; nightD.add(dk); } else if (h < 8) M.early++;
           if (h === 13 && d.getMinutes() === 13) M.lucky = 1;
-          days.add(d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate());
-          if (GREET.test(x.body)) D.bd.forEach(r => { if (r.email !== e && r.day === d.getDate() && r.month === d.getMonth() + 1) wish.add(r.email); });
+          days.add(dk); perDay[dk] = (perDay[dk] || 0) + 1;
+          if (re) { const f = String(x.body).match(re); if (f) f.forEach(sx => { const n = sx.slice(1).toLowerCase(); if (n !== (nm || '').toLowerCase()) ment.add(n); }); }
+          if (GREET.test(x.body)) D.bd.forEach(r => {
+            if (r.email !== e && r.day === d.getDate() && r.month === d.getMonth() + 1) { wish.add(r.email); if (h === 0 && d.getMinutes() < 15) M.midn = 1; }
+          });
         });
+        M.nightDays = nightD.size;
+        M.maxDay = Math.max.apply(null, [0].concat(Object.values(perDay)));
+        const others = Array.from(new Set(nicks.filter(x => x.email !== e).map(x => String(x.nickname).toLowerCase())));
+        M.roll = others.length >= 5 && others.every(n => ment.has(n)) ? 1 : 0;
+        const mine = new Set(cm.map(x => x.id)), rep = {};
+        D.chat.forEach(x => { if (x.reply_to && mine.has(x.reply_to) && x.email !== e) (rep[x.reply_to] = rep[x.reply_to] || new Set()).add(x.email); });
+        M.thread = Math.max.apply(null, [0].concat(Object.values(rep).map(v => v.size)));
+        const tms = cm.map(x => new Date(x.created_at).getTime());
+        M.salt = cm.length >= 100 && tms.length && (Math.max.apply(null, tms) - Math.min.apply(null, tms)) / 864e5 >= 90 ? 1 : 0;
         M.wishes = wish.size;
         const ts = Array.from(days).map(k => { const p = k.split('-'); return new Date(+p[0], +p[1], +p[2]).getTime(); }).sort((a, b) => a - b);
         let best = 0, run = 0;
@@ -2648,6 +2670,10 @@
         M.planner = D.days.filter(x => x.email === e).length;
         M.profile = 1 + (D.bd.some(x => x.email === e) ? 1 : 0) + (D.votes.some(x => x.email === e) ? 1 : 0) + (M.planner ? 1 : 0) + (M.stamps ? 1 : 0);
         M.founder = FOUNDERS.indexOf(nm) > -1 ? 1 : 0;
+        M.kinds = (M.posts ? 1 : 0) + (M.photos ? 1 : 0) + (M.mem ? 1 : 0) + (M.msgs ? 1 : 0) + (M.comments ? 1 : 0);
+        const META = ['top', 'plat', 'slam'];
+        M.plat = BADGES.filter(b => META.indexOf(b.id) < 0 && b.t.length > 1 && lvlOf(b, M) === b.t.length).length;
+        M.slam = BADGES.filter(b => META.indexOf(b.id) < 0 && b.t.length > 1 && lvlOf(b, M) >= b.t.length - 1).length;
         M.badges = BADGES.filter(b => b.id !== 'top' && lvlOf(b, M) > 0).length;
         return M;
       }
