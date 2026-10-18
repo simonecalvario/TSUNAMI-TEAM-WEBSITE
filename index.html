@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261018-1136">
+<meta name="tt-build" content="20261018-1217">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -909,7 +909,18 @@
       body.m .founder-card { flex: 0 0 82%; scroll-snap-align: center; }
       body.m .swipe-hint { display: block; text-align: center; color: var(--grey); font-size: .85rem; margin: 6px 0 4px; }
     }
-  </style>
+  
+    .act-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0; }
+    .act-f { display: flex; flex-wrap: wrap; gap: 6px; }
+    .act-f button, .act-bar select { background: rgba(255,255,255,.05); border: 1px solid var(--line); color: var(--white); border-radius: 999px; padding: 7px 12px; font: inherit; font-size: .85rem; }
+    .act-f button.on { background: var(--yellow); color: #000; border-color: var(--yellow); font-weight: 700; }
+    .act-bar select { border-radius: 8px; max-width: 100%; }
+    .act-day { margin: 18px 0 6px; color: var(--yellow); font-weight: 700; font-size: .85rem; letter-spacing: .06em; text-transform: uppercase; }
+    .act-it { display: flex; gap: 10px; align-items: flex-start; padding: 9px 12px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.035); font-size: .93rem; }
+    .act-it > i { font-style: normal; font-size: 1.15rem; line-height: 1.3; }
+    .act-it small { display: block; color: var(--muted, #9aa); font-size: .75rem; margin-top: 2px; }
+    .act-it.hl { background: rgba(245,210,27,.08); }
+</style>
 </head>
 
 <body>
@@ -990,6 +1001,7 @@
           <a href="#lagoon">Lagoon</a>
           <a href="#passport">Passport</a>
           <a href="#statute">Our Statute</a>
+          <a href="#activity">Activity</a>
           <a href="#join">Join Us</a>
           <span class="bell-wrap"><button id="bell" type="button" aria-label="Notifications">🔔<i></i></button><div id="bell-panel"></div></span>
           <a href="/cdn-cgi/access/logout">Logout</a>
@@ -1442,6 +1454,17 @@
       </div>
     </section>
 
+    <section id="activity" aria-labelledby="act-heading">
+      <div class="container">
+        <div class="section-label">Transparency</div>
+        <h2 id="act-heading">Activity <span>Log</span></h2>
+        <p class="intro">Everything that happens in the Tsunami world, in chronological order: contents, chat, votes, badges and levels. Secret badges stay secret.</p>
+        <div class="act-bar"><div class="act-f" id="act-f"></div><select id="act-m" aria-label="Filter by member"></select></div>
+        <div id="act-list"><p class="vote-hint">Loading…</p></div>
+        <button class="button" id="act-more" type="button" style="display:none;margin-top:14px">Show more</button>
+      </div>
+    </section>
+
     <section class="join" id="join">
       <div class="container">
         <div class="section-label">The connection is yours</div>
@@ -1488,6 +1511,7 @@
     <button type="button" data-v="founders"><i>👥</i>Founders</button>
     <button type="button" data-v="blog"><i>📖</i>Blog</button>
     <button type="button" data-v="statute"><i>📜</i>Our Statute</button>
+    <button type="button" data-v="activity"><i>📋</i>Activity Log</button>
     <button type="button" data-v="join"><i>✉️</i>Join Us</button>
     <hr>
     <a href="/cdn-cgi/access/logout"><i>🚪</i>Logout</a>
@@ -2414,7 +2438,7 @@
         } catch (e) {}
         nicks = (await get('nicknames?select=email,nickname')) || [];
         const m = nicks.find(x => x.email === email); nick = m ? m.nickname : null;
-        chatInit(); passInit(); bdayInit(); bellInit();
+        chatInit(); passInit(); bdayInit(); bellInit(); actInit();
       }
 
       /* ---------------- CHAT ---------------- */
@@ -2520,6 +2544,128 @@
 
       /* ---------------- PASSPORT + ALBUMS ---------------- */
       let att = [], photos = [], counts = { posts: 0, mem: 0, photos: 0 };
+
+      /* ---------------- ACTIVITY LOG ---------------- */
+      let actAt = 0, ACT = null, actF = 'all', actM = '', actN = 60, actBusy = false;
+      const ACTF = [['all', 'All'], ['badge', '🏅 Badges'], ['level', '⭐ Levels'], ['content', '📖 Content'], ['chat', '💬 Chat'], ['team', '🙋 Team']];
+      const ACTG = { badge: 'badge', level: 'level', post: 'content', comment: 'content', photo: 'content', mem: 'content', chat: 'chat', stamp: 'team', vote: 'team', days: 'team', bday: 'team', join: 'team' };
+      const ACTI = { badge: '🏅', level: '⭐', post: '📖', comment: '💭', photo: '📸', mem: '🎽', chat: '💬', stamp: '🛂', vote: '🗳', days: '📅', bday: '🎂', join: '🙋' };
+      const tsOf = r => { const t = Date.parse(r.created_at); return isNaN(t) ? 0 : t; };
+      async function getTs(table, cols, extra) {
+        let r = await get(table + '?select=' + cols + ',created_at' + (extra || ''));
+        if (r) { r.forEach(x => { x.ts = tsOf(x); }); return r; }
+        r = await get(table + '?select=' + cols + (extra || ''));
+        if (r) r.forEach(x => { x.ts = 0; });
+        return r || [];
+      }
+      const dayKey = ts => { const d = new Date(ts); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
+      const dayEnd = ts => { const d = new Date(ts); d.setHours(23, 59, 59, 999); return d.getTime(); };
+      const asc = a => a.slice().sort((x, y) => x.ts - y.ts);
+      const mName = k => { const m = MEETINGS.find(x => x.key === k); return m ? m.name : (k || 'a meeting'); };
+
+      function actBuild(D, joins) {
+        const ev = [], add = (ts, e, type, txt) => { if (ts && e) ev.push({ ts: ts, e: e, type: type, txt: txt }); };
+        D.posts.forEach(p => add(p.ts, p.email, 'post', 'published the post “' + esc(p.title || '') + '”'));
+        D.comments.forEach(c => add(c.ts, c.email, 'comment', 'commented on a Blog post'));
+        D.photos.forEach(p => add(p.ts, p.email, 'photo', 'added a photo to the ' + esc(mName(p.meeting)) + ' gallery'));
+        D.mem.forEach(m => add(m.ts, m.email, 'mem', 'added a Memorabilia piece'));
+        D.att.forEach(a => add(a.ts, a.email, 'stamp', 'collected the ' + esc(mName(a.meeting)) + ' stamp'));
+        D.votes.forEach(v => add(v.ts, v.email, 'vote', 'voted for ' + esc(v.city || 'a city') + (v.country ? ' (' + esc(v.country) + ')' : '')));
+        D.bd.forEach(b => add(b.ts, b.email, 'bday', 'saved their birthday'));
+        joins.forEach(j => add(j.ts, j.email, 'join', 'joined the crew as <b>' + esc(j.nickname) + '</b>'));
+        const grp = (rows, type, fn) => {
+          const g = {};
+          rows.forEach(r => { if (!r.ts) return; const k = r.email + '|' + dayKey(r.ts); (g[k] = g[k] || { e: r.email, ts: 0, n: 0 }); g[k].n++; if (r.ts > g[k].ts) g[k].ts = r.ts; });
+          Object.keys(g).forEach(k => add(g[k].ts, g[k].e, type, fn(g[k].n)));
+        };
+        grp(D.chat, 'chat', n => 'wrote ' + n + ' message' + (n > 1 ? 's' : '') + ' in the Lagoon');
+        grp(D.days, 'days', n => 'marked ' + n + ' free date' + (n > 1 ? 's' : '') + ' in the calendar');
+        return ev;
+      }
+
+      function actReplay(D, onDone) {
+        const S = {}; ['att', 'photos', 'posts', 'mem', 'comments', 'chat', 'votes', 'days', 'bd', 'reactions'].forEach(k => { S[k] = asc(D[k]); });
+        const upto = (arr, t) => { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m].ts <= t) lo = m + 1; else hi = m; } return arr.slice(0, lo); };
+        const cps = {}, mark = (e, ts) => { if (e && ts) (cps[e] = cps[e] || new Set()).add(dayEnd(ts)); };
+        let last = 0;
+        Object.keys(S).forEach(k => S[k].forEach(r => { mark(r.email, r.ts); if (r.ts > last) last = r.ts; }));
+        const emails = Object.keys(cps);
+        const out = []; let i = 0;
+        (function step() {
+          const t0 = Date.now();
+          while (i < emails.length && Date.now() - t0 < 25) {
+            const e = emails[i++], list = Array.from(cps[e]).sort((a, b) => a - b);
+            if (list[list.length - 1] < last) list.push(last);
+            let pl = {}, pL = 0;
+            list.forEach(c => {
+              const Dt = {}; Object.keys(S).forEach(k => { Dt[k] = upto(S[k], c); });
+              const M = metricsFor(e, Dt), when = Math.min(c, last);
+              BADGES.forEach(b => {
+                const l = lvlOf(b, M), p = pl[b.id] || 0;
+                for (let x = p + 1; x <= l; x++) {
+                  if (b.secret) out.push({ ts: when, e: e, type: 'badge', hl: 1, txt: 'unlocked a <b>secret badge</b> ✨' });
+                  else out.push({ ts: when, e: e, type: 'badge', hl: 1, txt: 'unlocked ' + b.ic + ' <b>' + esc(b.n) + '</b>' + (b.t.length > 1 ? ' · ' + TI[x - 1 + (4 - b.t.length)] + ' ' + TN[x - 1 + (4 - b.t.length)] : '') });
+                }
+                pl[b.id] = l;
+              });
+              const sc = scoreOf(M);
+              for (let L = pL + 1; L <= sc.L; L++) out.push({ ts: when, e: e, type: 'level', hl: 1, txt: 'reached level ' + LEVELS[L].ic + ' <b>' + LEVELS[L].n + '</b>' });
+              pL = Math.max(pL, sc.L);
+            });
+          }
+          if (i < emails.length) setTimeout(step, 0); else onDone(out);
+        })();
+      }
+
+      async function actLoad() {
+        if (actBusy) return; actBusy = true;
+        const a = await Promise.all([
+          getTs('attendance', 'email,meeting'), getTs('meeting_photos', 'email,meeting'), getTs('posts', 'id,email,title'),
+          getTs('memorabilia', 'id,email,meeting_key,meeting_year'), getTs('comments', 'id,email', '&limit=5000'),
+          getTs('chat_messages', 'id,email,body,reply_to', '&order=id.desc&limit=5000'), getTs('meeting_votes', 'email,city,country'),
+          getTs('meeting_days', 'email,day', '&limit=10000'), getTs('birthdays', 'email,day,month'), getTs('reactions', 'target,email', '&limit=10000'),
+          getTs('nicknames', 'email,nickname')
+        ]);
+        const D = { att: a[0], photos: a[1], posts: a[2], mem: a[3], comments: a[4], chat: a[5], votes: a[6], days: a[7], bd: a[8], reactions: a[9] };
+        const joins = a[10];
+        const base = actBuild(D, joins);
+        actReplay(D, function (rep) {
+          ACT = base.concat(rep).sort((x, y) => y.ts - x.ts || (x.hl ? 1 : 0) - (y.hl ? 1 : 0));
+          actBusy = false; actRender();
+        });
+      }
+
+      function actRender() {
+        const f = $('act-f'), sel = $('act-m'), list = $('act-list'), more = $('act-more');
+        if (!f || !ACT) return;
+        f.innerHTML = ACTF.map(x => '<button type="button" data-k="' + x[0] + '" class="' + (x[0] === actF ? 'on' : '') + '">' + x[1] + '</button>').join('');
+        const names = Array.from(new Set(ACT.map(x => nickOf(x.e)).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+        if (sel.dataset.n !== String(names.length)) {
+          sel.dataset.n = names.length;
+          sel.innerHTML = '<option value="">Everyone</option>' + names.map(n => '<option' + (n === actM ? ' selected' : '') + '>' + esc(n) + '</option>').join('');
+        }
+        const rows = ACT.filter(x => (actF === 'all' || ACTG[x.type] === actF) && (!actM || nickOf(x.e) === actM));
+        if (!rows.length) { list.innerHTML = '<p class="vote-hint">Nothing here yet.</p>'; more.style.display = 'none'; return; }
+        let h = '', day = '';
+        rows.slice(0, actN).forEach(x => {
+          const d = new Date(x.ts), dk = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          if (dk !== day) { day = dk; h += '<div class="act-day">' + dk + '</div>'; }
+          h += '<div class="act-it' + (x.hl ? ' hl' : '') + '"><i>' + ACTI[x.type] + '</i><div><b>' + esc(nickOf(x.e) || 'A member') + '</b> ' + x.txt + '</div></div>';
+        });
+        list.innerHTML = h; more.style.display = rows.length > actN ? '' : 'none';
+      }
+
+      function actInit() {
+        const f = $('act-f'); if (!f) return;
+        f.addEventListener('click', function (e) { const b = e.target.closest('button'); if (b) { actF = b.dataset.k; actN = 60; actRender(); } });
+        $('act-m').addEventListener('change', function () { actM = this.value; actN = 60; actRender(); });
+        $('act-more').addEventListener('click', function () { actN += 60; actRender(); });
+        const sec = $('activity');
+        const load = function () { if (!actBusy && (!ACT || Date.now() - actAt > 90000)) { actAt = Date.now(); actLoad(); } };
+        if ('IntersectionObserver' in window) new IntersectionObserver(function (en) { if (en.some(x => x.isIntersecting)) load(); }, { threshold: 0.01 }).observe(sec);
+        else load();
+      }
+
       async function passInit() {
         const mo = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         $('bd-d').innerHTML = Array.from({ length: 31 }, (_, i) => '<option>' + (i + 1) + '</option>').join('');
