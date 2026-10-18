@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261018-1217">
+<meta name="tt-build" content="20261018-1524">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -910,6 +910,12 @@
       body.m .swipe-hint { display: block; text-align: center; color: var(--grey); font-size: .85rem; margin: 6px 0 4px; }
     }
   
+    .crew li.cl { cursor: pointer; }
+    .crew li.cl b { color: var(--yellow); }
+    .crew li.cd { display: block; background: rgba(245,210,27,.06); padding: 8px 14px 10px 34px; }
+    .cd-r { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: .9rem; }
+    .cd-r b { color: var(--yellow); }
+    .cd-t { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 6px; font-weight: 700; }
     .act-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0; }
     .act-f { display: flex; flex-wrap: wrap; gap: 6px; }
     .act-f button, .act-bar select { background: rgba(255,255,255,.05); border: 1px solid var(--line); color: var(--white); border-radius: 999px; padding: 7px 12px; font: inherit; font-size: .85rem; }
@@ -2860,10 +2866,35 @@
         }
       }
 
+      const CREWM = {}, CREWOPEN = {};
+      function crewDetail(e) {
+        const M = CREWM[e]; if (!M) return '';
+        const got = BADGES.map(b => ({ b: b, l: lvlOf(b, M) })).filter(x => x.l > 0);
+        if (!got.length) return '<p class="vote-hint" style="margin:0">No badges yet.</p>';
+        let tot = 0;
+        const items = got.map(x => {
+          const xp = ptsOf(x.b, x.l); tot += xp;
+          const nm = x.b.secret ? '🔒 Secret badge' : x.b.ic + ' ' + esc(x.b.n) + (x.b.t.length > 1 ? ' ' + TI[x.l - 1 + (4 - x.b.t.length)] : '');
+          return { xp: xp, h: '<div class="cd-r"><span>' + nm + '</span><b>+' + xp + '</b></div>' };
+        }).sort((a, b) => b.xp - a.xp);
+        return items.map(i => i.h).join('') + '<div class="cd-r cd-t"><span>Total</span><b>' + tot + ' XP</b></div>';
+      }
+      function crewToggle(li) {
+        const e = li.dataset.e, nx = li.nextElementSibling;
+        if (nx && nx.classList.contains('cd')) { nx.remove(); delete CREWOPEN[e]; return; }
+        const d = document.createElement('li'); d.className = 'cd'; d.innerHTML = crewDetail(e);
+        li.parentNode.insertBefore(d, li.nextSibling); CREWOPEN[e] = 1;
+      }
       function renderCrew() {
         const emails = Array.from(new Set(nicks.map(x => x.email)));
-        const rows = emails.map(e => { const M = metricsFor(e, DATA), s = scoreOf(M); return { e: e, nick: nickOf(e) || 'A member', xp: s.xp, L: s.L, st: M.stamps, b: M.badges }; }).sort((a, b) => b.xp - a.xp || b.st - a.st);
-        $('crew').innerHTML = rows.length ? rows.map((r, i) => '<li><span>' + (i + 1) + '. ' + LEVELS[r.L].ic + ' ' + esc(r.nick) + (r.e === email ? ' (you)' : '') + ' <small style="color:var(--grey)">' + LEVELS[r.L].n + '</small></span><b>' + r.xp + ' XP</b></li>').join('') : '<li>No members yet.</li>';
+        const rows = emails.map(e => { const M = metricsFor(e, DATA), s = scoreOf(M); CREWM[e] = M; return { e: e, nick: nickOf(e) || 'A member', xp: s.xp, L: s.L, st: M.stamps, b: M.badges }; }).sort((a, b) => b.xp - a.xp || b.st - a.st);
+        $('crew').innerHTML = rows.length ? rows.map((r, i) => '<li class="cl" data-e="' + esc(r.e) + '" tabindex="0"><span>' + (i + 1) + '. ' + LEVELS[r.L].ic + ' ' + esc(r.nick) + (r.e === email ? ' (you)' : '') + ' <small style="color:var(--grey)">' + LEVELS[r.L].n + '</small></span><b>' + r.xp + ' XP ▾</b></li>').join('') : '<li>No members yet.</li>';
+        Object.keys(CREWOPEN).forEach(e => { const li = Array.from($('crew').children).find(x => x.dataset && x.dataset.e === e); if (li) { delete CREWOPEN[e]; crewToggle(li); } });
+        if (!$('crew').dataset.b) {
+          $('crew').dataset.b = 1;
+          $('crew').addEventListener('click', ev => { const li = ev.target.closest('li.cl'); if (li) crewToggle(li); });
+          $('crew').addEventListener('keydown', ev => { if (ev.key === 'Enter') { const li = ev.target.closest('li.cl'); if (li) crewToggle(li); } });
+        }
       }
       /* ---------------- BIRTHDAYS ---------------- */
       async function bdayInit() {
