@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261017-2203">
+<meta name="tt-build" content="20261018-0220">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -564,6 +564,13 @@
     #bell-panel a { display: block; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: .88rem; color: var(--grey); }
     #bell-panel a b { color: var(--white); }
     #bell-panel a.new { background: rgba(39,184,255,.12); }
+    #bell-panel h4 { padding: 10px 14px 4px; font-size: .68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); }
+    .nbadge { position: absolute; top: 3px; right: 8px; min-width: 17px; height: 17px; padding: 0 4px; box-sizing: border-box; border-radius: 9px; background: var(--blue, #27b8ff); color: #101010; font: 800 .65rem/17px sans-serif; text-align: center; font-style: normal; }
+    .nbadge.hot { background: var(--orange); }
+    #tabbar button { position: relative; }
+    .nav-links a { position: relative; }
+    .nav-links a .nbadge { top: -8px; right: -12px; }
+    #bell-panel .pnote { font-size: .8rem; border-top: 1px solid var(--line); }
     #bell-panel p { padding: 14px; color: var(--grey); font-size: .88rem; }
     #bday { display: none; text-align: center; padding: 9px 14px; font-size: .92rem; color: #101010; font-weight: 700; background: linear-gradient(90deg, var(--yellow), var(--orange)); }
     #bday.show { display: block; }
@@ -2495,33 +2502,94 @@
       async function bellInit() {
         const btn = $('bell'), panel = $('bell-panel');
         if (!btn || !email) return;
-        const KEY = 'tt_seen_' + email;
+        const KEY = 'tt_seen_' + email, CK = 'tt_chat_seen_' + email;
         let seen = 0; try { seen = +localStorage.getItem(KEY) || 0; } catch (e) {}
-        async function check() {
-          const cs = await get('comments?select=id,post_id,parent_id,email,author,created_at&order=created_at.desc&limit=300');
-          const ps = await get('posts?select=id,title,email&email=eq.' + encodeURIComponent(email));
-          if (!cs) return;
-          const chat = (await get('chat_messages?select=*&order=id.desc&limit=100')) || [];
-          const chatById = {}; chat.forEach(m => chatById[m.id] = m);
-          const mre = nick ? new RegExp('@' + nick.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'iu') : null;
-          const chatItems = chat.filter(m => m.email !== email && ((mre && mre.test(m.body)) || (m.reply_to && chatById[m.reply_to] && chatById[m.reply_to].email === email))).slice(0, 10);
-          const myC = new Set(cs.filter(c => c.email === email).map(c => c.id)), myP = new Set((ps || []).map(p => p.id));
-          const title = {}; (ps || []).forEach(p => title[p.id] = p.title);
-          const items = cs.filter(c => c.email !== email && ((c.parent_id && myC.has(c.parent_id)) || (!c.parent_id && myP.has(c.post_id)))).slice(0, 15);
-          const all = items.map(c => ({ t: new Date(c.created_at).getTime(), href: '#blog', who: c.author, txt: c.parent_id ? 'replied to your comment' : 'commented on your post “' + (title[c.post_id] || '') + '”', at: c.created_at }))
-            .concat(chatItems.map(m => ({ t: new Date(m.created_at).getTime(), href: '#lagoon', who: m.nickname, txt: (mre && mre.test(m.body)) ? 'mentioned you in the Lagoon' : 'replied to you in the Lagoon', at: m.created_at })))
-            .sort((x, y) => y.t - x.t).slice(0, 15);
-          const unread = all.filter(c => c.t > seen).length;
-          btn.classList.toggle('has', unread > 0); btn.querySelector('i').textContent = unread > 9 ? '9+' : unread;
-          panel.innerHTML = all.length ? all.map(c => '<a href="' + c.href + '" class="' + (c.t > seen ? 'new' : '') + '"><b>' + esc(c.who) + '</b> ' + esc(c.txt) + '<br><small>' + new Date(c.at).toLocaleDateString('en-GB') + '</small></a>').join('') : '<p>No notifications yet. Replies and mentions will appear here.</p>';
+        let chatSeen = 0; try { chatSeen = +localStorage.getItem(CK) || 0; } catch (e) {}
+        let topChat = 0, lastBadge = -1;
+
+        function badge(sel, n, hot) {
+          document.querySelectorAll(sel).forEach(function (el) {
+            let b = el.querySelector(':scope > .nbadge');
+            if (!n) { if (b) b.remove(); return; }
+            if (!b) { b = document.createElement('i'); b.className = 'nbadge'; el.appendChild(b); }
+            b.textContent = n > 9 ? '9+' : n; b.classList.toggle('hot', !!hot);
+          });
         }
-        btn.onclick = function (e) {
-          e.stopPropagation(); panel.classList.toggle('open');
-          if (!panel.classList.contains('open')) { try { localStorage.setItem(KEY, Date.now()); seen = Date.now(); } catch (x) {} btn.classList.remove('has'); }
+        function markChatSeen() {
+          if (!topChat) return;
+          chatSeen = topChat; try { localStorage.setItem(CK, chatSeen); } catch (e) {}
+          badge('#tabbar [data-v=lagoon], .nav-links > a[href="#lagoon"]', 0);
+        }
+        const lag = document.getElementById('lagoon');
+        if (lag && 'IntersectionObserver' in window) {
+          new IntersectionObserver(function (en) { if (en[0].isIntersecting) markChatSeen(); }, { threshold: 0.35 }).observe(lag);
+        }
+
+        async function check() {
+          const e = encodeURIComponent(email);
+          const [cs, ps, chat, myVote, myDays, myBd] = await Promise.all([
+            get('comments?select=id,post_id,parent_id,email,author,created_at&order=created_at.desc&limit=300'),
+            get('posts?select=id,title,email&email=eq.' + e),
+            get('chat_messages?select=*&order=id.desc&limit=100'),
+            get('meeting_votes?select=email&email=eq.' + e + '&limit=1'),
+            get('meeting_days?select=email&email=eq.' + e + '&limit=1'),
+            get('birthdays?select=email&email=eq.' + e + '&limit=1')
+          ]);
+          const items = [];
+          if (cs) {
+            const myC = new Set(cs.filter(c => c.email === email).map(c => c.id)), myP = new Set((ps || []).map(p => p.id));
+            const title = {}; (ps || []).forEach(p => title[p.id] = p.title);
+            cs.filter(c => c.email !== email && ((c.parent_id && myC.has(c.parent_id)) || (!c.parent_id && myP.has(c.post_id)))).slice(0, 15).forEach(c =>
+              items.push({ t: new Date(c.created_at).getTime(), href: '#blog', who: c.author, txt: c.parent_id ? 'replied to your comment' : 'commented on your post “' + (title[c.post_id] || '') + '”', at: c.created_at }));
+          }
+          let chatNew = 0, chatHot = 0;
+          if (chat && chat.length) {
+            topChat = Math.max.apply(null, chat.map(m => m.id));
+            const byId = {}; chat.forEach(m => byId[m.id] = m);
+            const mre = nick ? new RegExp('@' + nick.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'iu') : null;
+            chat.filter(m => m.email !== email).forEach(function (m) {
+              const mention = mre && mre.test(m.body), reply = m.reply_to && byId[m.reply_to] && byId[m.reply_to].email === email;
+              if (m.id > chatSeen) { chatNew++; if (mention || reply) chatHot++; }
+              if (mention || reply) items.push({ t: new Date(m.created_at).getTime(), href: '#lagoon', who: m.nickname, txt: mention ? 'mentioned you in the Lagoon' : 'replied to you in the Lagoon', at: m.created_at });
+            });
+          }
+          items.sort((x, y) => y.t - x.t);
+          const list = items.slice(0, 12);
+          const todos = [];
+          if (myVote !== null && !myVote.length) todos.push({ href: '#meetings', ic: '🗳', txt: 'Vote the city of the next Tsunami Meeting' });
+          if (myDays !== null && !myDays.length) todos.push({ href: '#meetings', ic: '📅', txt: 'Pick the dates you can attend' });
+          if (myBd !== null && !myBd.length) todos.push({ href: '#passport', ic: '🎂', txt: 'Add your birthday in the Passport' });
+          const unread = list.filter(c => c.t > seen).length;
+          const total = unread + todos.length;
+          btn.classList.toggle('has', total > 0); btn.querySelector('i').textContent = total > 9 ? '9+' : total;
+          let html = '';
+          if (todos.length) html += '<h4>To do</h4>' + todos.map(t => '<a href="' + t.href + '">' + t.ic + ' ' + esc(t.txt) + '</a>').join('');
+          if (chatNew) html += '<h4>Lagoon</h4><a href="#lagoon" class="' + (chatHot ? 'new' : '') + '">💬 ' + chatNew + ' new message' + (chatNew > 1 ? 's' : '') + (chatHot ? ' · ' + chatHot + ' for you' : '') + '</a>';
+          if (list.length) html += '<h4>Mentions &amp; replies</h4>' + list.map(c => '<a href="' + c.href + '" class="' + (c.t > seen ? 'new' : '') + '"><b>' + esc(c.who) + '</b> ' + esc(c.txt) + '<br><small>' + new Date(c.at).toLocaleDateString('en-GB') + '</small></a>').join('');
+          const ps2 = window.ttPush ? window.ttPush.state() : 'checking';
+          const prow = ps2 === 'on' ? '<a href="#" data-push="1">🔔 Push notifications: <b>ON</b> <small>(tap to turn off)</small></a>'
+            : ps2 === 'off' ? '<a href="#" data-push="1">🔕 <b>Turn on push notifications</b><br><small>Get an alert when someone mentions or replies to you</small></a>'
+            : ps2 === 'install' ? '<p class="pnote">📲 For push notifications: add this site to your Home Screen (Share → Add to Home Screen) and open it from there.</p>'
+            : ps2 === 'denied' ? '<p class="pnote">Push notifications are blocked. Allow them in your phone settings for this site.</p>' : '';
+          panel.innerHTML = (html || '<p>All caught up ✅ Nothing to do right now.</p>') + prow;
+          // tab badges
+          badge('#tabbar [data-v=lagoon], .nav-links > a[href="#lagoon"]', chatNew, chatHot);
+          const mt = todos.filter(t => t.href === '#meetings').length, pt = todos.filter(t => t.href === '#passport').length;
+          badge('#tabbar [data-v=meetings], .nav-links > a[href="#meetings"]', mt, false);
+          badge('#tabbar [data-v=passport], .nav-links > a[href="#passport"]', pt, false);
+          const dot = total + chatNew;
+          document.title = (dot ? '(' + dot + ') ' : '') + document.title.replace(/^\(\d+\)\s*/, '');
+          try { if (navigator.setAppBadge) { dot ? navigator.setAppBadge(dot) : navigator.clearAppBadge(); } } catch (x) {}
+          if (lag && lag.offsetParent !== null) { const r = lag.getBoundingClientRect(); if (r.top < innerHeight * 0.65 && r.bottom > innerHeight * 0.35) markChatSeen(); }
+        }
+        btn.onclick = function (ev) {
+          ev.stopPropagation(); panel.classList.toggle('open'); if (panel.classList.contains('open')) check();
+          if (!panel.classList.contains('open')) { try { localStorage.setItem(KEY, Date.now()); seen = Date.now(); } catch (x) {} check(); }
         };
-        document.addEventListener('click', function (e) { if (!e.target.closest('.bell-wrap') && panel.classList.contains('open')) { panel.classList.remove('open'); try { localStorage.setItem(KEY, Date.now()); seen = Date.now(); } catch (x) {} btn.classList.remove('has'); } });
-        panel.addEventListener('click', function () { panel.classList.remove('open'); });
-        check(); setInterval(check, 60000);
+        document.addEventListener('click', function (ev) { if (!ev.target.closest('.bell-wrap') && panel.classList.contains('open')) { panel.classList.remove('open'); try { localStorage.setItem(KEY, Date.now()); seen = Date.now(); } catch (x) {} check(); } });
+        panel.addEventListener('click', function (ev) { const pb = ev.target.closest('[data-push]'); if (pb) { ev.preventDefault(); ev.stopPropagation(); if (window.ttPush) window.ttPush.toggle().then(check); return; } panel.classList.remove('open'); try { localStorage.setItem(KEY, Date.now()); seen = Date.now(); } catch (x) {} });
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
+        check(); setInterval(function () { if (!document.hidden) check(); }, 30000);
       }
 
       init();
@@ -2718,6 +2786,59 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
   window.addEventListener('pageshow', function (e) { if (e.persisted) check(); });
   setTimeout(check, 1500);
+})();
+</script>
+<script>
+(function () {
+  var BASE = 'https://dykofnyhwusghfowfxbi.supabase.co', PUB = 'BIZygphZe69F81urAeiXeObdY3I781Loy8UN4T6THbGQlNu_bbLDmF86rIvnKqPwBeB5tOWcyvi0_9W6dM1KhM0', JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5a29mbnlod3VzZ2hmb3dmeGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjUwOTQsImV4cCI6MjEwNzY0MTA5NH0.wLS75UXlm2evHg1mlvjvrlJASDP9KRaE_b8fhnJ8htI';
+  var H = { apikey: JWT, Authorization: 'Bearer ' + JWT, 'Content-Type': 'application/json' };
+  var email = null, st = 'checking', reg = null;
+  var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var standalone = window.navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+
+  function key(b64) {
+    var p = '='.repeat((4 - b64.length % 4) % 4), r = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/'));
+    return Uint8Array.from(r, function (c) { return c.charCodeAt(0); });
+  }
+  function b64(buf) { return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  async function save(sub) {
+    var j = sub.toJSON();
+    await fetch(BASE + '/rest/v1/push_subscriptions?on_conflict=endpoint', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, H),
+      body: JSON.stringify({ endpoint: sub.endpoint, email: email, p256dh: j.keys.p256dh, auth: j.keys.auth }) });
+  }
+  async function refresh() {
+    if (iOS && !standalone) { st = 'install'; return; }
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) { st = 'unsupported'; return; }
+    if (Notification.permission === 'denied') { st = 'denied'; return; }
+    try {
+      reg = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+      var sub = await reg.pushManager.getSubscription();
+      if (sub && Notification.permission === 'granted') { st = 'on'; if (email) save(sub).catch(function () {}); }
+      else st = 'off';
+    } catch (e) { st = 'unsupported'; }
+  }
+  window.ttPush = {
+    state: function () { return st; },
+    toggle: async function () {
+      if (st === 'on') {
+        try {
+          var sub = await reg.pushManager.getSubscription();
+          if (sub) { await fetch(BASE + '/rest/v1/push_subscriptions?endpoint=eq.' + encodeURIComponent(sub.endpoint), { method: 'DELETE', headers: H }); await sub.unsubscribe(); }
+        } catch (e) {}
+        st = 'off'; return;
+      }
+      if (st !== 'off') return;
+      try {
+        var perm = await Notification.requestPermission();
+        if (perm !== 'granted') { st = perm === 'denied' ? 'denied' : 'off'; return; }
+        var s2 = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key(PUB) });
+        await save(s2); st = 'on';
+      } catch (e) { st = 'off'; }
+    }
+  };
+  fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : {}; })
+    .then(function (j) { if (j && j.email) email = j.email.toLowerCase(); return refresh(); }).catch(function () { refresh(); });
 })();
 </script>
 </body>
