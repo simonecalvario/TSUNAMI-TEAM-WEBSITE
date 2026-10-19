@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261018-1524">
+<meta name="tt-build" content="20261019-1118">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -615,6 +615,9 @@
     #bdg-pop .pop { position: relative; z-index: 2; width: min(320px, 86vw); padding: 24px 20px; text-align: center; background: var(--dark); border: 1px solid var(--yellow); border-radius: 16px; }
     .pop-t { font-size: 1.3rem; font-weight: 800; color: var(--yellow); margin-bottom: 14px; }
     .pop-b { margin-bottom: 14px; } .pop-b span { display: block; font-size: 3rem; } .pop-b b { display: block; font-size: 1.1rem; } .pop-b small { color: var(--grey); }
+    #bdg-pop .pop-t { color: var(--yellow); font-weight: 800; font-size: 1.2rem; margin-bottom: 4px; } #bdg-pop .pop-s { color: var(--grey); font-size: .85rem; margin-bottom: 14px; }
+    #bdg-pop .pop-w { margin: 6px 0 0; font-size: .85rem; line-height: 1.4; color: var(--white); } #bdg-pop .pop-w b { color: var(--yellow); }
+    #bdg-pop .pop { max-height: 86vh; overflow-y: auto; }
     #bdg-pop button { margin-top: 6px; padding: 12px 28px; border: 0; border-radius: 8px; background: var(--yellow); color: #101010; font: inherit; font-weight: 800; cursor: pointer; }
     #bdg-pop .cf { position: absolute; top: -10%; z-index: 1; font-style: normal; animation: fall 2.6s linear forwards; }
     @keyframes fall { to { transform: translateY(115vh) rotate(360deg); opacity: .6; } }
@@ -2837,8 +2840,21 @@
 
       function celebrate(ups) {
         const box = document.createElement('div'); box.id = 'bdg-pop';
-        box.innerHTML = '<div class="pop"><div class="pop-t">🎉 New badge!</div>' + ups.map(u => '<div class="pop-b"><span>' + u.b.ic + '</span><b>' + esc(u.b.n) + '</b><small>' + (u.b.t.length === 1 ? 'Unlocked' : TI[u.l - 1 + (4 - u.b.t.length)] + ' ' + TN[u.l - 1 + (4 - u.b.t.length)]) + '</small></div>').join('') + '<button type="button">Nice!</button></div>';
+        const nm = nickOf(email) || '';
+        box.innerHTML = '<div class="pop"><div class="pop-t">🎉 Congratulations' + (nm ? ', ' + esc(nm) : '') + '!</div><div class="pop-s">' + (ups.length > 1 ? 'You unlocked ' + ups.length + ' new badges' : 'You unlocked a new badge') + '</div>' + ups.map(u => {
+          const b = u.b, tiered = b.t.length > 1, off = 4 - b.t.length, xp = ptsOf(b, u.l) - ptsOf(b, u.l - 1), v = (myM && myM[b.m]) || 0;
+          const why = esc(b.d) + (tiered ? '<br>🎯 ' + esc(b.u.charAt(0).toUpperCase() + b.u.slice(1)) + ': <b>' + b.t[u.l - 1] + '</b>' : '');
+          return '<div class="pop-b"><span>' + b.ic + '</span><b>' + esc(b.n) + '</b><small>' + (tiered ? TI[u.l - 1 + off] + ' ' + TN[u.l - 1 + off] : (b.secret ? '🤫 Secret badge' : 'Unlocked')) + ' · +' + xp + ' XP</small><p class="pop-w">' + why + '</p></div>';
+        }).join('') + '<button type="button">Nice!</button></div>';
         for (let i = 0; i < 26; i++) { const s = document.createElement('i'); s.className = 'cf'; s.textContent = ['🎉', '✨', '🌊', '⭐'][i % 4]; s.style.left = Math.random() * 100 + '%'; s.style.animationDelay = (Math.random() * 1.2) + 's'; s.style.fontSize = (14 + Math.random() * 14) + 'px'; box.appendChild(s); }
+        box.addEventListener('click', function (e) { if (e.target.tagName === 'BUTTON' || e.target === box) box.remove(); });
+        document.body.appendChild(box);
+      }
+
+      function birthdayPop(name) {
+        const box = document.createElement('div'); box.id = 'bdg-pop';
+        box.innerHTML = '<div class="pop"><div class="pop-b"><span>🎂</span></div><div class="pop-t">Happy Birthday, ' + esc(name || 'friend') + '!</div><p class="pop-w">The whole Tsunami Team wishes you a day full of waves, friends and good vibes. 🌊🥳<br>Check the Lagoon: your crew will be sending you their wishes!</p><button type="button">Thank you! 🎉</button></div>';
+        for (let i = 0; i < 40; i++) { const s = document.createElement('i'); s.className = 'cf'; s.textContent = ['🎂', '🎉', '🎈', '🥳', '✨', '🎁'][i % 6]; s.style.left = Math.random() * 100 + '%'; s.style.animationDelay = (Math.random() * 1.8) + 's'; s.style.fontSize = (16 + Math.random() * 16) + 'px'; box.appendChild(s); }
         box.addEventListener('click', function (e) { if (e.target.tagName === 'BUTTON' || e.target === box) box.remove(); });
         document.body.appendChild(box);
       }
@@ -2923,6 +2939,11 @@
         };
         const now = new Date(); now.setHours(0, 0, 0, 0);
         const out = [];
+        if (mine && email && mine.day === now.getDate() && mine.month === now.getMonth() + 1) {
+          const k = 'tt_bdpop_' + email, yr = String(now.getFullYear()); let seenY = null;
+          try { seenY = localStorage.getItem(k); } catch (e) {}
+          if (seenY !== yr) { try { localStorage.setItem(k, yr); } catch (e) {} setTimeout(function () { birthdayPop(nickOf(email)); }, 1500); }
+        }
         const nameOf = r => (nicks.find(x => x.email === r.email) || {}).nickname || r.nickname || 'A member';
         const all = rows.map(r => {
           let d = new Date(now.getFullYear(), r.month - 1, r.day);
@@ -3058,13 +3079,42 @@
   #cs-gate b { color: var(--yellow); }
   #cs-gate button { width: 100%; padding: 13px; font: inherit; font-weight: 700; color: #101010; background: var(--yellow); border: 0; border-radius: 6px; cursor: pointer; }
   #cs-gate button:disabled { opacity: .5; cursor: default; }
+  #cs-gate .cs-who { font-size: .8rem; margin-bottom: 12px; }
+  #cs-gate .cs-how { text-align: left; line-height: 1.5; margin-bottom: 4px; font-size: .95rem; color: var(--white); }
+  #cs-gate .cs-how span { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; background: var(--yellow); color: #101010; font-weight: 700; font-size: .85rem; margin-right: 8px; }
+  #cs-gate .cs-it { font-size: .85rem; color: var(--grey); text-align: left; margin-bottom: 14px; }
+  #cs-gate .cs-warn { font-size: .85rem; padding: 10px 12px; border: 1px dashed var(--yellow); border-radius: 8px; }
+  #cs-gate .cs-help { font-size: .8rem; margin: 12px 0 0; }
+  #cs-gate .cs-big { font-size: 1rem; margin-bottom: 8px; }
+  #cs-gate .cs-card { font-size: 1.5rem; padding: 18px 10px; margin-bottom: 16px; border: 2px solid var(--yellow); border-radius: 10px; background: rgba(245,210,27,.1); color: var(--white); }
+  #cs-gate .cs-card small { display: block; font-size: .9rem; color: var(--grey); margin-bottom: 4px; }
+  #cs-gate .cs-sec { background: none; color: var(--white); border: 1px solid var(--line); margin-top: 10px; font-weight: 400; }
+  #cs-gate label { font-size: 1.02rem; padding: 14px; line-height: 1.3; }
+  #cs-gate label input { position: absolute; opacity: 0; pointer-events: none; }
+  #cs-gate label { position: relative; }
+  #cs-gate label.sel i { font-weight: 700; }
+  #cs-gate label i { margin-left: auto; font-style: normal; color: var(--yellow); }
+  #cs-gate label.off span { opacity: .8; }
   #cs-msg { min-height: 1.2em; margin-top: 10px; color: var(--grey); font-size: .88rem; }
 </style>
 <div id="cs-gate"><div class="box">
   <h2>Welcome aboard 🌊</h2>
-  <p>Choose who you are. Your call sign will identify you in the chat, blog, badges and everything else on the site. <b>You can't change it later.</b></p>
-  <div class="opts" id="cs-opts"></div>
-  <button type="button" id="cs-ok" disabled>Confirm</button>
+  <p class="cs-who" id="cs-who"></p>
+  <div id="cs-step1">
+    <div class="cs-how"><div><span>1</span>Tap <b>your name</b> in the list</div><div style="margin-top:8px"><span>2</span>Press <b>Continue</b> and check it’s you</div></div>
+    <div class="cs-it">Trova <b>il tuo nome</b> nella lista, toccalo e premi <b>Continue</b>.</div>
+    <div class="opts" id="cs-opts"></div>
+    <p class="cs-warn">⚠️ Your call sign is how everyone will see you in the chat, blog, badges and rankings. <b>It can’t be changed later.</b></p>
+    <button type="button" id="cs-ok" disabled>Select your name first</button>
+    <p class="cs-help">Your name isn’t in the list? Don’t pick someone else’s: ask Simone.</p>
+  </div>
+  <div id="cs-step2" style="display:none">
+    <p class="cs-big">You are</p>
+    <div class="cs-card" id="cs-card"></div>
+    <p>Is this right? After confirming you <b>can’t change it</b>.<br><small>È giusto? Dopo la conferma non si può più cambiare.</small></p>
+    <button type="button" id="cs-yes">Yes, that’s me</button>
+    <button type="button" id="cs-back" class="cs-sec">← Go back</button>
+  </div>
   <div id="cs-msg"></div>
 </div></div>
 <script>
@@ -3081,7 +3131,7 @@
     try { const r = await fetch(BASE + '/rest/v1/nicknames?select=nickname', { headers: hdr() }); if (r.ok) taken = (await r.json()).map(x => x.nickname.toLowerCase()); } catch (e) {}
     opts.innerHTML = MEMBERS.map(function (m, i) {
       const off = taken.indexOf(m[1].toLowerCase()) > -1;
-      return '<label class="' + (off ? 'off' : '') + '"><input type="radio" name="cs" value="' + i + '"' + (off ? ' disabled' : '') + '> <span>' + esc(m[0]) + ' – <b>' + esc(m[1]) + '</b>' + (off ? ' (taken)' : '') + '</span></label>';
+      return '<label class="' + (off ? 'off' : '') + '"><input type="radio" name="cs" value="' + i + '"' + (off ? ' disabled' : '') + '> <span>' + esc(m[0]) + ' – <b>' + esc(m[1]) + (off ? '</b> <small>(taken)</small>' : '</b>') + '</span><i>' + (off ? '' : '○') + '</i></label>';
     }).join('');
     g.classList.add('on'); document.body.style.overflow = 'hidden';
   }
@@ -3089,24 +3139,31 @@
   opts.addEventListener('change', function (e) {
     chosen = MEMBERS[+e.target.value];
     Array.prototype.forEach.call(opts.children, l => l.classList.toggle('sel', l.contains(e.target)));
-    ok.disabled = false;
+    Array.prototype.forEach.call(opts.querySelectorAll('i'), (x, i) => { if (!x.parentNode.classList.contains('off')) x.textContent = x.parentNode.classList.contains('sel') ? '✓' : '○'; });
+    ok.disabled = false; ok.textContent = 'Continue as ' + chosen[0] + ' →';
   });
-  ok.addEventListener('click', async function () {
+  const s1 = document.getElementById('cs-step1'), s2 = document.getElementById('cs-step2'), yes = document.getElementById('cs-yes');
+  ok.addEventListener('click', function () {
     if (!chosen) return;
-    if (!confirm('You are ' + chosen[0] + ' – "' + chosen[1] + '". This cannot be changed later. Confirm?')) return;
-    ok.disabled = true; msg.textContent = 'Saving…';
+    document.getElementById('cs-card').innerHTML = '<small>' + esc(chosen[0]) + '</small>call sign: <b style="color:var(--yellow)">' + esc(chosen[1]) + '</b>';
+    s1.style.display = 'none'; s2.style.display = ''; g.scrollTop = 0;
+  });
+  document.getElementById('cs-back').addEventListener('click', function () { s2.style.display = 'none'; s1.style.display = ''; msg.textContent = ''; });
+  yes.addEventListener('click', async function () {
+    if (!chosen) return;
+    yes.disabled = true; msg.textContent = 'Saving…';
     try {
       const r = await fetch(BASE + '/rest/v1/nicknames', { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json', Prefer: 'return=minimal' }, hdr()), body: JSON.stringify({ email: email, nickname: chosen[1] }) });
       if (!r.ok) throw new Error('x');
       location.reload();
-    } catch (e) { msg.textContent = 'That call sign was just taken, or you already have one. Reload and try again.'; ok.disabled = false; }
+    } catch (e) { msg.textContent = 'That call sign was just taken, or you already have one. Reload and try again.'; yes.disabled = false; }
   });
   function hdr() { return { apikey: JWT, Authorization: 'Bearer ' + JWT }; }
   fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' })
     .then(r => r.ok ? r.json() : {})
     .then(async function (j) {
       if (!j || !j.email) return;
-      email = j.email.toLowerCase();
+      email = j.email.toLowerCase(); document.getElementById('cs-who').textContent = 'Signed in as ' + email;
       const r = await fetch(BASE + '/rest/v1/nicknames?select=nickname&email=eq.' + encodeURIComponent(email), { headers: hdr() });
       if (!r.ok) return;
       if (!(await r.json()).length) open();
