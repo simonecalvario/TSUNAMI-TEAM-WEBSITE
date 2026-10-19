@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261019-1332">
+<meta name="tt-build" content="20261019-1343">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -962,6 +962,21 @@
     #guide-pop .gd-f { display: flex; gap: 8px; padding: 12px 20px 16px; border-top: 1px solid var(--line); }
     #guide-pop .gd-f button { flex: 1; padding: 12px 8px; border-radius: 8px; font: inherit; font-weight: 700; cursor: pointer; border: 1px solid var(--yellow); background: var(--yellow); color: #101010; }
     #guide-pop .gd-f button.sec { background: none; color: var(--white); border-color: var(--line); font-weight: 400; }
+    #guide-pop .gd-f { flex-wrap: wrap; }
+    #guide-pop .gd-f button.go { flex: 1 1 100%; font-size: 1rem; padding: 14px; }
+    #tour-ring { position: fixed; z-index: 99990; pointer-events: none; border: 2px solid var(--yellow); border-radius: 12px; box-shadow: 0 0 0 9999px rgba(2,6,16,.62), 0 0 18px 2px rgba(245,210,27,.6); transition: all .25s ease; }
+    #tour-card { position: fixed; z-index: 99991; left: 50%; transform: translateX(-50%); bottom: 18px; width: min(440px, 94vw); padding: 14px 16px 14px; background: var(--dark); border: 1px solid var(--yellow); border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+    body.m #tour-card { bottom: calc(72px + env(safe-area-inset-bottom)); }
+    #tour-card .tc-top { display: flex; justify-content: space-between; align-items: center; color: var(--orange); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 800; }
+    #tour-card .tc-top button { background: none; border: 0; color: var(--grey); font-size: 1.1rem; cursor: pointer; padding: 0 4px; }
+    #tour-card b { display: block; margin: 6px 0 2px; color: var(--yellow); font-size: 1.05rem; }
+    #tour-card p { margin: 0 0 8px; color: var(--white); font-size: .9rem; line-height: 1.4; }
+    #tour-card .tc-st { min-height: 1.2em; color: #5be37d; font-size: .85rem; font-weight: 700; }
+    #tour-card .tc-b { display: flex; gap: 8px; margin-top: 6px; }
+    #tour-card .tc-b button { flex: 1; padding: 11px 8px; border-radius: 8px; font: inherit; font-weight: 700; cursor: pointer; border: 1px solid var(--yellow); background: var(--yellow); color: #101010; }
+    #tour-card .tc-b button.sec { background: none; color: var(--white); border-color: var(--line); font-weight: 400; }
+    #tour-card .tc-b button.pulse { animation: tcp 1.2s ease-in-out infinite; }
+    @keyframes tcp { 50% { box-shadow: 0 0 0 5px rgba(245,210,27,.35); } }
     .act-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0; }
     .act-f { display: flex; flex-wrap: wrap; gap: 6px; }
     .act-f button, .act-bar select { background: rgba(255,255,255,.05); border: 1px solid var(--line); color: var(--white); border-radius: 999px; padding: 7px 12px; font: inherit; font-size: .85rem; }
@@ -2513,14 +2528,74 @@
         const box = document.createElement('div'); box.id = 'guide-pop';
         box.innerHTML = '<div class="gd"><div class="gd-h"><b>Welcome to Tsunami Team 🌊</b><small>Quick guide to the site</small></div><div class="gd-b">' +
           GUIDE.map(g => '<h4>' + g[0] + '</h4>' + g[1].map(r => '<div class="gd-r"><i>' + r[0] + '</i><div><b>' + esc(r[1]) + '</b> — ' + esc(r[2]) + '</div></div>').join('')).join('') +
-          '</div><div class="gd-f"><button type="button" class="sec" data-a="off">Don’t show again</button><button type="button" data-a="ok">Got it!</button></div></div>';
+          '</div><div class="gd-f"><button type="button" class="go" data-a="tour">▶ Start the guided tour</button><button type="button" class="sec" data-a="off">Don’t show again</button><button type="button" data-a="ok" class="sec">Close</button></div></div>';
         box.addEventListener('click', function (e) {
           const a = e.target.getAttribute && e.target.getAttribute('data-a');
           if (a === 'off') { try { localStorage.setItem(KEY, '1'); } catch (x) {} box.remove(); }
+          else if (a === 'tour') { box.remove(); tourStart(); }
           else if (a === 'ok' || e.target === box) box.remove();
         });
         document.body.appendChild(box);
       }
+
+      /* ---------------- GUIDED TOUR ---------------- */
+      const TOUR = [
+        { ic: '🎂', t: 'Your birthday', d: 'Choose day and month, then tap Save. Your crew will celebrate with you!', go: 'passport', tab: 'Birthdays', sel: '.bday-form', done: () => /Saved/.test(($('bd-msg') || {}).textContent || ''), ok: '✓ Birthday saved' },
+        { ic: '🛂', t: 'Your stamps', d: 'Tap the Tsunami Meetings you lived: each one stamps your passport.', go: 'passport', tab: 'Stamps', sel: '#stamps', done: () => !!document.querySelector('#stamps .stamp.on'), ok: '✓ You have at least one stamp' },
+        { ic: '📍', t: 'Where: vote the city', d: 'Vote the city for the next Tsunami Meeting. Votes are public, with call signs.', go: 'meetings', tab: 'Vote city', sel: '#meetings .vote-box' },
+        { ic: '📅', t: 'When: your free dates', d: 'Mark the days you are free, so we can find the best dates for everyone.', go: 'meetings', tab: 'Dates', sel: '#meetings .when-box' },
+        { ic: '💬', t: 'Say hi in the Lagoon', d: 'Write a greeting to the crew. Tip: type @ and a call sign to tag someone!', go: 'lagoon', sel: '#chat-form' }
+      ];
+      let tourI = -1, tourTimer = null, tourRaf = 0;
+      function tourEl(st) { return Array.from(document.querySelectorAll(st.sel)).find(e => e.offsetParent !== null) || document.querySelector(st.sel) || document.getElementById(st.go); }
+      function tourStop() {
+        tourI = -1; clearInterval(tourTimer); cancelAnimationFrame(tourRaf);
+        ['tour-ring', 'tour-card'].forEach(id => { const e = $(id); if (e) e.remove(); });
+      }
+      function tourStart() { tourStop(); tourStep(0); }
+      function tourStep(i) {
+        tourI = i; clearInterval(tourTimer);
+        if (i >= TOUR.length) return tourEnd();
+        const st = TOUR[i];
+        if (location.hash !== '#' + st.go) location.hash = '#' + st.go;
+        if (st.tab) { const tb = Array.from(document.querySelectorAll('#' + st.go + ' .subtabs button')).find(b => b.textContent.indexOf(st.tab) > -1); if (tb) tb.click(); }
+        let ring = $('tour-ring'), card = $('tour-card');
+        if (!ring) { ring = document.createElement('div'); ring.id = 'tour-ring'; document.body.appendChild(ring); }
+        if (!card) { card = document.createElement('div'); card.id = 'tour-card'; document.body.appendChild(card); }
+        const last = i === TOUR.length - 1;
+        card.innerHTML = '<div class="tc-top"><span>Step ' + (i + 1) + ' of ' + TOUR.length + '</span><button type="button" data-t="exit" aria-label="Close tour">✕</button></div><b>' + st.ic + ' ' + esc(st.t) + '</b><p>' + esc(st.d) + '</p><div class="tc-st" id="tc-st"></div><div class="tc-b"><button type="button" class="sec" data-t="skip">' + (last ? 'Skip' : 'Skip →') + '</button><button type="button" data-t="next" id="tc-next">' + (last ? 'Finish 🎉' : 'Next →') + '</button></div>';
+        setTimeout(function () {
+          const el = tourEl(st); if (!el) return;
+          try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { el.scrollIntoView(); }
+        }, 250);
+        cancelAnimationFrame(tourRaf);
+        (function loop() {
+          const r = $('tour-ring'); if (!r || tourI !== i) return;
+          const el = tourEl(st);
+          if (el) { const b = el.getBoundingClientRect(); r.style.display = ''; r.style.left = (b.left - 6) + 'px'; r.style.top = (b.top - 6) + 'px'; r.style.width = (b.width + 12) + 'px'; r.style.height = (b.height + 12) + 'px'; }
+          else r.style.display = 'none';
+          tourRaf = requestAnimationFrame(loop);
+        })();
+        if (st.done) {
+          const chk = function () { const ok = st.done(), s2 = $('tc-st'), nx = $('tc-next'); if (!s2) return; s2.textContent = ok ? st.ok : ''; if (nx) nx.classList.toggle('pulse', !!ok); };
+          chk(); tourTimer = setInterval(chk, 600);
+        }
+      }
+      function tourEnd() {
+        clearInterval(tourTimer); cancelAnimationFrame(tourRaf);
+        const r = $('tour-ring'); if (r) r.remove();
+        let card = $('tour-card'); if (!card) { card = document.createElement('div'); card.id = 'tour-card'; document.body.appendChild(card); }
+        card.innerHTML = '<b>🌊 You are all set!</b><p>Enjoy the site. You can reopen the guide anytime from More → Site guide, or from the bell.</p><div class="tc-b"><button type="button" class="sec" data-t="off">Don’t show the guide again</button><button type="button" data-t="exit">Done 🎉</button></div>';
+        tourI = TOUR.length;
+      }
+      document.addEventListener('click', function (e) {
+        const b = e.target.closest && e.target.closest('#tour-card [data-t]'); if (!b) return;
+        const a = b.dataset.t;
+        if (a === 'next' || a === 'skip') tourStep(tourI + 1);
+        else if (a === 'exit') tourStop();
+        else if (a === 'off') { try { localStorage.setItem('tt_guide_off_' + email, '1'); } catch (x) {} tourStop(); }
+      });
+
       function guideInit() {
         if (!email || !nick) return;
         document.addEventListener('click', function (e) {
