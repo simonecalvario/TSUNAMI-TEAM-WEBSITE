@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261019-1323">
+<meta name="tt-build" content="20261019-1332">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -921,35 +921,34 @@
     .cd-r { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: .9rem; }
     .cd-r b { color: var(--yellow); }
     .cd-t { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 6px; font-weight: 700; }
-    .booster-btn { position: relative; display: inline-block; margin: 0 auto 20px; padding: 15px 34px; border: 1px solid rgba(39,184,255,.7); border-radius: 999px; background: linear-gradient(180deg, #0c4a73, #07263d); color: #fff; font: inherit; font-weight: 800; font-size: 1rem; letter-spacing: .05em; cursor: pointer; box-shadow: 0 6px 22px rgba(39,184,255,.25); transition: transform .2s, box-shadow .2s; -webkit-tap-highlight-color: transparent; }
-    .booster-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(39,184,255,.4); }
-    .booster-btn .bw { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; }
-    .booster-btn .bwl { position: absolute; left: 0; right: 0; bottom: auto; top: 0; height: 160%; transform: translateY(35%); transition: transform .75s cubic-bezier(.3,.7,.2,1); }
-    .booster-btn .bwl svg { position: absolute; left: 0; top: 0; width: 200%; height: 26px; animation: bwave 3.2s linear infinite; }
-    .booster-btn .bwl svg.bw2 { top: 5px; animation-duration: 5s; animation-direction: reverse; opacity: .55; }
-    .booster-btn .bwl::after { content: ''; position: absolute; left: 0; right: 0; top: 20px; bottom: 0; background: #27b8ff; }
-    .booster-btn .bwl svg path { fill: #27b8ff; }
-    .booster-btn .bl { position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; text-shadow: 0 1px 4px rgba(0,0,0,.45); transition: color .3s; }
-    .booster-btn .bl em { font-style: normal; display: inline-block; animation: bbob 2.4s ease-in-out infinite; }
-    .booster-btn .dot { display: none; position: absolute; top: -3px; right: 4px; width: 13px; height: 13px; border-radius: 50%; background: #ff4d4d; z-index: 3; }
+    .booster-btn { position: relative; display: block; width: min(300px, 84vw); height: 58px; margin: 0 auto 22px; padding: 0; border: 1px solid rgba(39,184,255,.7); border-radius: 999px; background: linear-gradient(180deg, #0a2f4d, #061c2f); overflow: hidden; cursor: pointer; font: inherit; color: #fff; box-shadow: 0 6px 22px rgba(39,184,255,.22); -webkit-tap-highlight-color: transparent; }
+    .booster-btn .bk { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 13px, rgba(39,184,255,.07) 13px 14px); }
+    .booster-btn .bwk { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, #0c4a73, #1a8fd0 60%, #27b8ff); }
+    .booster-btn .bcr { position: absolute; top: -6px; bottom: -6px; right: -16px; width: 34px; overflow: hidden; }
+    .booster-btn .bcr svg { position: absolute; left: 0; top: 0; width: 100%; height: 200%; animation: bcrest 2.4s linear infinite; }
+    .booster-btn .bcr path { fill: #27b8ff; }
+    .booster-btn .bfm { position: absolute; top: 0; bottom: 0; right: 10px; width: 6px; border-radius: 6px; background: rgba(255,255,255,.65); filter: blur(1px); animation: bfoam 1.6s ease-in-out infinite; }
+    .booster-btn .bsf { position: absolute; top: 0; bottom: 0; left: 0; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 14px; white-space: nowrap; font-weight: 800; font-size: 1rem; letter-spacing: .05em; text-shadow: 0 1px 5px rgba(0,0,0,.55); will-change: transform; }
+    .booster-btn .bsf em { font-style: normal; display: inline-block; animation: bbob 1.8s ease-in-out infinite; }
+    .booster-btn .dot { display: none; position: absolute; top: 5px; right: 12px; width: 12px; height: 12px; border-radius: 50%; background: #ff4d4d; z-index: 3; }
     .booster-btn.new .dot { display: block; animation: bping 1.6s ease-out infinite; }
-    .booster-btn.surge { animation: bpunch .9s ease; }
-    .booster-btn.surge .bwl { transform: translateY(-26%); }
-    .booster-btn.surge .bwl svg path, .booster-btn.surge .bwl::after { fill: var(--yellow); background: var(--yellow); }
-    .booster-btn.surge .bl { color: #101010; text-shadow: none; }
-    .booster-btn .dr { position: absolute; left: 50%; top: 20%; width: 8px; height: 8px; border-radius: 50%; background: #27b8ff; opacity: 0; pointer-events: none; z-index: 1; }
-    .booster-btn.surge .dr { animation: bdrop .8s ease-out forwards; animation-delay: .3s; }
-    @keyframes bwave { to { transform: translateX(-50%); } }
-    @keyframes bbob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-3px) rotate(8deg); } }
-    @keyframes bping { 0% { box-shadow: 0 0 0 0 rgba(255,77,77,.7); } 100% { box-shadow: 0 0 0 10px rgba(255,77,77,0); } }
-    @keyframes bpunch { 0% { transform: scale(1); } 25% { transform: scale(.94, 1.06); } 55% { transform: scale(1.1, .94); } 100% { transform: scale(1); } }
-    @keyframes bdrop { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), -62px) scale(.3); } }
-    @media (prefers-reduced-motion: reduce) { .booster-btn *, .booster-btn { animation: none !important; } }
+    .booster-btn.riding .dot { display: none; }
+    @keyframes bcrest { to { transform: translateY(-50%); } }
+    @keyframes bfoam { 0%, 100% { opacity: .35; transform: scaleY(.7); } 50% { opacity: .9; transform: scaleY(1); } }
+    @keyframes bbob { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-3px) rotate(10deg); } }
+    @keyframes bping { 0% { box-shadow: 0 0 0 0 rgba(255,77,77,.7); } 100% { box-shadow: 0 0 0 9px rgba(255,77,77,0); } }
+    @media (prefers-reduced-motion: reduce) { .booster-btn * { animation: none !important; } }
     #boost-pop { position: fixed; inset: 0; z-index: 100002; display: flex; align-items: center; justify-content: center; padding: 18px; background: rgba(2,6,16,.9); }
     #boost-pop .bq { width: min(440px, 100%); padding: 28px 22px 22px; text-align: center; background: var(--dark); border: 1px solid var(--yellow); border-radius: 16px; max-height: 90vh; overflow-y: auto; }
     #boost-pop .bq-k { color: var(--yellow); font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; }
     #boost-pop .bq-t { margin: 16px 0 14px; font-size: 1.28rem; line-height: 1.45; font-style: italic; color: var(--white); }
     #boost-pop .bq-a { color: var(--yellow); font-weight: 700; }
+    #boost-pop .bq-b button.fv.on { border-color: #ff6b81; color: #ff6b81; }
+    #boost-pop .bq-more { display: block; width: 100%; margin-top: 12px; padding: 8px; background: none; border: 0; color: var(--grey); font: inherit; font-size: .85rem; cursor: pointer; text-decoration: underline; }
+    #boost-pop .bq-l { margin-top: 12px; text-align: left; max-height: 52vh; overflow-y: auto; }
+    #boost-pop .bq-i { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    #boost-pop .bq-i p { margin: 0 0 4px; font-style: italic; font-size: .95rem; line-height: 1.4; } #boost-pop .bq-i b { color: var(--yellow); font-size: .85rem; display: block; } #boost-pop .bq-i small { color: var(--grey); font-size: .75rem; }
+    #boost-pop .bq-i button { flex: none; background: none; border: 1px solid var(--line); border-radius: 6px; color: var(--grey); padding: 4px 8px; cursor: pointer; }
     #boost-pop .bq-s { margin-top: 3px; color: var(--grey); font-size: .82rem; }
     #boost-pop .bq-tag { display: inline-block; margin-top: 8px; font-size: .78rem; color: var(--grey); }
     #boost-pop .bq-b { display: flex; gap: 8px; margin-top: 20px; }
@@ -1066,7 +1065,7 @@
   <main>
     <section class="hero" id="home">
       <div class="container hero-content">
-        <button type="button" id="booster-btn" class="booster-btn"><span class="bw"><span class="bwl"><svg class="bw2" viewBox="0 0 200 20" preserveAspectRatio="none"><path d="M0 10 Q 12.5 0 25 10 T 50 10 T 75 10 T 100 10 T 125 10 T 150 10 T 175 10 T 200 10 V30 H0Z"/></svg><svg class="bw1" viewBox="0 0 200 20" preserveAspectRatio="none"><path d="M0 10 Q 12.5 0 25 10 T 50 10 T 75 10 T 100 10 T 125 10 T 150 10 T 175 10 T 200 10 V30 H0Z"/></svg></span></span><i class="dr" style="--dx:-60px"></i><i class="dr" style="--dx:-34px"></i><i class="dr" style="--dx:-12px"></i><i class="dr" style="--dx:14px"></i><i class="dr" style="--dx:38px"></i><i class="dr" style="--dx:62px"></i><span class="bl"><em>🌊</em>Daily Booster</span><b class="dot"></b></button>
+        <button type="button" id="booster-btn" class="booster-btn" aria-label="Daily Booster"><span class="bk"></span><span class="bwk"><span class="bcr"><svg viewBox="0 0 34 160" preserveAspectRatio="none"><path d="M0 0 H14 Q 24 10 14 20 T 14 40 Q 24 50 14 60 T 14 80 Q 24 90 14 100 T 14 120 Q 24 130 14 140 T 14 160 V160 H0 Z"/></svg></span></span><span class="bsf"><em>🏄</em>Daily Booster</span><b class="dot"></b></button>
         <img class="logo" src="finaltsunami%20team%20%20sticker.png" alt="TSUNAMI TEAM logo — be liquid.">
 
         <div class="eyebrow">Freedom · Friendship · Experiences</div>
@@ -3146,7 +3145,7 @@
           const ls = window.ttLock ? window.ttLock.state() : 'unsupported';
           const lrow = ls === 'on' ? '<a href="#" data-lock="1">🔒 Face ID lock: <b>ON</b> <small>(tap to turn off)</small></a>'
             : ls === 'off' ? '<a href="#" data-lock="1">🔓 <b>Turn on Face ID lock</b><br><small>Ask Face ID whenever the app is opened</small></a>' : '';
-          panel.innerHTML = (html || '<p>All caught up ✅ Nothing to do right now.</p>') + prow + lrow + '<a href="#" data-guide="1">📖 <b>Site guide</b><br><small>What’s where and what to do</small></a>';
+          panel.innerHTML = (html || '<p>All caught up ✅ Nothing to do right now.</p>') + prow + lrow + '<a href="#" data-favs="1">❤️ <b>Favorite quotes</b><br><small>Your saved Daily Booster quotes</small></a>' + '<a href="#" data-guide="1">📖 <b>Site guide</b><br><small>What’s where and what to do</small></a>';
           // tab badges
           badge('#tabbar [data-v=lagoon], .nav-links > a[href="#lagoon"]', chatNew, chatHot);
           const mt = todos.filter(t => t.href === '#meetings').length, pt = todos.filter(t => t.href === '#passport').length;
@@ -3288,7 +3287,7 @@
   function hash(t) { var h = 5381; for (var i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
   window.TT_BOOST = { hashes: Q.map(function (q) { return hash(q[0]); }) };
   var BASE = 'https://dykofnyhwusghfowfxbi.supabase.co', BEMAIL = null;
-  fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : {}; }).then(function (j) { if (j && j.email) BEMAIL = j.email.toLowerCase(); }).catch(function () {});
+  fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : {}; }).then(function (j) { if (j && j.email) { BEMAIL = j.email.toLowerCase(); favInit(); } }).catch(function () {});
   function record(q) {
     if (!BEMAIL) return;
     var JW = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5a29mbnlod3VzZ2hmb3dmeGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjUwOTQsImV4cCI6MjEwNzY0MTA5NH0.wLS75UXlm2evHg1mlvjvrlJASDP9KRaE_b8fhnJ8htI';
@@ -3298,20 +3297,85 @@
   var key = 'tt_boost_' + dayNum(), seen = false;
   try { seen = localStorage.getItem(key) === '1'; } catch (e) {}
   if (!seen) btn.classList.add('new');
-  function show() {
-    var q = Q[(dayNum() * step) % Q.length];
+  /* ---- favorites ---- */
+  var JW2 = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5a29mbnlod3VzZ2hmb3dmeGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjUwOTQsImV4cCI6MjEwNzY0MTA5NH0.wLS75UXlm2evHg1mlvjvrlJASDP9KRaE_b8fhnJ8htI', favs = [], FH = { apikey: JW2, Authorization: 'Bearer ' + JW2, 'Content-Type': 'application/json' };
+  var byHash = {}; Q.forEach(function (q) { byHash[hash(q[0])] = q; });
+  function favLocalKey() { return 'tt_favs_' + (BEMAIL || ''); }
+  function favSave() { try { localStorage.setItem(favLocalKey(), JSON.stringify(favs)); } catch (e) {} }
+  function favInit() {
+    try { favs = JSON.parse(localStorage.getItem(favLocalKey())) || []; } catch (e) { favs = []; }
+    fetch(BASE + '/rest/v1/booster_favs?select=q&email=eq.' + encodeURIComponent(BEMAIL), { headers: FH })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (rows) {
+        if (!rows) return;
+        var remote = rows.map(function (x) { return x.q; }), changed = false;
+        remote.forEach(function (h) { if (favs.indexOf(h) < 0) { favs.push(h); changed = true; } });
+        favs.forEach(function (h) { if (remote.indexOf(h) < 0) favPush(h); });
+        if (changed) favSave();
+      }).catch(function () {});
+  }
+  function favPush(h) { fetch(BASE + '/rest/v1/booster_favs?on_conflict=email,q', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=ignore-duplicates,return=minimal' }, FH), body: JSON.stringify({ email: BEMAIL, q: h }) }).catch(function () {}); }
+  function favDel(h) { fetch(BASE + '/rest/v1/booster_favs?email=eq.' + encodeURIComponent(BEMAIL) + '&q=eq.' + encodeURIComponent(h), { method: 'DELETE', headers: FH }).catch(function () {}); }
+  function favToggle(h) {
+    var i = favs.indexOf(h);
+    if (i < 0) { favs.push(h); favPush(h); } else { favs.splice(i, 1); favDel(h); }
+    favSave();
+  }
+  function quoteHtml(q) { return '<p class="bq-t">“' + esc(q[0]) + '”</p><div class="bq-a">— ' + esc(q[1]) + '</div><div class="bq-s">' + esc(q[2]) + '</div>'; }
+  function today() { return Q[(dayNum() * step) % Q.length]; }
+  function render(box, view, onclose) {
+    var q = today(), h = hash(q[0]), isFav = favs.indexOf(h) > -1;
+    if (view === 'favs') {
+      var items = favs.map(function (x) { return byHash[x] ? { h: x, q: byHash[x] } : null; }).filter(Boolean);
+      box.innerHTML = '<div class="bq"><div class="bq-k">❤️ My favorite quotes</div>' + (items.length ? '<div class="bq-l">' + items.map(function (it) {
+        return '<div class="bq-i"><div><p>“' + esc(it.q[0]) + '”</p><b>— ' + esc(it.q[1]) + '</b><small>' + esc(it.q[2]) + '</small></div><button type="button" data-rm="' + esc(it.h) + '" aria-label="Remove">✕</button></div>';
+      }).join('') + '</div>' : '<p class="bq-t" style="font-size:1rem">No favorites yet. Tap the ♡ under a quote to save it here.</p>') + '<div class="bq-b"><button type="button" class="sec" data-a="back">← Back</button><button type="button" data-a="ok">Close</button></div></div>';
+      return;
+    }
+    box.innerHTML = '<div class="bq"><div class="bq-k">🌅 Your Daily Booster</div>' + quoteHtml(q) + '<span class="bq-tag">' + TAGS[q[3]] + '</span><div class="bq-b"><button type="button" class="sec fv' + (isFav ? ' on' : '') + '" data-a="fav">' + (isFav ? '❤️ Saved' : '♡ Save') + '</button><button type="button" data-a="ok">Thanks! 🌊</button></div><button type="button" class="bq-more" data-a="favs">❤️ My favorites (' + favs.filter(function (x) { return byHash[x]; }).length + ')</button></div>';
+  }
+  function show(onclose, view) {
     var box = document.getElementById('boost-pop');
     if (!box) { box = document.createElement('div'); box.id = 'boost-pop'; document.body.appendChild(box); }
-    box.innerHTML = '<div class="bq"><div class="bq-k">🌅 Your Daily Booster</div><p class="bq-t">“' + esc(q[0]) + '”</p><div class="bq-a">— ' + esc(q[1]) + '</div><div class="bq-s">' + esc(q[2]) + '</div><span class="bq-tag">' + TAGS[q[3]] + '</span><div class="bq-b"><button type="button" data-a="ok">Thanks! 🌊</button></div></div>';
-    box.onclick = function (e) { if ((e.target.getAttribute && e.target.getAttribute('data-a')) || e.target === box) box.remove(); };
+    render(box, view || 'today', onclose);
+    box.onclick = function (e) {
+      var t = e.target, a = t.getAttribute && t.getAttribute('data-a'), rm = t.getAttribute && t.getAttribute('data-rm');
+      if (rm) { favToggle(rm); render(box, 'favs', onclose); }
+      else if (a === 'fav') { favToggle(hash(today()[0])); render(box, 'today', onclose); }
+      else if (a === 'favs') render(box, 'favs', onclose);
+      else if (a === 'back') render(box, 'today', onclose);
+      else if (a === 'ok' || t === box) { box.remove(); if (onclose) onclose(); }
+    };
   }
-  var busy = false;
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-favs]'); if (!t) return;
+    e.preventDefault(); var bp = document.getElementById('bell-panel'); if (bp) bp.classList.remove('open');
+    show(null, 'favs');
+  });
+  var busy = false, P = 0;
+  var wk = btn.querySelector('.bwk'), sf = btn.querySelector('.bsf');
+  function place(p) {
+    var W = btn.clientWidth, L = sf.offsetWidth, x = p * (W - L - 2);
+    sf.style.transform = 'translateX(' + x + 'px)';
+    wk.style.width = (x + L - 4) + 'px';
+    P = p;
+  }
+  function anim(from, to, ms, ease, done) {
+    var t0 = null;
+    function f(t) { if (t0 === null) t0 = t; var k = Math.min(1, (t - t0) / ms); place(from + (to - from) * ease(k)); if (k < 1) requestAnimationFrame(f); else if (done) done(); }
+    requestAnimationFrame(f);
+  }
+  place(0); window.addEventListener('resize', function () { place(P); });
+  function back() { anim(1, 0, 650, function (k) { return 1 - Math.pow(1 - k, 3); }, function () { busy = false; btn.classList.remove('riding'); }); }
   btn.addEventListener('click', function () {
     if (busy) return; busy = true;
-    btn.classList.add('surge'); btn.classList.remove('new');
-    setTimeout(function () { show(); record(Q[(dayNum() * step) % Q.length]); }, 800);
-    setTimeout(function () { btn.classList.remove('surge'); busy = false; }, 1500);
+    btn.classList.remove('new'); btn.classList.add('riding');
     try { localStorage.setItem(key, '1'); } catch (e) {}
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { place(1); show(back); record(Q[(dayNum() * step) % Q.length]); return; }
+    anim(0, 1, 1100, function (k) { return k * k * (3 - 2 * k) * 0.55 + k * k * k * 0.45; }, function () {
+      show(back); record(Q[(dayNum() * step) % Q.length]);
+    });
   });
 })();
 </script>
