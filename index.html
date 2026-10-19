@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261019-1245">
+<meta name="tt-build" content="20261019-1323">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -921,10 +921,30 @@
     .cd-r { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: .9rem; }
     .cd-r b { color: var(--yellow); }
     .cd-t { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 6px; font-weight: 700; }
-    .booster-btn { position: relative; display: inline-block; margin: 0 auto 18px; padding: 10px 22px; border: 1px solid var(--yellow); border-radius: 999px; background: rgba(245,210,27,.1); color: var(--yellow); font: inherit; font-weight: 800; font-size: .95rem; letter-spacing: .03em; cursor: pointer; }
-    .booster-btn:hover { background: var(--yellow); color: #101010; }
-    .booster-btn i { display: none; position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; border-radius: 50%; background: #ff4d4d; }
-    .booster-btn.new i { display: block; }
+    .booster-btn { position: relative; display: inline-block; margin: 0 auto 20px; padding: 15px 34px; border: 1px solid rgba(39,184,255,.7); border-radius: 999px; background: linear-gradient(180deg, #0c4a73, #07263d); color: #fff; font: inherit; font-weight: 800; font-size: 1rem; letter-spacing: .05em; cursor: pointer; box-shadow: 0 6px 22px rgba(39,184,255,.25); transition: transform .2s, box-shadow .2s; -webkit-tap-highlight-color: transparent; }
+    .booster-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(39,184,255,.4); }
+    .booster-btn .bw { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; }
+    .booster-btn .bwl { position: absolute; left: 0; right: 0; bottom: auto; top: 0; height: 160%; transform: translateY(35%); transition: transform .75s cubic-bezier(.3,.7,.2,1); }
+    .booster-btn .bwl svg { position: absolute; left: 0; top: 0; width: 200%; height: 26px; animation: bwave 3.2s linear infinite; }
+    .booster-btn .bwl svg.bw2 { top: 5px; animation-duration: 5s; animation-direction: reverse; opacity: .55; }
+    .booster-btn .bwl::after { content: ''; position: absolute; left: 0; right: 0; top: 20px; bottom: 0; background: #27b8ff; }
+    .booster-btn .bwl svg path { fill: #27b8ff; }
+    .booster-btn .bl { position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; text-shadow: 0 1px 4px rgba(0,0,0,.45); transition: color .3s; }
+    .booster-btn .bl em { font-style: normal; display: inline-block; animation: bbob 2.4s ease-in-out infinite; }
+    .booster-btn .dot { display: none; position: absolute; top: -3px; right: 4px; width: 13px; height: 13px; border-radius: 50%; background: #ff4d4d; z-index: 3; }
+    .booster-btn.new .dot { display: block; animation: bping 1.6s ease-out infinite; }
+    .booster-btn.surge { animation: bpunch .9s ease; }
+    .booster-btn.surge .bwl { transform: translateY(-26%); }
+    .booster-btn.surge .bwl svg path, .booster-btn.surge .bwl::after { fill: var(--yellow); background: var(--yellow); }
+    .booster-btn.surge .bl { color: #101010; text-shadow: none; }
+    .booster-btn .dr { position: absolute; left: 50%; top: 20%; width: 8px; height: 8px; border-radius: 50%; background: #27b8ff; opacity: 0; pointer-events: none; z-index: 1; }
+    .booster-btn.surge .dr { animation: bdrop .8s ease-out forwards; animation-delay: .3s; }
+    @keyframes bwave { to { transform: translateX(-50%); } }
+    @keyframes bbob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-3px) rotate(8deg); } }
+    @keyframes bping { 0% { box-shadow: 0 0 0 0 rgba(255,77,77,.7); } 100% { box-shadow: 0 0 0 10px rgba(255,77,77,0); } }
+    @keyframes bpunch { 0% { transform: scale(1); } 25% { transform: scale(.94, 1.06); } 55% { transform: scale(1.1, .94); } 100% { transform: scale(1); } }
+    @keyframes bdrop { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), -62px) scale(.3); } }
+    @media (prefers-reduced-motion: reduce) { .booster-btn *, .booster-btn { animation: none !important; } }
     #boost-pop { position: fixed; inset: 0; z-index: 100002; display: flex; align-items: center; justify-content: center; padding: 18px; background: rgba(2,6,16,.9); }
     #boost-pop .bq { width: min(440px, 100%); padding: 28px 22px 22px; text-align: center; background: var(--dark); border: 1px solid var(--yellow); border-radius: 16px; max-height: 90vh; overflow-y: auto; }
     #boost-pop .bq-k { color: var(--yellow); font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; }
@@ -1046,7 +1066,7 @@
   <main>
     <section class="hero" id="home">
       <div class="container hero-content">
-        <button type="button" id="booster-btn" class="booster-btn">🌅 Daily Booster<i></i></button>
+        <button type="button" id="booster-btn" class="booster-btn"><span class="bw"><span class="bwl"><svg class="bw2" viewBox="0 0 200 20" preserveAspectRatio="none"><path d="M0 10 Q 12.5 0 25 10 T 50 10 T 75 10 T 100 10 T 125 10 T 150 10 T 175 10 T 200 10 V30 H0Z"/></svg><svg class="bw1" viewBox="0 0 200 20" preserveAspectRatio="none"><path d="M0 10 Q 12.5 0 25 10 T 50 10 T 75 10 T 100 10 T 125 10 T 150 10 T 175 10 T 200 10 V30 H0Z"/></svg></span></span><i class="dr" style="--dx:-60px"></i><i class="dr" style="--dx:-34px"></i><i class="dr" style="--dx:-12px"></i><i class="dr" style="--dx:14px"></i><i class="dr" style="--dx:38px"></i><i class="dr" style="--dx:62px"></i><span class="bl"><em>🌊</em>Daily Booster</span><b class="dot"></b></button>
         <img class="logo" src="finaltsunami%20team%20%20sticker.png" alt="TSUNAMI TEAM logo — be liquid.">
 
         <div class="eyebrow">Freedom · Friendship · Experiences</div>
@@ -3285,8 +3305,12 @@
     box.innerHTML = '<div class="bq"><div class="bq-k">🌅 Your Daily Booster</div><p class="bq-t">“' + esc(q[0]) + '”</p><div class="bq-a">— ' + esc(q[1]) + '</div><div class="bq-s">' + esc(q[2]) + '</div><span class="bq-tag">' + TAGS[q[3]] + '</span><div class="bq-b"><button type="button" data-a="ok">Thanks! 🌊</button></div></div>';
     box.onclick = function (e) { if ((e.target.getAttribute && e.target.getAttribute('data-a')) || e.target === box) box.remove(); };
   }
+  var busy = false;
   btn.addEventListener('click', function () {
-    show(); btn.classList.remove('new'); record(Q[(dayNum() * step) % Q.length]);
+    if (busy) return; busy = true;
+    btn.classList.add('surge'); btn.classList.remove('new');
+    setTimeout(function () { show(); record(Q[(dayNum() * step) % Q.length]); }, 800);
+    setTimeout(function () { btn.classList.remove('surge'); busy = false; }, 1500);
     try { localStorage.setItem(key, '1'); } catch (e) {}
   });
 })();
