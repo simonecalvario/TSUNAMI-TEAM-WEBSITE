@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261019-1410xyz">
+<meta name="tt-build" content="20261019-1410xyzw">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -2554,20 +2554,27 @@
         { ic: '🛂', t: 'Your stamps', d: 'Tap the Tsunami Meetings you lived: each one stamps your passport.', go: 'passport', tab: 'Stamps', sel: '#stamps', done: () => !!document.querySelector('#stamps .stamp.on'), ok: '✓ You have at least one stamp' },
         { ic: '📍', t: 'Where: vote the city', d: 'Vote the city for the next Tsunami Meeting. Votes are public, with call signs.', go: 'meetings', tab: 'Vote city', sel: '#meetings .vote-box' },
         { ic: '📅', t: 'When: your free dates', d: 'Mark the days you are free, so we can find the best dates for everyone.', go: 'meetings', tab: 'Dates', sel: '#meetings .when-box' },
+        { ic: '🔔', t: 'Notifications & Face ID', d: 'Tap the bell: turn on push notifications to get alerts when someone mentions you, and the Face ID lock to protect the app.', go: null, sel: '#bell', panel: true, done: () => (window.ttPush && window.ttPush.state() === 'on') || (window.ttLock && window.ttLock.state() === 'on'), ok: '✓ Alerts or Face ID are on' },
         { ic: '💬', t: 'Say hi in the Lagoon', d: 'Write a greeting to the crew. Tip: type @ and a call sign to tag someone!', go: 'lagoon', sel: '#chat-form' }
       ];
-      let tourI = -1, tourTimer = null, tourRaf = 0;
-      function tourEl(st) { return Array.from(document.querySelectorAll(st.sel)).find(e => e.offsetParent !== null) || document.querySelector(st.sel) || document.getElementById(st.go); }
+      let tourOpen = false, tourI = -1, tourTimer = null, tourRaf = 0;
+      function tourEl(st) { if (st.panel && tourOpen) return $('bell-panel'); return Array.from(document.querySelectorAll(st.sel)).find(e => e.offsetParent !== null) || document.querySelector(st.sel) || document.getElementById(st.go); }
+      function tourPanel(open) {
+        const bp = $('bell-panel'), bb = $('bell'); if (!bp || !bb) return;
+        if (bp.classList.contains('open') !== open) bb.click();
+      }
       function tourStop() {
+        tourPanel(false);
         tourI = -1; clearInterval(tourTimer); cancelAnimationFrame(tourRaf);
         ['tour-ring', 'tour-card'].forEach(id => { const e = $(id); if (e) e.remove(); });
       }
       function tourStart() { tourStop(); tourStep(0); }
       function tourStep(i) {
-        tourI = i; clearInterval(tourTimer);
+        tourI = i; tourOpen = false; clearInterval(tourTimer);
         if (i >= TOUR.length) return tourEnd();
         const st = TOUR[i];
-        if (location.hash !== '#' + st.go) location.hash = '#' + st.go;
+        tourPanel(false);
+        if (st.go && location.hash !== '#' + st.go) location.hash = '#' + st.go;
         if (st.tab) { const tb = Array.from(document.querySelectorAll('#' + st.go + ' .subtabs button')).find(b => b.textContent.indexOf(st.tab) > -1); if (tb) tb.click(); }
         let ring = $('tour-ring'), card = $('tour-card');
         if (!ring) { ring = document.createElement('div'); ring.id = 'tour-ring'; document.body.appendChild(ring); }
@@ -2604,6 +2611,13 @@
         if (a === 'next' || a === 'skip') tourStep(tourI + 1);
         else if (a === 'doit') {
           const st = TOUR[tourI]; if (!st) return;
+          if (st.panel) {
+            b.dataset.t = 'next'; b.textContent = b.dataset.last === '1' ? 'Finish 🎉' : 'Next →';
+            tourOpen = true; setTimeout(function () { tourPanel(true); }, 60);
+            const idx = tourI, pn = $('bell-panel');
+            if (pn) pn.addEventListener('click', function () { setTimeout(function () { if (tourI !== idx) return; const s2 = $('tc-st'), nx = $('tc-next'); if (s2 && !s2.textContent) s2.textContent = '👍 Great! Tap Next when you are done'; if (nx) nx.classList.add('pulse'); }, 600); }, { once: true });
+            return;
+          }
           const el = tourEl(st), card = $('tour-card');
           if (card) card.classList.add('min', 'top');
           b.dataset.t = 'next'; b.textContent = b.dataset.last === '1' ? 'Finish 🎉' : 'Next →';
