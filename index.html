@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261019-1410">
+<meta name="tt-build" content="20261019-1410x">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -976,6 +976,8 @@
     #tour-card .tc-top button { background: none; border: 0; color: var(--grey); font-size: 1.1rem; cursor: pointer; padding: 0 4px; }
     #tour-card b { display: block; margin: 6px 0 2px; color: var(--yellow); font-size: 1.05rem; }
     #tour-card p { margin: 0 0 8px; color: var(--white); font-size: .9rem; line-height: 1.4; }
+    #tour-card.min p { display: none; }
+    #tour-card.min { padding: 10px 14px; }
     #tour-card .tc-st { min-height: 1.2em; color: #5be37d; font-size: .85rem; font-weight: 700; }
     #tour-card .tc-b { display: flex; gap: 8px; margin-top: 6px; }
     #tour-card .tc-b button { flex: 1; padding: 11px 8px; border-radius: 8px; font: inherit; font-weight: 700; cursor: pointer; border: 1px solid var(--yellow); background: var(--yellow); color: #101010; }
@@ -2569,7 +2571,7 @@
         if (!ring) { ring = document.createElement('div'); ring.id = 'tour-ring'; document.body.appendChild(ring); }
         if (!card) { card = document.createElement('div'); card.id = 'tour-card'; document.body.appendChild(card); }
         const last = i === TOUR.length - 1;
-        card.innerHTML = '<div class="tc-top"><span>Step ' + (i + 1) + ' of ' + TOUR.length + '</span><button type="button" data-t="exit" aria-label="Close tour">✕</button></div><b>' + st.ic + ' ' + esc(st.t) + '</b><p>' + esc(st.d) + '</p><div class="tc-st" id="tc-st"></div><div class="tc-b"><button type="button" class="sec" data-t="skip">' + (last ? 'Skip' : 'Skip →') + '</button><button type="button" data-t="next" id="tc-next">' + (last ? 'Finish 🎉' : 'Next →') + '</button></div>';
+        card.innerHTML = '<div class="tc-top"><span>Step ' + (i + 1) + ' of ' + TOUR.length + '</span><button type="button" data-t="exit" aria-label="Close tour">✕</button></div><b>' + st.ic + ' ' + esc(st.t) + '</b><p>' + esc(st.d) + '</p><div class="tc-st" id="tc-st"></div><div class="tc-b"><button type="button" class="sec" data-t="skip">Skip it' + (last ? '' : ' →') + '</button><button type="button" data-t="doit" id="tc-next" data-last="' + (last ? 1 : 0) + '">Do it 👉</button></div>';
         setTimeout(function () {
           const el = tourEl(st); if (!el) return;
           try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { el.scrollIntoView(); }
@@ -2598,6 +2600,18 @@
         const b = e.target.closest && e.target.closest('#tour-card [data-t]'); if (!b) return;
         const a = b.dataset.t;
         if (a === 'next' || a === 'skip') tourStep(tourI + 1);
+        else if (a === 'doit') {
+          const st = TOUR[tourI]; if (!st) return;
+          const el = tourEl(st), card = $('tour-card');
+          if (card) card.classList.add('min');
+          b.dataset.t = 'next'; b.textContent = b.dataset.last === '1' ? 'Finish 🎉' : 'Next →';
+          if (el) {
+            el.style.scrollMarginTop = '90px';
+            try { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (x) { el.scrollIntoView(); }
+            const f = el.querySelector('input:not([type=hidden]),select,textarea,button');
+            if (f) setTimeout(function () { try { f.focus({ preventScroll: true }); } catch (x) {} }, 450);
+          }
+        }
         else if (a === 'exit') tourStop();
         else if (a === 'off') { try { localStorage.setItem('tt_guide_off_' + email, '1'); } catch (x) {} tourStop(); }
       });
