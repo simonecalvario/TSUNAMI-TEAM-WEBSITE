@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261019-1206">
+<meta name="tt-build" content="20261019-1213">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -932,6 +932,15 @@
     #boost-pop .bq-tag { display: inline-block; margin-top: 8px; font-size: .78rem; color: var(--grey); }
     #boost-pop .bq-b { display: flex; gap: 8px; margin-top: 20px; }
     #boost-pop .bq-b button { flex: 1; padding: 12px; border-radius: 8px; font: inherit; font-weight: 700; cursor: pointer; border: 1px solid var(--yellow); background: var(--yellow); color: #101010; }
+    #guide-pop { position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center; padding: 14px; background: rgba(2,6,16,.9); }
+    #guide-pop .gd { width: min(480px, 100%); max-height: 92vh; display: flex; flex-direction: column; background: var(--dark); border: 1px solid var(--yellow); border-radius: 16px; overflow: hidden; }
+    #guide-pop .gd-h { padding: 18px 20px 10px; text-align: center; } #guide-pop .gd-h b { display: block; color: var(--yellow); font-size: 1.25rem; } #guide-pop .gd-h small { color: var(--grey); }
+    #guide-pop .gd-b { padding: 4px 20px 10px; overflow-y: auto; font-size: .9rem; line-height: 1.4; }
+    #guide-pop h4 { margin: 14px 0 6px; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--orange); }
+    #guide-pop .gd-r { display: flex; gap: 10px; padding: 5px 0; color: var(--grey); } #guide-pop .gd-r i { font-style: normal; width: 1.5em; flex: none; text-align: center; } #guide-pop .gd-r b { color: var(--white); }
+    #guide-pop .gd-f { display: flex; gap: 8px; padding: 12px 20px 16px; border-top: 1px solid var(--line); }
+    #guide-pop .gd-f button { flex: 1; padding: 12px 8px; border-radius: 8px; font: inherit; font-weight: 700; cursor: pointer; border: 1px solid var(--yellow); background: var(--yellow); color: #101010; }
+    #guide-pop .gd-f button.sec { background: none; color: var(--white); border-color: var(--line); font-weight: 400; }
     .act-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0; }
     .act-f { display: flex; flex-wrap: wrap; gap: 6px; }
     .act-f button, .act-bar select { background: rgba(255,255,255,.05); border: 1px solid var(--line); color: var(--white); border-radius: 999px; padding: 7px 12px; font: inherit; font-size: .85rem; }
@@ -1535,6 +1544,7 @@
     <button type="button" data-v="blog"><i>📖</i>Blog</button>
     <button type="button" data-v="statute"><i>📜</i>Our Statute</button>
     <button type="button" data-v="activity"><i>📋</i>Activity Log</button>
+    <a href="#" data-guide="1"><i>📖</i>Site guide</a>
     <button type="button" data-v="join"><i>✉️</i>Join Us</button>
     <hr>
     <a href="/cdn-cgi/access/logout"><i>🚪</i>Logout</a>
@@ -2453,6 +2463,59 @@
         });
       }
 
+
+      /* ---------------- SITE GUIDE ---------------- */
+      const GUIDE = [
+        ['Your first steps', [
+          ['🎂', 'Save your birthday', 'Passport → Birthdays. Your crew will celebrate with you.'],
+          ['🗳', 'Vote the next city', 'Meetings → Vote city. Votes are public, with call signs.'],
+          ['📅', 'Mark your free dates', 'Meetings → Dates. Find the days that work for everyone.'],
+          ['🛂', 'Collect your stamps', 'Passport → Stamps. Tap the meetings you lived.'],
+          ['💬', 'Say hi in the Lagoon', 'Use @callsign to tag someone, and reply to messages.']
+        ]],
+        ['What’s where', [
+          ['🌊', 'Home · Philosophy · Experiences', 'Who we are and what we live together.'],
+          ['👥', 'Founders · Our Statute', 'The 13 founders and our founding words.'],
+          ['📍', 'Meetings', 'Map of our meetings, city vote and dates. Tap a pin for its gallery.'],
+          ['🎽', 'Memorabilia', 'Pieces and merch of the team: add yours too.'],
+          ['📖', 'Blog', 'Post stories, photos and memories; comment and react.'],
+          ['💬', 'Lagoon', 'The team chat.'],
+          ['🛂', 'Passport', 'Stamps, badges and XP levels, the crew ranking (tap a name to see badges) and birthdays.'],
+          ['📋', 'Activity Log', 'Everything that happens, in order: transparency for all.'],
+          ['🌅', 'Daily Booster', 'The home button: one quote a day. Read it daily to earn badges!']
+        ]],
+        ['Good to know', [
+          ['🔔', 'The bell', 'Shows what to do and who mentioned you. Turn on push alerts there.'],
+          ['🏅', 'Badges', 'Earn XP with everything you do. Some badges are secret…'],
+          ['📲', 'Use it like an app', 'Add the site to your Home Screen; Face ID lock is in the bell.']
+        ]]
+      ];
+      function guideShow() {
+        if ($('guide-pop')) return;
+        const KEY = 'tt_guide_off_' + email;
+        const box = document.createElement('div'); box.id = 'guide-pop';
+        box.innerHTML = '<div class="gd"><div class="gd-h"><b>Welcome to Tsunami Team 🌊</b><small>Quick guide to the site</small></div><div class="gd-b">' +
+          GUIDE.map(g => '<h4>' + g[0] + '</h4>' + g[1].map(r => '<div class="gd-r"><i>' + r[0] + '</i><div><b>' + esc(r[1]) + '</b> — ' + esc(r[2]) + '</div></div>').join('')).join('') +
+          '</div><div class="gd-f"><button type="button" class="sec" data-a="off">Don’t show again</button><button type="button" data-a="ok">Got it!</button></div></div>';
+        box.addEventListener('click', function (e) {
+          const a = e.target.getAttribute && e.target.getAttribute('data-a');
+          if (a === 'off') { try { localStorage.setItem(KEY, '1'); } catch (x) {} box.remove(); }
+          else if (a === 'ok' || e.target === box) box.remove();
+        });
+        document.body.appendChild(box);
+      }
+      function guideInit() {
+        if (!email || !nick) return;
+        document.addEventListener('click', function (e) {
+          const t = e.target.closest && e.target.closest('[data-guide]'); if (!t) return;
+          e.preventDefault(); const sh = $('m-sheet'); if (sh) sh.classList.remove('open');
+          const bp = $('bell-panel'); if (bp) bp.classList.remove('open');
+          guideShow();
+        });
+        let off = false; try { off = localStorage.getItem('tt_guide_off_' + email) === '1'; } catch (e) {}
+        if (!off) setTimeout(guideShow, 900);
+      }
+
       async function init() {
         try {
           const r = await fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' });
@@ -2461,7 +2524,7 @@
         } catch (e) {}
         nicks = (await get('nicknames?select=email,nickname')) || [];
         const m = nicks.find(x => x.email === email); nick = m ? m.nickname : null;
-        chatInit(); passInit(); bdayInit(); bellInit(); actInit();
+        chatInit(); passInit(); bdayInit(); bellInit(); actInit(); guideInit();
       }
 
       /* ---------------- CHAT ---------------- */
@@ -3065,7 +3128,7 @@
           const ls = window.ttLock ? window.ttLock.state() : 'unsupported';
           const lrow = ls === 'on' ? '<a href="#" data-lock="1">🔒 Face ID lock: <b>ON</b> <small>(tap to turn off)</small></a>'
             : ls === 'off' ? '<a href="#" data-lock="1">🔓 <b>Turn on Face ID lock</b><br><small>Ask Face ID whenever the app is opened</small></a>' : '';
-          panel.innerHTML = (html || '<p>All caught up ✅ Nothing to do right now.</p>') + prow + lrow;
+          panel.innerHTML = (html || '<p>All caught up ✅ Nothing to do right now.</p>') + prow + lrow + '<a href="#" data-guide="1">📖 <b>Site guide</b><br><small>What’s where and what to do</small></a>';
           // tab badges
           badge('#tabbar [data-v=lagoon], .nav-links > a[href="#lagoon"]', chatNew, chatHot);
           const mt = todos.filter(t => t.href === '#meetings').length, pt = todos.filter(t => t.href === '#passport').length;
