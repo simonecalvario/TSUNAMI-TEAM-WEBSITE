@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261019-1213">
+<meta name="tt-build" content="20261019-1228">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -341,7 +341,9 @@
       color: var(--grey);
     }
 
-    .experiences {
+    .experiences-block { margin-top: 70px; padding-top: 50px; border-top: 1px solid var(--line); }
+    .experiences-block .sub-h { margin-top: 6px; }
+    .experiences-unused {
       background:
         linear-gradient(
           135deg,
@@ -1024,7 +1026,6 @@
 
         <div class="nav-links">
           <a href="#philosophy">Philosophy</a>
-          <a href="#experiences">Experiences</a>
           <a href="#founders">Founders</a>
           <a href="#meetings">Meetings</a>
           <a href="#memorabilia">Memorabilia</a>
@@ -1113,14 +1114,11 @@
             </p>
           </article>
         </div>
-      </div>
-    </section>
 
-    <section class="experiences" id="experiences">
-      <div class="container">
+        <div class="experiences-block">
         <div class="section-label">One spirit, many adventures</div>
 
-        <h2>Made of <span>experiences.</span></h2>
+        <h2 class="sub-h">Made of <span>experiences.</span></h2>
 
         <p class="intro">
           We are not defined by one place, one activity or one way
@@ -1161,6 +1159,7 @@
               The connection remains, ready to bring us together again.
             </p>
           </article>
+        </div>
         </div>
       </div>
     </section>
@@ -1538,13 +1537,12 @@
     <button type="button" data-v="more"><span>☰</span>More</button>
   </div>
   <div id="m-sheet">
-    <button type="button" data-v="philosophy"><i>🌊</i>Philosophy</button>
-    <button type="button" data-v="experiences"><i>🧭</i>Experiences</button>
     <button type="button" data-v="founders"><i>👥</i>Founders</button>
-    <button type="button" data-v="blog"><i>📖</i>Blog</button>
+    <button type="button" data-v="philosophy"><i>🌊</i>Philosophy</button>
     <button type="button" data-v="statute"><i>📜</i>Our Statute</button>
+    <button type="button" data-v="blog"><i>📖</i>Blog</button>
     <button type="button" data-v="activity"><i>📋</i>Activity Log</button>
-    <a href="#" data-guide="1"><i>📖</i>Site guide</a>
+    <a href="#" data-guide="1"><i>🧭</i>Site guide</a>
     <button type="button" data-v="join"><i>✉️</i>Join Us</button>
     <hr>
     <a href="/cdn-cgi/access/logout"><i>🚪</i>Logout</a>
@@ -2474,8 +2472,8 @@
           ['💬', 'Say hi in the Lagoon', 'Use @callsign to tag someone, and reply to messages.']
         ]],
         ['What’s where', [
-          ['🌊', 'Home · Philosophy · Experiences', 'Who we are and what we live together.'],
-          ['👥', 'Founders · Our Statute', 'The 13 founders and our founding words.'],
+          ['👥', 'Founders', 'The 13 founders of the team.'],
+          ['🌊', 'Philosophy · Statute', 'What we believe, the experiences we share and our founding words.'],
           ['📍', 'Meetings', 'Map of our meetings, city vote and dates. Tap a pin for its gallery.'],
           ['🎽', 'Memorabilia', 'Pieces and merch of the team: add yours too.'],
           ['📖', 'Blog', 'Post stories, photos and memories; comment and react.'],
