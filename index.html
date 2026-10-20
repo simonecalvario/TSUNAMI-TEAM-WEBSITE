@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261019-1410xyzwvu">
+<meta name="tt-build" content="20261019-1410xyzwvut">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -1607,9 +1607,9 @@
   <script>
     (function () {
       const cities = [
-        { name: 'Barcelona', coords: [41.3851, 2.1734], key: 'barcelona', url: '/barcelona.html', icon: 'assets/images/pins/barcelona.png' },
-        { name: 'Doha', coords: [25.2854, 51.5310], key: 'doha', url: '/doha.html', icon: 'assets/images/pins/doha.png' },
-        { name: 'Munich', coords: [48.1351, 11.5820], key: 'munich', url: '/munich.html', icon: 'assets/images/pins/munich.png' }
+        { name: 'Barcelona', coords: [41.3851, 2.1734], key: 'barcelona', url: '/barcelona.html', icon: 'assets/images/pins/barcelona.png', ar: 1088 / 944 },
+        { name: 'Doha', coords: [25.2854, 51.5310], key: 'doha', url: '/doha.html', icon: 'assets/images/pins/doha.png', ar: 471 / 406 },
+        { name: 'Munich', coords: [48.1351, 11.5820], key: 'munich', url: '/munich.html', icon: 'assets/images/pins/munich.png', ar: 911 / 765 }
       ];
 
       const initialZoom = 3;
@@ -1635,23 +1635,23 @@
 
       const pinCounts = {};
       const markers = {};
-      function createIcon(iconUrl, size, n) {
-        const h = Math.round(size * 1.25);
+      function createIcon(iconUrl, size, n, ar) {
+        const h = Math.round(size / (ar || 1.1547));
         return L.divIcon({
           className: 'tt-pin',
-          html: '<img src="' + iconUrl + '" alt="" style="width:100%;height:100%;display:block">' + (n > 0 ? '<span class="pin-n">' + n + '</span>' : ''),
+          html: '<img src="' + iconUrl + '" alt="" style="width:100%;height:100%;display:block;object-fit:contain">' + (n > 0 ? '<span class="pin-n">' + n + '</span>' : ''),
           iconSize: [size, h],
-          iconAnchor: [Math.round(size / 2), Math.round(size * 1.15)],
-          popupAnchor: [0, -Math.round(size * 1.05)]
+          iconAnchor: [Math.round(size / 2), Math.round(h * 0.92)],
+          popupAnchor: [0, -Math.round(h * 0.84)]
         });
       }
       function refreshPins() {
         const sz = sizeForZoom(map.getZoom());
-        cities.forEach(c => { if (markers[c.key]) markers[c.key].setIcon(createIcon(c.icon, sz, pinCounts[c.key] || 0)); });
+        cities.forEach(c => { if (markers[c.key]) markers[c.key].setIcon(createIcon(c.icon, sz, pinCounts[c.key] || 0, c.ar)); });
       }
 
       cities.forEach(city => {
-        const marker = L.marker(city.coords, { icon: createIcon(city.icon, sizeForZoom(map.getZoom()), 0), keyboard: true }).addTo(map);
+        const marker = L.marker(city.coords, { icon: createIcon(city.icon, sizeForZoom(map.getZoom()), 0, city.ar), keyboard: true }).addTo(map);
         markers[city.key] = marker;
 
         const popupHtml = `
