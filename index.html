@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261019-1410xyzw">
+<meta name="tt-build" content="20261019-1410xyzwv">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -464,6 +464,7 @@
       border: 1px solid var(--line); border-top: 0; color: var(--grey);
     }
     #vote-results li:hover { color: var(--yellow); }
+    .mp-off { display: none !important; }
     .vote-hint { color: var(--grey); font-size: 0.9rem; margin-top: 10px; }
     #vote-pending { margin-bottom: 14px; }
     #vote-pending p { margin-bottom: 10px; }
@@ -1329,9 +1330,11 @@
           <h3>Where to next? Vote for the next Tsunami Meeting</h3>
           <input id="vote-q" type="search" placeholder="Search a city in the world…" autocomplete="off">
           <ul id="vote-results"></ul>
-          <p class="vote-hint">Or click any place on the map. One vote each, you can change it anytime.</p>
+          <button type="button" class="button" id="vote-onmap" style="margin-top:10px">🗺 Or choose it on the map</button>
+          <p class="vote-hint">One vote each, you can change it anytime.</p>
         </div>
 
+        <div class="pin-tip mp-off" id="map-pick"><span>👆</span><p><strong>Tap any place on the map to choose your city.</strong> Then confirm your vote.</p></div>
         <div class="pin-tip"><span>📸</span><p><strong>Click a pin on the map to open the gallery of that Tsunami Meeting.</strong> There you can relive the trip and add your own photos of your Tsunami experiences.</p></div>
         <div id="world-map"></div>
 
@@ -1894,7 +1897,17 @@
         $('vote-q').value = '';
       });
 
+      function subtab(name) {
+        const b = Array.from(document.querySelectorAll('#meetings .subtabs button')).find(x => x.textContent.indexOf(name) > -1);
+        if (b) b.click();
+      }
+      $('vote-onmap').addEventListener('click', function () {
+        $('map-pick').classList.remove('mp-off');
+        subtab('Map');
+        setTimeout(function () { try { $('map-pick').scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (x) {} map.invalidateSize(); }, 120);
+      });
       map.on('click', async function (e) {
+        const picking = !$('map-pick').classList.contains('mp-off') || document.querySelector('#meetings .subtabs');
         try {
           const r = await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=en&lat=' + e.latlng.lat + '&lon=' + e.latlng.lng);
           const j = await r.json();
@@ -1902,6 +1915,8 @@
           const city = place(a, null);
           if (!city) { $('vote-pending').innerHTML = '<p>Please click on a city or a land area.</p>'; return; }
           choose({ city: city, country: a.country, lat: e.latlng.lat, lng: e.latlng.lng });
+          $('map-pick').classList.add('mp-off');
+          if (picking) { subtab('Vote'); setTimeout(function () { try { $('vote-pending').scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (x) {} }, 150); }
         } catch (err) {
           $('vote-pending').innerHTML = '<p>Could not read that place, try the search bar.</p>';
         }
