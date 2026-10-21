@@ -1,0 +1,25 @@
+name: Deploy API Worker
+
+# Optional: publishes worker/ to Cloudflare from GitHub (the dashboard editor works too).
+# Needs two repository secrets: CLOUDFLARE_API_TOKEN ("Edit Cloudflare Workers" template)
+# and CLOUDFLARE_ACCOUNT_ID.
+on:
+  push:
+    branches: [main]
+    paths: ['worker/**', '.github/workflows/deploy-worker.yml']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip when Cloudflare secrets are missing
+        id: chk
+        run: echo "ok=${{ secrets.CLOUDFLARE_API_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+      - if: steps.chk.outputs.ok == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker

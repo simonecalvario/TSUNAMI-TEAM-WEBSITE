@@ -1,0 +1,9 @@
+name = "tsunami-api"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = false
+
+routes = [
+  { pattern = "www.tsunamiteambeliquid.com/api/*", zone_name = "tsunamiteambeliquid.com" }
+]
+# No variables or secrets: the Supabase function "access-token" does the checks.
