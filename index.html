@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261019-1410xyzwvutsr">
+<meta name="tt-build" content="20261019-1410xyzwvutsrq">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -2729,7 +2729,8 @@
           guideShow();
         });
         let off = false; try { off = localStorage.getItem('tt_guide_off_' + email) === '1'; } catch (e) {}
-        if (!off) setTimeout(guideShow, 900);
+        let seen = false; try { seen = sessionStorage.getItem('tt_guide_seen') === '1'; } catch (e) {}
+        if (!off && !seen) { try { sessionStorage.setItem('tt_guide_seen', '1'); } catch (e) {} setTimeout(guideShow, 900); }
       }
 
       async function init() {
