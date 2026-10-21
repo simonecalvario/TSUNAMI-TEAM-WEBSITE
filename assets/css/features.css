@@ -108,3 +108,45 @@
 .jr-f { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 10px; font-size: .88rem; color: var(--grey); }
 .jr-go { color: var(--yellow); font-weight: 700; }
 @media (max-width: 520px) { .jr-ph img:nth-child(n+4) { display: none; } }
+
+/* ===== Trip room ===== */
+.trip-box { margin: 48px 0 10px; }
+.trip-box > h3 { color: var(--yellow); margin-bottom: 8px; }
+.trip-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 14px 0; padding: 14px 16px; border: 1px solid rgba(245,210,27,.35); border-radius: 12px; background: rgba(245,210,27,.06); }
+.trip-head b { display: block; font-size: 1.2rem; }
+.trip-head span { color: var(--grey); font-size: .9rem; }
+.trip-head .button, .trip-form .button, .te-add .button { border: 0; cursor: pointer; font-size: .85rem; padding: 10px 16px; }
+.trip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.trip-card { background: var(--dark); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
+.trip-wide { grid-column: 1 / -1; }
+.trip-card h4 { margin-bottom: 10px; }
+.trip-card h5 { color: var(--yellow); font-size: .85rem; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 1px; }
+.trip-st { display: flex; gap: 6px; flex-wrap: wrap; }
+.trip-st button { flex: 1; padding: 9px 8px; border-radius: 8px; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--white); font: inherit; font-size: .88rem; cursor: pointer; }
+.trip-st button.on { border-color: var(--yellow); color: var(--yellow); background: rgba(245,210,27,.08); }
+.trip-form { display: grid; gap: 8px; margin-top: 12px; }
+.trip-form label { display: grid; gap: 3px; color: var(--grey); font-size: .8rem; }
+.trip-form input, .ti-add input, .te-add input, .te-add select { width: 100%; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--line); background: #07142a; color: var(--white); font: inherit; font-size: 16px; color-scheme: dark; }
+.trip-form .button { justify-self: start; }
+.trip-crew { display: grid; gap: 6px; margin-top: 14px; }
+.trip-crew div { padding: 8px 11px; border-radius: 8px; background: rgba(255,255,255,.035); border: 1px solid var(--line); font-size: .88rem; }
+.trip-crew small { display: block; color: var(--grey); font-size: .78rem; }
+.trip-crew .tc-no { opacity: .55; }
+.ti-part ul, .te-list { list-style: none; margin: 0; padding: 0; }
+.ti-part li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
+.ti-part li label { flex: 1; display: flex; gap: 8px; align-items: flex-start; cursor: pointer; min-width: 0; }
+.ti-part li.done span { text-decoration: line-through; color: var(--grey); }
+.ti-part li small { color: var(--grey); font-size: .74rem; white-space: nowrap; }
+.ti-x { background: none; border: 0; color: var(--grey); cursor: pointer; font-size: .85rem; }
+.ti-add { display: flex; gap: 6px; margin-top: 8px; }
+.ti-add button { padding: 0 14px; border-radius: 8px; border: 0; background: var(--yellow); color: #101010; font-weight: 900; font-size: 1.1rem; cursor: pointer; }
+.te-add { display: grid; grid-template-columns: 120px 90px 1fr auto; gap: 8px; align-items: center; }
+.te-split { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: .84rem; color: var(--grey); }
+.te-split label { display: flex; gap: 4px; align-items: center; color: var(--white); cursor: pointer; }
+.te-add .vote-hint { grid-column: 1 / -1; margin: 0; }
+.te-settle div { display: flex; gap: 8px; align-items: center; padding: 7px 10px; border-radius: 8px; background: rgba(255,255,255,.035); margin-bottom: 5px; font-size: .9rem; }
+.te-settle div.mine { border: 1px solid rgba(245,210,27,.4); }
+.te-settle span { margin-left: auto; color: var(--yellow); font-weight: 700; }
+.te-list li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
+.te-list small { display: block; color: var(--grey); font-size: .76rem; }
+@media (max-width: 760px) { .trip-grid { grid-template-columns: 1fr; } .te-add { grid-template-columns: 1fr 90px; } .te-add #te-note { grid-column: 1 / -1; } .te-add .button { grid-column: 1 / -1; justify-self: start; } }
