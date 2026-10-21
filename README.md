@@ -26,7 +26,7 @@ One-time steps:
    paste `worker/src/index.js` → Deploy), then Settings → Domains & Routes → Add route
    `www.tsunamiteambeliquid.com/api/*` on zone `tsunamiteambeliquid.com`.
    (Or add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as GitHub secrets and run the "Deploy API Worker" action.)
-2. **Audience**: logged in on the site, open `https://www.tsunamiteambeliquid.com/api/whoami` and put the `aud` value in `ACCESS_AUD` at the top of `supabase/functions/access-token/index.ts`, then redeploy the function.
+2. **Audience** (done): `ACCESS_AUD` and `ACCESS_TEAM` at the top of `supabase/functions/access-token/index.ts` come from `/api/whoami`; redeploy the function if the Access application changes.
 3. **Check**: open `https://www.tsunamiteambeliquid.com/api/token` → it must show `{"token":"…","exp":…}`.
 4. **Lock the database**: run `supabase/migrations/lockdown_after_worker.sql`.
    From then on only signed members can read, and everyone can change only their own content.
