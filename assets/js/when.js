@@ -125,6 +125,7 @@
           runs.sort((a, b) => b.sum - a.sum || a.first - b.first);
           if (runs[0]) target = runs[0];
         }
+        if (window.TT) TT.set('next', { first: target ? target.first : null, last: target ? target.last : null, city: cdCity, voters: V });
         tick();
       }
       function tick() {

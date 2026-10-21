@@ -60,3 +60,24 @@
 .fc-chips:empty { display: none; }
 .fc-chips span { font-size: .74rem; color: var(--grey); background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; }
 .fc-chips .liq { color: var(--white); }
+
+/* ===== Home: photo mosaic + latest wave ===== */
+.hero-photos { position: absolute; inset: -20px; z-index: 0; display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 22vh; gap: 6px;
+  opacity: .16; transform: rotate(-4deg) scale(1.12); pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%); mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
+  animation: mosaic-drift 60s ease-in-out infinite alternate; }
+.hero-photos span { background-size: cover; background-position: center; border-radius: 8px; filter: saturate(.8); }
+@keyframes mosaic-drift { from { transform: rotate(-4deg) scale(1.12) translateY(0); } to { transform: rotate(-4deg) scale(1.12) translateY(-40px); } }
+@media (max-width: 700px) { .hero-photos { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 16vh; } }
+@media (prefers-reduced-motion: reduce) { .hero-photos { animation: none; } }
+.wave-strip { margin: 42px auto 0; max-width: 980px; text-align: left; }
+.ws-h { color: var(--orange); font-size: .75rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
+.ws-r { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.ws-c { display: flex; gap: 10px; align-items: center; padding: 12px 14px; background: rgba(11,23,48,.78); border: 1px solid var(--line); border-radius: 12px;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transition: border-color .2s, transform .2s; min-width: 0; }
+.ws-c:hover { border-color: var(--yellow); transform: translateY(-2px); }
+.ws-c i { font-style: normal; font-size: 1.5rem; }
+.ws-c span { min-width: 0; font-size: .9rem; line-height: 1.35; overflow: hidden; }
+.ws-c small { display: block; color: var(--grey); font-size: .72rem; }
+.ws-c b { color: var(--yellow); }
+@media (max-width: 700px) { .ws-r { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; } .ws-c { flex: 0 0 74%; scroll-snap-align: start; } }
