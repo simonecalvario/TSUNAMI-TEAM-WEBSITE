@@ -22,13 +22,12 @@ the Access login to the Supabase function `access-token` → that function check
 
 One-time steps:
 
-1. **Supabase secret `ACCESS_AUD`**: the AUD tag of the Access application
-   (Cloudflare Zero Trust → Access → Applications → the site → Configure/Overview → "Application Audience (AUD) Tag").
-2. **Create the Worker** (Cloudflare dashboard → Workers & Pages → Create → Worker "tsunami-api" → Edit code →
+1. **Create the Worker** (Cloudflare dashboard → Workers & Pages → Create → Worker "tsunami-api" → Edit code →
    paste `worker/src/index.js` → Deploy), then Settings → Domains & Routes → Add route
    `www.tsunamiteambeliquid.com/api/*` on zone `tsunamiteambeliquid.com`.
    (Or add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as GitHub secrets and run the "Deploy API Worker" action.)
-3. **Check**: logged in on the site, open `https://www.tsunamiteambeliquid.com/api/token` → it must show `{"token":"…","exp":…}`.
+2. **Audience**: logged in on the site, open `https://www.tsunamiteambeliquid.com/api/whoami` and put the `aud` value in `ACCESS_AUD` at the top of `supabase/functions/access-token/index.ts`, then redeploy the function.
+3. **Check**: open `https://www.tsunamiteambeliquid.com/api/token` → it must show `{"token":"…","exp":…}`.
 4. **Lock the database**: run `supabase/migrations/lockdown_after_worker.sql`.
    From then on only signed members can read, and everyone can change only their own content.
 

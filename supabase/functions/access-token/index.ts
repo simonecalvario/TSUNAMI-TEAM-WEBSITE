@@ -1,6 +1,7 @@
 // access-token: turns a Cloudflare Access login into a Supabase session for that member.
 // Called by the /api/token Worker, which forwards the Access JWT in `x-access-jwt`.
-// Secret: ACCESS_AUD (Access application AUD tag).
+// ACCESS_AUD: the Access application AUD tag (not secret; read it at /api/whoami). The ACCESS_AUD secret overrides it.
+const ACCESS_AUD = "";
 // Self-check: a request whose x-selftest matches a row of public.tt_selftest (service-role only) mints and deletes a test session.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -62,7 +63,7 @@ Deno.serve(async (req) => {
       await admin.auth.admin.deleteUser(session.user.id);
       return json({ ok: true, role: claims.role, email: claims.email, exp_in: claims.exp - Math.floor(Date.now() / 1000) });
     }
-    const aud = Deno.env.get("ACCESS_AUD");
+    const aud = Deno.env.get("ACCESS_AUD") || ACCESS_AUD;
     if (!aud) return json({ error: "ACCESS_AUD not set" }, 503);
     let email: string;
     try { email = await verifyAccess(req.headers.get("x-access-jwt"), aud); }
