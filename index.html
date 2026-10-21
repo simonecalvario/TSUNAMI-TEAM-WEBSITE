@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261021-165351">
+<meta name="tt-build" content="20261021-165443">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -18,8 +18,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <link rel="stylesheet" href="assets/css/site.css?v=20261021-165351">
-  <link rel="stylesheet" href="assets/css/features.css?v=20261021-165351">
+  <link rel="stylesheet" href="assets/css/site.css?v=20261021-165443">
+  <link rel="stylesheet" href="assets/css/features.css?v=20261021-165443">
 </head>
 
 <body>
@@ -30,8 +30,8 @@
   <p id="lock-msg"></p>
   <a href="/cdn-cgi/access/logout">Log out instead</a>
 </div></div>
-<script src="assets/js/tt-core.js?v=20261021-165351"></script>
-<script src="assets/js/lock.js?v=20261021-165351"></script>
+<script src="assets/js/tt-core.js?v=20261021-165443"></script>
+<script src="assets/js/lock.js?v=20261021-165443"></script>
 
   <header>
     <div class="container">
@@ -374,6 +374,20 @@
       </div>
     </section>
 
+    <section id="reconnect" aria-labelledby="rc-heading">
+      <div class="container">
+        <div class="section-label">The connection remains</div>
+        <h2 id="rc-heading">Re<span>connect</span></h2>
+        <p class="intro">Everyone follows their own path, but the crew is never far. Tell us your city, see who lives near you, and let the others know when you are passing through their town.</p>
+        <div class="rc-grid">
+          <div class="rc-card"><h3>🏠 My home city</h3><div id="rc-home"></div></div>
+          <div class="rc-card"><h3>✈️ I’ll be in…</h3><p class="vote-hint" style="margin-top:0">Members who live within 250 km get a notification.</p><div id="rc-ping"></div></div>
+        </div>
+        <div id="rc-map"></div>
+        <div class="rc-lists"><div><h3 class="sub">Coming up</h3><div id="rc-trips"></div></div><div><h3 class="sub">Who lives near whom</h3><div id="rc-near"></div></div></div>
+      </div>
+    </section>
+
     <section id="memorabilia" aria-labelledby="mem-heading">
       <div class="container">
         <div class="section-label">Souvenirs of our journeys</div>
@@ -612,22 +626,23 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/js/map.js?v=20261021-165351"></script>
+  <script src="assets/js/map.js?v=20261021-165443"></script>
 
-  <script src="assets/js/home-scroll.js?v=20261021-165351"></script>
-  <script src="assets/js/ui.js?v=20261021-165351"></script>
-  <script src="assets/js/vote.js?v=20261021-165351"></script>
-  <script src="assets/js/blog.js?v=20261021-165351"></script>
-  <script src="assets/js/when.js?v=20261021-165351"></script>
-  <script src="assets/js/memorabilia.js?v=20261021-165351"></script>
-  <script src="assets/js/community.js?v=20261021-165351"></script>
-  <script src="assets/js/nav.js?v=20261021-165351"></script>
-  <script src="assets/js/profile.js?v=20261021-165351"></script>
-  <script src="assets/js/founders.js?v=20261021-165351"></script>
-  <script src="assets/js/home.js?v=20261021-165351"></script>
-  <script src="assets/js/journey.js?v=20261021-165351"></script>
-  <script src="assets/js/trip.js?v=20261021-165351"></script>
-<link rel="stylesheet" href="assets/css/gate.css?v=20261021-165351">
+  <script src="assets/js/home-scroll.js?v=20261021-165443"></script>
+  <script src="assets/js/ui.js?v=20261021-165443"></script>
+  <script src="assets/js/vote.js?v=20261021-165443"></script>
+  <script src="assets/js/blog.js?v=20261021-165443"></script>
+  <script src="assets/js/when.js?v=20261021-165443"></script>
+  <script src="assets/js/memorabilia.js?v=20261021-165443"></script>
+  <script src="assets/js/community.js?v=20261021-165443"></script>
+  <script src="assets/js/nav.js?v=20261021-165443"></script>
+  <script src="assets/js/profile.js?v=20261021-165443"></script>
+  <script src="assets/js/founders.js?v=20261021-165443"></script>
+  <script src="assets/js/home.js?v=20261021-165443"></script>
+  <script src="assets/js/journey.js?v=20261021-165443"></script>
+  <script src="assets/js/trip.js?v=20261021-165443"></script>
+  <script src="assets/js/reconnect.js?v=20261021-165443"></script>
+<link rel="stylesheet" href="assets/css/gate.css?v=20261021-165443">
 <div id="cs-gate"><div class="box">
   <h2>Welcome aboard 🌊</h2>
   <p class="cs-who" id="cs-who"></p>
@@ -648,11 +663,11 @@
   </div>
   <div id="cs-msg"></div>
 </div></div>
-<script src="assets/js/gate.js?v=20261021-165351"></script>
+<script src="assets/js/gate.js?v=20261021-165443"></script>
 
-<script src="assets/js/booster.js?v=20261021-165351"></script>
-<script src="assets/js/mobile.js?v=20261021-165351"></script>
-<script src="assets/js/update.js?v=20261021-165351"></script>
-<script src="assets/js/push.js?v=20261021-165351"></script>
+<script src="assets/js/booster.js?v=20261021-165443"></script>
+<script src="assets/js/mobile.js?v=20261021-165443"></script>
+<script src="assets/js/update.js?v=20261021-165443"></script>
+<script src="assets/js/push.js?v=20261021-165443"></script>
 </body>
 </html>
