@@ -1,9 +1,5 @@
     (function () {
-      const cities = [
-        { name: 'Barcelona', coords: [41.3851, 2.1734], key: 'barcelona', url: '/barcelona.html', icon: 'assets/images/pins/barcelona.png', ar: 1088 / 944 },
-        { name: 'Doha', coords: [25.2854, 51.5310], key: 'doha', url: '/doha.html', icon: 'assets/images/pins/doha.png', ar: 471 / 406 },
-        { name: 'Munich', coords: [48.1351, 11.5820], key: 'munich', url: '/munich.html', icon: 'assets/images/pins/munich.png', ar: 911 / 765 }
-      ];
+      const cities = TT.MEETINGS.map(m => ({ name: m.name, coords: m.coords, key: m.key, url: '/gallery.html?m=' + m.key, icon: 'assets/images/pins/' + m.key + '.png', ar: m.ar }));
 
       const initialZoom = 3;
       const baseSize = 40;

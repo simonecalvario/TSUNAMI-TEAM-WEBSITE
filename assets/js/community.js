@@ -6,11 +6,7 @@
       const R = BASE + '/rest/v1/';
       const $ = id => document.getElementById(id);
       const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-      const MEETINGS = [
-        { key: 'doha', cc: 'QA', name: 'Doha', icon: '🇶🇦', year: 2023 },
-        { key: 'barcelona', cc: 'ES', name: 'Barcelona', icon: '🇪🇸', year: 2024 },
-        { key: 'munich', cc: 'DE', name: 'Munich', icon: '🇩🇪', year: 2026 }
-      ];
+      const MEETINGS = TT.MEETINGS;
       async function get(q) { try { const r = await fetch(R + q, { headers: H }); return r.ok ? await r.json() : null; } catch (e) { return null; } }
       let email = null, nick = null, nicks = [];
 

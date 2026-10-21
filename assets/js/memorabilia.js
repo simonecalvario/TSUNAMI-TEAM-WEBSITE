@@ -6,17 +6,16 @@
       const $ = id => document.getElementById(id);
       if (!$('mem-grid')) return;
       const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-      const MEET = [
-        { key: 'doha', label: '🇶🇦 Doha 2023', place: 'Doha', year: 2023 },
-        { key: 'barcelona', label: '🇪🇸 Barcelona 2024', place: 'Barcelona', year: 2024 },
-        { key: 'munich', label: '🇩🇪 Munich 2026', place: 'Munich', year: 2026 },
+      const MEET = TT.MEETINGS.map(m => ({ key: m.key, label: m.icon + ' ' + m.name + ' ' + m.year, place: m.name, year: m.year })).concat([
         { key: 'next', label: '🔜 Next meeting' },
         { key: 'other', label: '✨ Other' }
-      ];
+      ]);
+      $('mem-meeting').insertAdjacentHTML('afterbegin', TT.MEETINGS.map(m => '<option value="' + m.key + '">' + m.icon + ' ' + esc(m.name) + ' ' + m.year + '</option>').join(''));
+      $('mem-meeting').selectedIndex = 0;
       let email = null, items = [], filter = 'all';
       const tagOf = m => {
         const k = MEET.find(x => x.key === m.meeting_key);
-        if (k && (k.key === 'doha' || k.key === 'barcelona' || k.key === 'munich' || k.key === 'next')) return k.label;
+        if (k && k.key !== 'other') return k.label;
         const y = m.meeting_year || (m.meeting_date ? new Date(m.meeting_date).getFullYear() : '');
         return '📍 ' + esc(m.meeting_place || 'Meeting') + (y ? ' ' + y : '');
       };

@@ -4,6 +4,6 @@ set -e
 cd "$(dirname "$0")/.."
 B=$(date -u +%Y%m%d-%H%M%S)
 for f in *.html; do
-  sed -i -E "s/(name=\"tt-build\" content=\")[^\"]*/\1$B/; s/(assets\/(css|js)\/[a-z0-9-]+\.(css|js))\?v=[A-Za-z0-9-]+/\1?v=$B/g" "$f"
+  sed -i -E "s/(<meta name=\"tt-build\" content=\")[^\"]*/\1$B/; s/(assets\/(css|js)\/[a-z0-9-]+\.(css|js))\?v=[A-Za-z0-9-]+/\1?v=$B/g" "$f"
 done
 echo "build $B"
