@@ -14,10 +14,4 @@
   // ui.js toggles .active on the links; mirror it on the group button.
   const mark = () => groups.forEach(g => g.classList.toggle('has-active', !!g.querySelector('a.active')));
   new MutationObserver(mark).observe(document.querySelector('.nav-links'), { subtree: true, attributes: true, attributeFilter: ['class'] });
-  // Reveal the three states of the Statute one after the other.
-  const st = document.querySelector('.states');
-  if (st && 'IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.documentElement.classList.add('js-reveal');
-    new IntersectionObserver(function (en, o) { if (en.some(x => x.isIntersecting)) { st.classList.add('in'); o.disconnect(); } }, { threshold: 0.15 }).observe(st);
-  }
 })();
