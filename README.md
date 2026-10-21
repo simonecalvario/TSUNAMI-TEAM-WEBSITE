@@ -28,7 +28,8 @@ One-time steps:
    (Or add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as GitHub secrets and run the "Deploy API Worker" action.)
 2. **Audience** (done): `ACCESS_AUD` and `ACCESS_TEAM` at the top of `supabase/functions/access-token/index.ts` come from `/api/whoami`; redeploy the function if the Access application changes.
 3. **Check**: open `https://www.tsunamiteambeliquid.com/api/token` → it must show `{"token":"…","exp":…}`.
-4. **Lock the database**: run `supabase/migrations/lockdown_after_worker.sql`.
-   From then on only signed members can read, and everyone can change only their own content.
+4. **Lock the database** (done on 2026-10-21, `20261021182500_lockdown_restrictive.sql`): without a member token
+   nothing can be read or written, and every member can change only their own content.
+   When you add a table, give it member policies like the others and no anon access.
 
 `supabase/migrations/optional_cleanup_triggers.sql` (optional) removes others' comments and reactions when a photo or post is deleted.
