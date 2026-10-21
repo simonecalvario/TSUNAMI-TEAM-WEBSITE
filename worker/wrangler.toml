@@ -7,3 +7,4 @@ routes = [
   { pattern = "www.tsunamiteambeliquid.com/api/*", zone_name = "tsunamiteambeliquid.com" }
 ]
 # No variables or secrets: the Supabase function "access-token" does the checks.
+# Deployed by Cloudflare Workers Builds (repo connected, root directory /worker) on every push to main.
