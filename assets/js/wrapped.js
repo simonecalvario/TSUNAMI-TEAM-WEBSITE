@@ -57,7 +57,7 @@
     const cards = [];
     if (S.meet.length) cards.push(c('🌊', S.meet.length, 'Tsunami Meeting' + (S.meet.length > 1 ? 's' : '') + ': ' + S.meet.map(m => m.icon + ' ' + esc(m.name)).join(', ')));
     if (S.km) cards.push(c('✈️', Math.round(S.km).toLocaleString('en-GB') + ' km', 'travelled for friendship (from your home city and back)'));
-    else if (S.meet.length) cards.push(c('✈️', '? km', 'add your home city in <a href="#reconnect">Reconnect</a> to count your kilometres'));
+    else if (S.meet.length) cards.push(c('✈️', '? km', 'add your city in the <a href="#passport">Passport</a> to count your kilometres'));
     cards.push(c('💬', S.msgs, 'messages in the Lagoon' + (S.topDay ? '. Your loudest day: ' + S.topDay.d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) + ' (' + S.topDay.n + ')' : '')));
     if (S.buddy) cards.push(c('🤝', esc(name(S.buddy.e)), 'your chat buddy: ' + S.buddy.n + (S.buddy.n > 1 ? ' replies' : ' reply') + ' exchanged'));
     if (S.photos || S.got) cards.push(c('📸', S.photos, 'photos shared · ' + S.got + ' reactions received'));

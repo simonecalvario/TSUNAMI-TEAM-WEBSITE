@@ -35,8 +35,7 @@
           ['📸', 'Add photos to the galleries', 'Meetings → Map. Tap a pin to open that meeting’s gallery: add photos, react with emojis and comment.'],
           ['🌅', 'Open your Daily Booster', 'Tap the logo on the home page every day: a quote to start your day, and badges to earn.'],
           ['💬', 'Say hi in the Lagoon', 'Use @callsign to tag someone, and reply to messages.'],
-          ['🏠', 'Add your home city', 'Reconnect → My home city. See who lives near you and get told when someone visits.'],
-          ['💧', 'Choose your liquid', 'Under the Statute: lake, river, wave or tsunami. It shows on your card.']
+          ['🏠', 'Add your city', 'Passport → Birthdays & city. It counts your kilometres in your Wrapped.']
         ]],
         ['What’s where', [
           ['👥', 'Founders', 'The 13 founders of the team.'],
@@ -44,7 +43,6 @@
           ['📍', 'Meetings', 'Map of our meetings, city vote and dates. Tap a pin for its gallery: add photos, react and comment.'],
           ['🧳', 'Trip room', 'Meetings → Trip: say if you are coming, your arrival, the checklist, shared expenses and the time capsule.'],
           ['🧭', 'Our journey', 'Every Tsunami Meeting so far, with the crew, photos and souvenirs.'],
-          ['📡', 'Reconnect', 'Home cities, who lives near whom and “I’ll be in…” trips.'],
           ['🎽', 'Memorabilia', 'Pieces and merch of the team: add yours too.'],
           ['📖', 'Blog', 'Post stories, photos and memories; comment and react.'],
           ['💬', 'Lagoon', 'The team chat.'],
@@ -340,8 +338,8 @@
       /* ---------------- ACTIVITY LOG ---------------- */
       let actAt = 0, ACT = null, actF = 'all', actM = '', actN = 60, actBusy = false;
       const ACTF = [['all', 'All'], ['badge', '🏅 Badges'], ['level', '⭐ Levels'], ['content', '📖 Content'], ['chat', '💬 Chat'], ['team', '🙋 Team']];
-      const ACTG = { rsvp: 'team', travel: 'team', capsule: 'team', liquid: 'team', badge: 'badge', level: 'level', post: 'content', comment: 'content', photo: 'content', pcomm: 'content', preact: 'content', mem: 'content', chat: 'chat', stamp: 'team', vote: 'team', days: 'team', bday: 'team', join: 'team' };
-      const ACTI = { rsvp: '🧳', travel: '✈️', capsule: '⏳', liquid: '💧', badge: '🏅', level: '⭐', post: '📖', comment: '💭', photo: '📸', pcomm: '🖼️', preact: '😍', mem: '🎽', chat: '💬', stamp: '🛂', vote: '🗳', days: '📅', bday: '🎂', join: '🙋' };
+      const ACTG = { rsvp: 'team', badge: 'badge', level: 'level', post: 'content', comment: 'content', photo: 'content', pcomm: 'content', preact: 'content', mem: 'content', chat: 'chat', stamp: 'team', vote: 'team', days: 'team', bday: 'team', join: 'team' };
+      const ACTI = { rsvp: '🧳', badge: '🏅', level: '⭐', post: '📖', comment: '💭', photo: '📸', pcomm: '🖼️', preact: '😍', mem: '🎽', chat: '💬', stamp: '🛂', vote: '🗳', days: '📅', bday: '🎂', join: '🙋' };
       const tsOf = r => { const t = Date.parse(r.created_at); return isNaN(t) ? 0 : t; };
       async function getTs(table, cols, extra) {
         let r = await get(table + '?select=' + cols + ',created_at' + (extra || ''));
@@ -368,8 +366,7 @@
         joins.forEach(j => add(j.ts, j.email, 'join', 'joined the crew as <b>' + esc(j.nickname) + '</b>'));
         const RS = { yes: 'is coming to the next Tsunami Meeting 🙌', maybe: 'might come to the next Tsunami Meeting', no: 'can’t make it to the next Tsunami Meeting' };
         (D.rsvp || []).forEach(r => add(r.ts, r.email, 'rsvp', RS[r.status] || 'answered the trip room'));
-        (D.travel || []).forEach(t => add(t.ts, t.email, 'travel', 'announced a trip to ' + esc(t.city)));
-        (D.prof || []).forEach(p => { if (p.liquid && TT.LIQUIDS[p.liquid]) add(p.ts, p.email, 'liquid', 'chose to be ' + TT.LIQUIDS[p.liquid].ic + ' <b>' + esc(TT.LIQUIDS[p.liquid].n) + '</b>'); });
+
         const grp = (rows, type, fn) => {
           const g = {};
           rows.forEach(r => { if (!r.ts) return; const k = r.email + '|' + dayKey(r.ts); (g[k] = g[k] || { e: r.email, ts: 0, n: 0 }); g[k].n++; if (r.ts > g[k].ts) g[k].ts = r.ts; });
@@ -424,9 +421,9 @@
           getTs('meeting_days', 'email,day', '&limit=10000'), getTs('birthdays', 'email,day,month'), getTs('reactions', 'target,email', '&limit=10000'),
           getTs('nicknames', 'email,nickname'), getTs('booster_reads', 'email,day,q', '&limit=20000'),
           getTs('photo_reactions', 'target,email,emoji', '&limit=20000'), getTs('photo_comments', 'id,photo_id,email', '&limit=5000'),
-          getTs('trip_rsvp', 'email,status'), getTs('travel_pings', 'email,city'), getTs('profiles', 'email,liquid')
+          getTs('trip_rsvp', 'email,status')
         ]);
-        const D = { att: a[0], photos: a[1], posts: a[2], mem: a[3], comments: a[4], chat: a[5], votes: a[6], days: a[7], bd: a[8], reactions: a[9], boost: a[11], pr: a[12], pc: a[13], rsvp: a[14], travel: a[15], prof: a[16] };
+        const D = { att: a[0], photos: a[1], posts: a[2], mem: a[3], comments: a[4], chat: a[5], votes: a[6], days: a[7], bd: a[8], reactions: a[9], boost: a[11], pr: a[12], pc: a[13], rsvp: a[14] };
         const joins = a[10];
         const base = actBuild(D, joins);
         actReplay(D, function (rep) {
@@ -725,6 +722,7 @@
       function renderCrew() {
         const emails = Array.from(new Set(nicks.map(x => x.email)));
         const rows = emails.map(e => { const M = metricsFor(e, DATA), s = scoreOf(M); CREWM[e] = M; return { e: e, nick: nickOf(e) || 'A member', xp: s.xp, L: s.L, st: M.stamps, b: M.badges }; }).sort((a, b) => b.xp - a.xp || b.st - a.st);
+        TT.set('levels', rows.map(r => ({ e: r.e, xp: r.xp, ic: LEVELS[r.L].ic, n: LEVELS[r.L].n })));
         $('crew').innerHTML = rows.length ? rows.map((r, i) => '<li class="cl" data-e="' + esc(r.e) + '" tabindex="0"><span>' + (i + 1) + '. ' + LEVELS[r.L].ic + ' ' + esc(r.nick) + (r.e === email ? ' (you)' : '') + ' <small style="color:var(--grey)">' + LEVELS[r.L].n + '</small></span><b>' + r.xp + ' XP ▾</b></li>').join('') : '<li>No members yet.</li>';
         Object.keys(CREWOPEN).forEach(e => { const li = Array.from($('crew').children).find(x => x.dataset && x.dataset.e === e); if (li) { delete CREWOPEN[e]; crewToggle(li); } });
         if (!$('crew').dataset.b) {

@@ -25,6 +25,7 @@
       '<button class="button" type="submit">Seal it 🔒</button></div><span id="cap-msg" class="vote-hint"></span></form>';
     if (opened.length) h += '<h4 class="cap-h">📬 Opened capsules</h4>' + opened.slice().reverse().map(c => '<div class="cap-open"><p>' + esc(c.body) + '</p><small>— ' + esc(c.nickname || name(c.email)) + ', written ' + new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ' · opened ' + nice(c.open_at) + '</small></div>').join('');
     box.innerHTML = h;
+    const cn = document.getElementById('cap-n'); if (cn) cn.textContent = n ? '· ' + n + ' sealed' : (opened.length ? '· ' + opened.length + ' opened' : '');
   }
   box.addEventListener('submit', async function (e) {
     e.preventDefault(); if (!email) return;

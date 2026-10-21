@@ -18,7 +18,7 @@
       api.get('trip_items?select=*&trip=eq.' + TRIP + '&order=id.asc'),
       api.get('trip_expenses?select=*&trip=eq.' + TRIP + '&order=id.desc')
     ]);
-    if (a === null) { box.querySelector('.trip-grid').innerHTML = '<p class="vote-hint">The trip room is not available yet.</p>'; return; }
+    if (a === null) { $('trip-rsvp').innerHTML = '<p class="vote-hint">The trip room is not available right now.</p>'; return; }
     rsvp = a; items = b || []; exp = c || [];
     render();
   }
@@ -49,8 +49,8 @@
   function rsvpView() {
     const m = me(), s = m ? m.status : '';
     $('trip-rsvp').innerHTML = '<div class="trip-st">' + Object.keys(ST).map(k => '<button type="button" data-st="' + k + '" class="' + (s === k ? 'on' : '') + '">' + ST[k][0] + ' ' + ST[k][1] + '</button>').join('') + '</div>' +
-      (s && s !== 'no' ? '<div class="trip-form"><label>Arrival <input type="datetime-local" id="trip-arr" value="' + local(m.arrive_at) + '"></label><label>Departure <input type="datetime-local" id="trip-dep" value="' + local(m.depart_at) + '"></label>' +
-        '<input id="trip-note" maxlength="200" placeholder="Flight, train, where you stay…" value="' + esc(m.note || '') + '"><button type="button" class="button" id="trip-save">Save</button><span id="trip-msg" class="vote-hint"></span></div>' : '');
+      (s && s !== 'no' ? '<details class="trip-det"><summary>' + (m.arrive_at ? '🛬 ' + esc(dt(m.arrive_at)) + ' · edit' : '✈️ Add your arrival (optional)') + '</summary><div class="trip-form"><label>Arrival <input type="datetime-local" id="trip-arr" value="' + local(m.arrive_at) + '"></label><label>Departure <input type="datetime-local" id="trip-dep" value="' + local(m.depart_at) + '"></label>' +
+        '<input id="trip-note" maxlength="200" placeholder="Flight, train, where you stay…" value="' + esc(m.note || '') + '"><button type="button" class="button" id="trip-save">Save</button><span id="trip-msg" class="vote-hint"></span></div></details>' : '');
     const order = { yes: 0, maybe: 1, no: 2 };
     const list = rsvp.slice().sort((a, b) => order[a.status] - order[b.status] || String(a.arrive_at || '9').localeCompare(String(b.arrive_at || '9')));
     $('trip-crew').innerHTML = list.length ? list.map(r => '<div class="tc-' + r.status + '"><b>' + ST[r.status][0] + ' ' + esc(name(r.email)) + (r.email === email ? ' (you)' : '') + '</b>' +
@@ -121,7 +121,14 @@
         : '<p class="vote-hint">No expenses yet. Add the first one when someone pays for the group.</p>');
   }
 
-  function render() { head(); rsvpView(); itemsView(); expView(); }
+  function counts() {
+    const open = items.filter(i => !i.done_by).length;
+    $('trip-items-n').textContent = items.length ? '· ' + open + ' open of ' + items.length : '';
+    const tot = {}; exp.forEach(x => { tot[x.currency] = (tot[x.currency] || 0) + Number(x.amount); });
+    const mine = balances().filter(b => b.from === email);
+    $('trip-exp-n').textContent = exp.length ? '· ' + Object.keys(tot).map(c => money(tot[c], c)).join(' + ') + (mine.length ? ' · you owe ' + mine.map(b => money(b.n, b.c)).join(' + ') : '') : '';
+  }
+  function render() { head(); rsvpView(); itemsView(); expView(); counts(); }
 
   box.addEventListener('click', async function (e) {
     const st = e.target.closest('[data-st]'); if (st) { setStatus(st.dataset.st); return; }

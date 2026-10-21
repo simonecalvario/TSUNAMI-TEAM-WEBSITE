@@ -63,7 +63,7 @@
     { key: 'map', label: '🗺 Map', els: q('#meetings .pin-tip, #world-map') },
     { key: 'vote', label: '🗳 Vote city', els: q('#meetings .vote-box, #meetings .vote-panel') },
     { key: 'dates', label: '📅 Dates', els: q('#meetings .when-box') },
-    { key: 'trip', label: '🧳 Trip', els: q('#meetings .trip-box, #meetings .capsule-box') }
+    { key: 'trip', label: '🧳 Trip', els: q('#meetings .trip-box') }
   ], document.getElementById('countdown'));
 
   (function () {

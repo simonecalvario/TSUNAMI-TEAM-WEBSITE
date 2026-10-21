@@ -10,13 +10,6 @@
     { key: 'munich', name: 'Munich', country: 'Germany', cc: 'DE', icon: '🇩🇪', year: 2026, coords: [48.1351, 11.5820], ar: 911 / 765 }
   ];
   const MEMBERS = [['Antonio', 'Toro Loco'], ['Biagio', 'Biageo'], ['Carlos', 'Carlitos'], ['Donato', 'The Boss'], ['Francesco', 'Frankie'], ['Marcos', 'Tronco'], ['Massimo', 'Jack Hammer'], ['Pietro', 'Uncle Peter'], ['Rinaldo', 'Rino'], ['Salvatore', 'Kraken'], ['Saskia', 'Alaaf Kia'], ['Simone', 'Don Simon'], ['Tessa', 'Tres Tess']];
-  // "Choose your liquid": the state of water each member feels closest to.
-  const LIQUIDS = {
-    lake: { ic: '🏞️', n: 'Mountain lake', d: 'Calm and clear. The quiet strength of the crew.' },
-    river: { ic: '🏞', n: 'River', d: 'Always on the move, always finding a way.' },
-    wave: { ic: '🌊', n: 'Wave', d: 'Playful energy that comes and goes.' },
-    tsunami: { ic: '🌪️', n: 'Tsunami', d: 'Stormy and powerful. Unstoppable when it starts.' }
-  };
 
   const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const enc = encodeURIComponent;
@@ -124,5 +117,5 @@
   function set(n, d) { last[n] = d; emit(n, d); }
   function when(n, f) { if (n in last) f(last[n]); on(n, f); }
 
-  window.TT = { BASE, ANON, H, HJ, R, MEETINGS, MEMBERS, LIQUIDS, esc, enc, identity, api, nicks, shrink, upload, km, on, emit, set, when, token: () => tokP };
+  window.TT = { BASE, ANON, H, HJ, R, MEETINGS, MEMBERS, esc, enc, identity, api, nicks, shrink, upload, km, on, emit, set, when, token: () => tokP };
 })();
