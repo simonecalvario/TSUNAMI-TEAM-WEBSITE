@@ -1,7 +1,9 @@
 // access-token: turns a Cloudflare Access login into a Supabase session for that member.
 // Called by the /api/token Worker, which forwards the Access JWT in `x-access-jwt`.
 // ACCESS_AUD: the Access application AUD tag (not secret; read it at /api/whoami). The ACCESS_AUD secret overrides it.
-const ACCESS_AUD = "";
+const ACCESS_AUD = "0f56068daa3029168e687d4cccf188327f5e06799e68e2154864d8f3b72baa4f";
+// Only logins signed by our Zero Trust team are accepted.
+const ACCESS_TEAM = "https://proud-glitter-1ca5.cloudflareaccess.com";
 // Self-check: a request whose x-selftest matches a row of public.tt_selftest (service-role only) mints and deletes a test session.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -27,8 +29,7 @@ async function verifyAccess(jwt: string | null, aud: string): Promise<string> {
   if (!s) throw new Error("missing");
   const head = JSON.parse(new TextDecoder().decode(fromB64u(h)));
   const body = JSON.parse(new TextDecoder().decode(fromB64u(p)));
-  // The AUD tag is unique to our Access application, so a token from any other team fails below.
-  if (!/^https:\/\/[a-z0-9-]+\.cloudflareaccess\.com$/.test(body.iss || "")) throw new Error("issuer");
+  if (body.iss !== ACCESS_TEAM) throw new Error("issuer");
   const auds = Array.isArray(body.aud) ? body.aud : [body.aud];
   if (!auds.includes(aud)) throw new Error("audience");
   if (!body.exp || body.exp < Date.now() / 1000) throw new Error("expired");
