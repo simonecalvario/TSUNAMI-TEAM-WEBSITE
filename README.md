@@ -16,15 +16,20 @@ Website to manage the TSUNAMI TEAM PROJECT
 
 ## Security setup (member identity)
 
-Until this is done, anyone who copies the public Supabase key can read or change the data.
+How it works: Cloudflare Access logs the member in → the Worker in `worker/` (route `/api/*`) forwards
+the Access login to the Supabase function `access-token` → that function checks it and returns a
+1-hour database session for the member's email → `tt-core.js` attaches it to every request.
 
-1. **Deploy the Worker** in `worker/` (it serves `/api/token`):
-   - In `worker/wrangler.toml`, fill in `ACCESS_TEAM` (Zero Trust team name) and `ACCESS_AUD` (the Access application's AUD tag).
-   - In GitHub → Settings → Secrets and variables → Actions, add `CLOUDFLARE_API_TOKEN` (template "Edit Cloudflare Workers"), `CLOUDFLARE_ACCOUNT_ID`, and `SUPABASE_JWT_SECRET` (Supabase → Project Settings → JWT Keys → Legacy JWT secret).
-   - Run the "Deploy API Worker" action (or push a change in `worker/`).
-2. **Check it**: while logged in, open `https://www.tsunamiteambeliquid.com/api/token`. It must show `{"token":"…","exp":…}`.
-3. **Lock the database**: run `supabase/migrations/lockdown_after_worker.sql` in the Supabase SQL editor.
+One-time steps:
+
+1. **Supabase secret `ACCESS_AUD`**: the AUD tag of the Access application
+   (Cloudflare Zero Trust → Access → Applications → the site → Configure/Overview → "Application Audience (AUD) Tag").
+2. **Create the Worker** (Cloudflare dashboard → Workers & Pages → Create → Worker "tsunami-api" → Edit code →
+   paste `worker/src/index.js` → Deploy), then Settings → Domains & Routes → Add route
+   `www.tsunamiteambeliquid.com/api/*` on zone `tsunamiteambeliquid.com`.
+   (Or add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as GitHub secrets and run the "Deploy API Worker" action.)
+3. **Check**: logged in on the site, open `https://www.tsunamiteambeliquid.com/api/token` → it must show `{"token":"…","exp":…}`.
+4. **Lock the database**: run `supabase/migrations/lockdown_after_worker.sql`.
    From then on only signed members can read, and everyone can change only their own content.
 
-The member policies are already in place (migration `20261021150000_…`), so step 3 is the only switch.
 `supabase/migrations/optional_cleanup_triggers.sql` (optional) removes others' comments and reactions when a photo or post is deleted.

@@ -6,12 +6,4 @@ workers_dev = false
 routes = [
   { pattern = "www.tsunamiteambeliquid.com/api/*", zone_name = "tsunamiteambeliquid.com" }
 ]
-
-[vars]
-# Zero Trust → Settings → Custom Pages shows the team domain: <ACCESS_TEAM>.cloudflareaccess.com
-ACCESS_TEAM = "REPLACE_WITH_TEAM_NAME"
-# Zero Trust → Access → Applications → (the site) → Overview → Application Audience (AUD) Tag
-ACCESS_AUD = "REPLACE_WITH_AUD_TAG"
-
-# Secret, set once with:  npx wrangler secret put SUPABASE_JWT_SECRET
-# (or from the GitHub Action, see .github/workflows/deploy-worker.yml)
+# No variables or secrets: the Supabase function "access-token" does the checks.
