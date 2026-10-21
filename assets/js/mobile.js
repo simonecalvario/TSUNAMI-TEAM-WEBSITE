@@ -63,7 +63,7 @@
     { key: 'map', label: '🗺 Map', els: q('#meetings .pin-tip, #world-map') },
     { key: 'vote', label: '🗳 Vote city', els: q('#meetings .vote-box, #meetings .vote-panel') },
     { key: 'dates', label: '📅 Dates', els: q('#meetings .when-box') },
-    { key: 'trip', label: '🧳 Trip', els: q('#meetings .trip-box') }
+    { key: 'trip', label: '🧳 Trip', els: q('#meetings .trip-box, #meetings .capsule-box') }
   ], document.getElementById('countdown'));
 
   (function () {
@@ -73,11 +73,13 @@
     const crewAt = kids.findIndex(k => k.tagName === 'H3' && /crew/i.test(k.textContent));
     const bdAt = kids.findIndex(k => k.tagName === 'H3' && /birthday/i.test(k.textContent));
     const badgesAt = kids.indexOf(document.getElementById('badges'));
+    const wrAt = kids.findIndex(k => k.tagName === 'H3' && /wrapped/i.test(k.textContent));
     makeTabs('passport', [
       { key: 'st', label: '🛂 Stamps', els: kids.slice(start, badgesAt) },
       { key: 'bg', label: '🏅 Badges', els: [kids[badgesAt]] },
       { key: 'cr', label: '👥 Crew', els: kids.slice(crewAt, bdAt) },
-      { key: 'bd', label: '🎂 Birthdays', els: kids.slice(bdAt) }
+      { key: 'bd', label: '🎂 Birthdays', els: kids.slice(bdAt, wrAt > -1 ? wrAt : undefined) },
+      { key: 'wr', label: '🎁 Wrapped', els: wrAt > -1 ? kids.slice(wrAt) : [] }
     ], kids[start - 1]);
   })();
 

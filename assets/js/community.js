@@ -34,16 +34,21 @@
           ['🛂', 'Collect your stamps', 'Passport → Stamps. Tap the meetings you lived.'],
           ['📸', 'Add photos to the galleries', 'Meetings → Map. Tap a pin to open that meeting’s gallery: add photos, react with emojis and comment.'],
           ['🌅', 'Open your Daily Booster', 'Tap the logo on the home page every day: a quote to start your day, and badges to earn.'],
-          ['💬', 'Say hi in the Lagoon', 'Use @callsign to tag someone, and reply to messages.']
+          ['💬', 'Say hi in the Lagoon', 'Use @callsign to tag someone, and reply to messages.'],
+          ['🏠', 'Add your home city', 'Reconnect → My home city. See who lives near you and get told when someone visits.'],
+          ['💧', 'Choose your liquid', 'Under the Statute: lake, river, wave or tsunami. It shows on your card.']
         ]],
         ['What’s where', [
           ['👥', 'Founders', 'The 13 founders of the team.'],
           ['🌊', 'Philosophy · Statute', 'What we believe, the experiences we share and our founding words.'],
           ['📍', 'Meetings', 'Map of our meetings, city vote and dates. Tap a pin for its gallery: add photos, react and comment.'],
+          ['🧳', 'Trip room', 'Meetings → Trip: say if you are coming, your arrival, the checklist, shared expenses and the time capsule.'],
+          ['🧭', 'Our journey', 'Every Tsunami Meeting so far, with the crew, photos and souvenirs.'],
+          ['📡', 'Reconnect', 'Home cities, who lives near whom and “I’ll be in…” trips.'],
           ['🎽', 'Memorabilia', 'Pieces and merch of the team: add yours too.'],
           ['📖', 'Blog', 'Post stories, photos and memories; comment and react.'],
           ['💬', 'Lagoon', 'The team chat.'],
-          ['🛂', 'Passport', 'Stamps, badges and XP levels, the crew ranking (tap a name to see badges) and birthdays.'],
+          ['🛂', 'Passport', 'Stamps, badges and XP levels, the crew ranking (tap a name to see badges), birthdays and your yearly Wrapped.'],
           ['📋', 'Activity Log', 'Everything that happens, in order: transparency for all.'],
           ['🌅', 'Daily Booster', 'Tap the logo on the home page: one quote a day. Read it daily to earn badges!']
         ]],
@@ -335,8 +340,8 @@
       /* ---------------- ACTIVITY LOG ---------------- */
       let actAt = 0, ACT = null, actF = 'all', actM = '', actN = 60, actBusy = false;
       const ACTF = [['all', 'All'], ['badge', '🏅 Badges'], ['level', '⭐ Levels'], ['content', '📖 Content'], ['chat', '💬 Chat'], ['team', '🙋 Team']];
-      const ACTG = { badge: 'badge', level: 'level', post: 'content', comment: 'content', photo: 'content', pcomm: 'content', preact: 'content', mem: 'content', chat: 'chat', stamp: 'team', vote: 'team', days: 'team', bday: 'team', join: 'team' };
-      const ACTI = { badge: '🏅', level: '⭐', post: '📖', comment: '💭', photo: '📸', pcomm: '🖼️', preact: '😍', mem: '🎽', chat: '💬', stamp: '🛂', vote: '🗳', days: '📅', bday: '🎂', join: '🙋' };
+      const ACTG = { rsvp: 'team', travel: 'team', capsule: 'team', liquid: 'team', badge: 'badge', level: 'level', post: 'content', comment: 'content', photo: 'content', pcomm: 'content', preact: 'content', mem: 'content', chat: 'chat', stamp: 'team', vote: 'team', days: 'team', bday: 'team', join: 'team' };
+      const ACTI = { rsvp: '🧳', travel: '✈️', capsule: '⏳', liquid: '💧', badge: '🏅', level: '⭐', post: '📖', comment: '💭', photo: '📸', pcomm: '🖼️', preact: '😍', mem: '🎽', chat: '💬', stamp: '🛂', vote: '🗳', days: '📅', bday: '🎂', join: '🙋' };
       const tsOf = r => { const t = Date.parse(r.created_at); return isNaN(t) ? 0 : t; };
       async function getTs(table, cols, extra) {
         let r = await get(table + '?select=' + cols + ',created_at' + (extra || ''));
@@ -361,6 +366,10 @@
         D.votes.forEach(v => add(v.ts, v.email, 'vote', 'voted for ' + esc(v.city || 'a city') + (v.country ? ' (' + esc(v.country) + ')' : '')));
         D.bd.forEach(b => add(b.ts, b.email, 'bday', 'saved their birthday'));
         joins.forEach(j => add(j.ts, j.email, 'join', 'joined the crew as <b>' + esc(j.nickname) + '</b>'));
+        const RS = { yes: 'is coming to the next Tsunami Meeting 🙌', maybe: 'might come to the next Tsunami Meeting', no: 'can’t make it to the next Tsunami Meeting' };
+        (D.rsvp || []).forEach(r => add(r.ts, r.email, 'rsvp', RS[r.status] || 'answered the trip room'));
+        (D.travel || []).forEach(t => add(t.ts, t.email, 'travel', 'announced a trip to ' + esc(t.city)));
+        (D.prof || []).forEach(p => { if (p.liquid && TT.LIQUIDS[p.liquid]) add(p.ts, p.email, 'liquid', 'chose to be ' + TT.LIQUIDS[p.liquid].ic + ' <b>' + esc(TT.LIQUIDS[p.liquid].n) + '</b>'); });
         const grp = (rows, type, fn) => {
           const g = {};
           rows.forEach(r => { if (!r.ts) return; const k = r.email + '|' + dayKey(r.ts); (g[k] = g[k] || { e: r.email, ts: 0, n: 0 }); g[k].n++; if (r.ts > g[k].ts) g[k].ts = r.ts; });
@@ -414,9 +423,10 @@
           getTs('chat_messages', 'id,email,body,reply_to', '&order=id.desc&limit=5000'), getTs('meeting_votes', 'email,city,country'),
           getTs('meeting_days', 'email,day', '&limit=10000'), getTs('birthdays', 'email,day,month'), getTs('reactions', 'target,email', '&limit=10000'),
           getTs('nicknames', 'email,nickname'), getTs('booster_reads', 'email,day,q', '&limit=20000'),
-          getTs('photo_reactions', 'target,email,emoji', '&limit=20000'), getTs('photo_comments', 'id,photo_id,email', '&limit=5000')
+          getTs('photo_reactions', 'target,email,emoji', '&limit=20000'), getTs('photo_comments', 'id,photo_id,email', '&limit=5000'),
+          getTs('trip_rsvp', 'email,status'), getTs('travel_pings', 'email,city'), getTs('profiles', 'email,liquid')
         ]);
-        const D = { att: a[0], photos: a[1], posts: a[2], mem: a[3], comments: a[4], chat: a[5], votes: a[6], days: a[7], bd: a[8], reactions: a[9], boost: a[11], pr: a[12], pc: a[13] };
+        const D = { att: a[0], photos: a[1], posts: a[2], mem: a[3], comments: a[4], chat: a[5], votes: a[6], days: a[7], bd: a[8], reactions: a[9], boost: a[11], pr: a[12], pc: a[13], rsvp: a[14], travel: a[15], prof: a[16] };
         const joins = a[10];
         const base = actBuild(D, joins);
         actReplay(D, function (rep) {
