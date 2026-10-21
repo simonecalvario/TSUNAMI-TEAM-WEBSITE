@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261021-164646">
+<meta name="tt-build" content="20261021-165002">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -18,7 +18,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <link rel="stylesheet" href="assets/css/site.css?v=20261021-164646">
+  <link rel="stylesheet" href="assets/css/site.css?v=20261021-165002">
+  <link rel="stylesheet" href="assets/css/features.css?v=20261021-165002">
 </head>
 
 <body>
@@ -29,8 +30,8 @@
   <p id="lock-msg"></p>
   <a href="/cdn-cgi/access/logout">Log out instead</a>
 </div></div>
-<script src="assets/js/tt-core.js?v=20261021-164646"></script>
-<script src="assets/js/lock.js?v=20261021-164646"></script>
+<script src="assets/js/tt-core.js?v=20261021-165002"></script>
+<script src="assets/js/lock.js?v=20261021-165002"></script>
 
   <header>
     <div class="container">
@@ -38,15 +39,24 @@
         <a class="brand" href="#home">TSUNAMI TEAM</a>
 
         <div class="nav-links">
-          <a href="#philosophy">Philosophy</a>
-          <a href="#founders">Founders</a>
-          <a href="#meetings">Meetings</a>
-          <a href="#memorabilia">Memorabilia</a>
-          <a href="#blog">Blog</a>
-          <a href="#lagoon">Lagoon</a>
-          <a href="#passport">Passport</a>
-          <a href="#statute">Our Statute</a>
-          <a href="#activity">Activity</a>
+          <a href="#home">Home</a>
+          <div class="nav-group"><button type="button" aria-haspopup="true">About ▾</button><div class="nav-drop">
+            <a href="#philosophy">Philosophy</a>
+            <a href="#founders">Founders</a>
+            <a href="#statute">Our Statute</a>
+          </div></div>
+          <div class="nav-group"><button type="button" aria-haspopup="true">Meetings ▾</button><div class="nav-drop">
+            <a href="#meetings">Next meeting</a>
+            <a href="#journey">Our journey</a>
+            <a href="#reconnect">Reconnect</a>
+            <a href="#memorabilia">Memorabilia</a>
+          </div></div>
+          <div class="nav-group"><button type="button" aria-haspopup="true">Community ▾</button><div class="nav-drop">
+            <a href="#lagoon">Lagoon</a>
+            <a href="#blog">Blog</a>
+            <a href="#passport">Passport</a>
+            <a href="#activity">Activity</a>
+          </div></div>
           <a href="#join">Join Us</a>
           <span class="bell-wrap"><button id="bell" type="button" aria-label="Notifications">🔔<i></i></button><div id="bell-panel"></div></span>
           <a href="/cdn-cgi/access/logout">Logout</a>
@@ -454,47 +464,56 @@
           without losing the connection with one another.
         </p>
 
-        <article class="statute">
-          <p>
-            You could be solid, strong as a rock, compact and impenetrable,
-            surely you will be the toughest and the hardest, but only until
-            you remain steady in your place, otherwise you will crumble
-            becoming a punch of sand, losing your certainties like dust
-            in the wind.
-          </p>
+        <div class="states">
+          <article class="state solid">
+            <div class="st-ic" aria-hidden="true">🪨</div>
+            <h3>Solid</h3>
+            <p>
+              You could be solid, strong as a rock, compact and impenetrable.
+              Surely you will be the toughest and the hardest, but only as long as
+              you remain steady in your place; otherwise you will crumble,
+              becoming a handful of sand, losing your certainties like dust
+              in the wind.
+            </p>
+          </article>
 
-          <p>
-            You could be air, free as a bird, light and fast, surely you
-            will enjoy all the amazing experiences that you could have
-            in your thousands trips, but when you’ll turn back your eyes,
-            you won’t find anyone but yourself, and when, at the end of
-            the day, you’ll rest, there will be no one to share with your
-            excited feelings and, if you try to phone someone, maybe he
-            will be busy, like you were since few hours before.
-            And you will be alone, like a wonderful star in the dark space.
-          </p>
+          <article class="state air">
+            <div class="st-ic" aria-hidden="true">🕊️</div>
+            <h3>Air</h3>
+            <p>
+              You could be air, free as a bird, light and fast. Surely you
+              will enjoy all the amazing experiences of your thousand trips,
+              but when you turn back your eyes, you won’t find anyone but
+              yourself. And when, at the end of the day, you rest, there will
+              be no one to share your excited feelings with. If you try to call
+              someone, maybe they will be busy, just like you were a few hours
+              before. And you will be alone, like a wonderful star in the dark space.
+            </p>
+          </article>
 
-          <p>
-            So you could be liquid, clear as water, adaptable and
-            incompressible at the same time, calm and quiet like a crystal
-            mountain lake or stormy and powerful like a tsunami, surely
-            you could enjoy your experiences, you could have your space
-            and making your own adventures with anyone you want, you won’t
-            break any chains, there are none. You could also be yourself
-            with yourself, but the most important thing is that you could
-            be yourself also staying with the others, they will adapt on
-            you and you on them and, at the same time, you won’t lose each
-            other, there will be always a connection, a link, no matter
-            how strong and big, but you know that it will be. And you will
-            be part of something bigger than you, which will lead you to
-            be yourself and greater than yourself. YOU will be US.
-          </p>
+          <article class="state liquid">
+            <div class="st-ic" aria-hidden="true">💧</div>
+            <h3>Liquid</h3>
+            <p>
+              So you could be liquid, clear as water, adaptable and
+              incompressible at the same time, calm and quiet like a crystal
+              mountain lake or stormy and powerful like a tsunami. Surely
+              you could enjoy your experiences, have your space and make your
+              own adventures with anyone you want. You won’t break any chains:
+              there are none. You could be yourself with yourself, but the most
+              important thing is that you could be yourself while staying with
+              the others. They will adapt to you and you to them and, at the same
+              time, you won’t lose each other. There will always be a connection,
+              a link, no matter how strong or big, but you know that it will be there.
+              And you will be part of something bigger than you, which will lead you
+              to be yourself and greater than yourself.
+            </p>
+          </article>
+        </div>
 
-          <p class="closing">
-            Friendship is liquid, so choose your liquid and be it.
-            TSUNAMI TEAM
-          </p>
-        </article>
+        <p class="st-us">YOU will be <span>US.</span></p>
+        <p class="st-closing">Friendship is liquid, so choose your liquid and be it.<br><b>TSUNAMI TEAM</b></p>
+        <div class="st-choose" id="st-choose"></div>
       </div>
     </section>
 
@@ -551,6 +570,8 @@
   </div>
   <div id="m-sheet">
     <button type="button" data-v="founders"><i>👥</i>Founders</button>
+    <button type="button" data-v="journey"><i>🧭</i>Our journey</button>
+    <button type="button" data-v="reconnect"><i>📡</i>Reconnect</button>
     <button type="button" data-v="philosophy"><i>🌊</i>Philosophy</button>
     <button type="button" data-v="statute"><i>📜</i>Our Statute</button>
     <button type="button" data-v="blog"><i>📖</i>Blog</button>
@@ -570,16 +591,19 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/js/map.js?v=20261021-164646"></script>
+  <script src="assets/js/map.js?v=20261021-165002"></script>
 
-  <script src="assets/js/home-scroll.js?v=20261021-164646"></script>
-  <script src="assets/js/ui.js?v=20261021-164646"></script>
-  <script src="assets/js/vote.js?v=20261021-164646"></script>
-  <script src="assets/js/blog.js?v=20261021-164646"></script>
-  <script src="assets/js/when.js?v=20261021-164646"></script>
-  <script src="assets/js/memorabilia.js?v=20261021-164646"></script>
-  <script src="assets/js/community.js?v=20261021-164646"></script>
-<link rel="stylesheet" href="assets/css/gate.css?v=20261021-164646">
+  <script src="assets/js/home-scroll.js?v=20261021-165002"></script>
+  <script src="assets/js/ui.js?v=20261021-165002"></script>
+  <script src="assets/js/vote.js?v=20261021-165002"></script>
+  <script src="assets/js/blog.js?v=20261021-165002"></script>
+  <script src="assets/js/when.js?v=20261021-165002"></script>
+  <script src="assets/js/memorabilia.js?v=20261021-165002"></script>
+  <script src="assets/js/community.js?v=20261021-165002"></script>
+  <script src="assets/js/nav.js?v=20261021-165002"></script>
+  <script src="assets/js/profile.js?v=20261021-165002"></script>
+  <script src="assets/js/founders.js?v=20261021-165002"></script>
+<link rel="stylesheet" href="assets/css/gate.css?v=20261021-165002">
 <div id="cs-gate"><div class="box">
   <h2>Welcome aboard 🌊</h2>
   <p class="cs-who" id="cs-who"></p>
@@ -600,11 +624,11 @@
   </div>
   <div id="cs-msg"></div>
 </div></div>
-<script src="assets/js/gate.js?v=20261021-164646"></script>
+<script src="assets/js/gate.js?v=20261021-165002"></script>
 
-<script src="assets/js/booster.js?v=20261021-164646"></script>
-<script src="assets/js/mobile.js?v=20261021-164646"></script>
-<script src="assets/js/update.js?v=20261021-164646"></script>
-<script src="assets/js/push.js?v=20261021-164646"></script>
+<script src="assets/js/booster.js?v=20261021-165002"></script>
+<script src="assets/js/mobile.js?v=20261021-165002"></script>
+<script src="assets/js/update.js?v=20261021-165002"></script>
+<script src="assets/js/push.js?v=20261021-165002"></script>
 </body>
 </html>

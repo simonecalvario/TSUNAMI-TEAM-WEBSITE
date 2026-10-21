@@ -1,0 +1,62 @@
+/* ===== Grouped menu ===== */
+.nav-links { align-items: center; }
+.nav-group { position: relative; }
+.nav-group > button { background: none; border: 0; color: inherit; font: inherit; cursor: pointer; padding: 4px 0; }
+.nav-group > button:hover, .nav-group:focus-within > button { color: var(--yellow); }
+.nav-drop { position: absolute; top: 100%; left: -14px; min-width: 190px; padding: 8px; display: none; flex-direction: column; gap: 2px;
+  background: rgba(6,13,28,.97); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 14px 34px rgba(0,0,0,.45); z-index: 20; }
+.nav-group:hover .nav-drop, .nav-group:focus-within .nav-drop, .nav-group.open .nav-drop { display: flex; }
+.nav-drop a { padding: 8px 10px !important; border-radius: 6px; }
+.nav-drop a::after { display: none; }
+.nav-drop a:hover, .nav-drop a.active { background: rgba(245,210,27,.08); }
+.nav-group.has-active > button { color: var(--yellow); }
+
+/* ===== Statute: three states ===== */
+.states { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start; }
+.state { background: var(--dark); border: 1px solid var(--line); border-radius: 12px; padding: clamp(20px, 3vw, 30px); position: relative; overflow: hidden; }
+.state h3 { font-size: 1.5rem; margin: 4px 0 12px; }
+.state p { color: #d8d8d8; font-family: Georgia, "Times New Roman", serif; font-size: 1.02rem; line-height: 1.85; }
+.st-ic { font-size: 2.4rem; line-height: 1; }
+.state.solid { filter: saturate(.6); }
+.state.solid h3 { color: #c9b8a0; }
+.state.air h3 { color: #bfe4ff; }
+.state.liquid { border-color: rgba(245,210,27,.45); background: linear-gradient(160deg, rgba(39,184,255,.16), var(--dark) 60%); box-shadow: 0 0 0 1px rgba(39,184,255,.12), 0 20px 50px rgba(39,184,255,.12); }
+.state.liquid h3 { color: var(--yellow); }
+.state.liquid::after { content: ""; position: absolute; left: -20%; right: -20%; bottom: -46px; height: 90px; border-radius: 45%;
+  background: rgba(39,184,255,.12); animation: st-wave 9s linear infinite; pointer-events: none; }
+@keyframes st-wave { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.states .state { transition: opacity .8s ease, transform .8s ease; }
+.js-reveal .states .state { opacity: 0; transform: translateY(24px); }
+.js-reveal .states.in .state { opacity: 1; transform: none; }
+.js-reveal .states.in .state.air { transition-delay: .25s; }
+.js-reveal .states.in .state.liquid { transition-delay: .5s; }
+.st-us { text-align: center; font-size: clamp(2.4rem, 8vw, 5rem); font-weight: 900; letter-spacing: -2px; margin: 46px 0 6px; line-height: 1.05; }
+.st-us span { color: var(--yellow); }
+.st-closing { text-align: center; color: var(--grey); font-size: 1.05rem; }
+.st-closing b { color: var(--yellow); letter-spacing: 3px; }
+@media (max-width: 860px) { .states { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .state.liquid::after { animation: none; } .js-reveal .states .state { opacity: 1; transform: none; } }
+
+/* Choose your liquid */
+.st-choose { max-width: 760px; margin: 34px auto 0; text-align: center; }
+.st-choose h3 { font-size: 1.1rem; margin-bottom: 4px; }
+.st-choose > p { color: var(--grey); font-size: .92rem; margin-bottom: 14px; }
+.liq-opts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.liq-opts button { background: var(--dark); border: 1px solid var(--line); border-radius: 12px; color: var(--white); font: inherit; padding: 14px 8px; cursor: pointer; transition: border-color .2s, transform .2s; }
+.liq-opts button:hover { transform: translateY(-2px); border-color: var(--blue); }
+.liq-opts button.on { border-color: var(--yellow); background: rgba(245,210,27,.08); }
+.liq-opts i { display: block; font-style: normal; font-size: 1.8rem; }
+.liq-opts b { display: block; margin: 4px 0 2px; }
+.liq-opts small { color: var(--grey); font-size: .76rem; line-height: 1.35; display: block; }
+.liq-crew { margin-top: 14px; color: var(--grey); font-size: .88rem; }
+@media (max-width: 560px) { .liq-opts { grid-template-columns: 1fr 1fr; } }
+
+/* ===== Founders: shorter cards ===== */
+.founder-card { display: flex; flex-direction: column; }
+.founder-card .desc { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.founder-card.open .desc { display: block; -webkit-line-clamp: unset; }
+.fc-more { background: none; border: 0; color: var(--yellow); font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; margin-top: 6px; }
+.fc-chips { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.fc-chips:empty { display: none; }
+.fc-chips span { font-size: .74rem; color: var(--grey); background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; }
+.fc-chips .liq { color: var(--white); }

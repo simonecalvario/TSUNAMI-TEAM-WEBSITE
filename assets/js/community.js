@@ -795,7 +795,7 @@
         function markChatSeen() {
           if (!topChat) return;
           chatSeen = topChat; try { localStorage.setItem(CK, chatSeen); } catch (e) {}
-          badge('#tabbar [data-v=lagoon], .nav-links > a[href="#lagoon"]', 0);
+          badge('#tabbar [data-v=lagoon], .nav-links a[href="#lagoon"]', 0);
         }
         const lag = document.getElementById('lagoon');
         if (lag && 'IntersectionObserver' in window) {
@@ -854,10 +854,10 @@
             : ls === 'off' ? '<a href="#" data-lock="1">🔓 <b>Turn on Face ID lock</b><br><small>Ask Face ID whenever the app is opened</small></a>' : '';
           panel.innerHTML = (html || '<p>All caught up ✅ Nothing to do right now.</p>') + prow + lrow + '<a href="#" data-favs="1">❤️ <b>Favorite quotes</b><br><small>Your saved Daily Booster quotes</small></a>' + '<a href="#" data-guide="1">📖 <b>Site guide</b><br><small>What’s where and what to do</small></a>';
           // tab badges
-          badge('#tabbar [data-v=lagoon], .nav-links > a[href="#lagoon"]', chatNew, chatHot);
+          badge('#tabbar [data-v=lagoon], .nav-links a[href="#lagoon"]', chatNew, chatHot);
           const mt = todos.filter(t => t.href === '#meetings').length, pt = todos.filter(t => t.href === '#passport').length;
-          badge('#tabbar [data-v=meetings], .nav-links > a[href="#meetings"]', mt, false);
-          badge('#tabbar [data-v=passport], .nav-links > a[href="#passport"]', pt, false);
+          badge('#tabbar [data-v=meetings], .nav-links a[href="#meetings"]', mt, false);
+          badge('#tabbar [data-v=passport], .nav-links a[href="#passport"]', pt, false);
           const dot = total + chatNew;
           document.title = (dot ? '(' + dot + ') ' : '') + document.title.replace(/^\(\d+\)\s*/, '');
           try { if (navigator.setAppBadge) { dot ? navigator.setAppBadge(dot) : navigator.clearAppBadge(); } } catch (x) {}

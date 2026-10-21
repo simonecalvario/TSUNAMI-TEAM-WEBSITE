@@ -865,7 +865,7 @@
     @media (max-width: 700px) {
       body.m { padding-bottom: calc(66px + env(safe-area-inset-bottom)); }
       body.m nav { min-height: 52px; padding: 6px 0; flex-direction: row; align-items: center; }
-      body.m .nav-links > a { display: none; }
+      body.m .nav-links > a, body.m .nav-links > .nav-group { display: none; }
       body.m .nav-links { flex-wrap: nowrap; }
       body.m .brand { font-size: .92rem; }
       body.m section { padding: 30px 0 40px; }
