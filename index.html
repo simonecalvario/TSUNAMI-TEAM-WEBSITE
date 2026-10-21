@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261019-1410xyzwvuts">
+<meta name="tt-build" content="20261019-1410xyzwvutsr">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -1024,14 +1024,16 @@
 </div></div>
 <script>
 (function () {
-  var KEY = 'tt_lock_cred', GRACE = 60000, avail = false, hiddenAt = 0;
+  var KEY = 'tt_lock_cred', GRACE = 60000, avail = false, hiddenAt = 0, TSK = 'tt_lock_ts', skipUntil = 0;
+  function stamp() { try { localStorage.setItem(TSK, String(Date.now())); } catch (e) {} }
+  function fresh() { try { var t = +localStorage.getItem(TSK) || 0; return !!t && Date.now() - t < GRACE; } catch (e) { return false; } }
   var el = document.getElementById('lock'), msg = document.getElementById('lock-msg');
   function enabled() { try { return !!localStorage.getItem(KEY); } catch (e) { return false; } }
   function rnd(n) { var a = new Uint8Array(n); crypto.getRandomValues(a); return a; }
   function toB64(buf) { return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))); }
   function fromB64(t) { return Uint8Array.from(atob(t), function (c) { return c.charCodeAt(0); }); }
   function lockNow() { if (!enabled()) return; el.classList.add('on'); document.documentElement.style.overflow = 'hidden'; msg.textContent = ''; tryAuto(); }
-  function unlockUI() { el.classList.remove('on'); document.documentElement.style.overflow = ''; msg.textContent = ''; }
+  function unlockUI() { stamp(); el.classList.remove('on'); document.documentElement.style.overflow = ''; msg.textContent = ''; }
   async function assertId() {
     await navigator.credentials.get({ publicKey: { challenge: rnd(32), rpId: location.hostname, userVerification: 'required', timeout: 60000,
       allowCredentials: [{ type: 'public-key', id: fromB64(localStorage.getItem(KEY)), transports: ['internal'] }] } });
@@ -1068,10 +1070,14 @@
     if (window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable)
       PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(function (v) { avail = !!v; }).catch(function () {});
   } catch (e) {}
-  if (enabled()) lockNow();
+  if (enabled()) { if (fresh()) stamp(); else lockNow(); }
+  function alive() { if (!el.classList.contains('on')) stamp(); }
+  setInterval(function () { if (!document.hidden) alive(); }, 10000);
+  window.addEventListener('pagehide', alive);
+  document.addEventListener('click', function (e) { if (e.target && e.target.type === 'file') skipUntil = Date.now() + 600000; }, true);
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { hiddenAt = Date.now(); return; }
-    if (enabled() && hiddenAt && Date.now() - hiddenAt > GRACE) { autoTried = false; lockNow(); }
+    if (document.hidden) { hiddenAt = Date.now(); alive(); return; }
+    if (enabled() && !fresh() && Date.now() > skipUntil) { autoTried = false; lockNow(); } else alive();
   });
   window.addEventListener('pageshow', function (e) { if (e.persisted && enabled()) { autoTried = false; lockNow(); } });
 })();
@@ -2542,14 +2548,14 @@
           ['🗳', 'Vote the next city', 'Meetings → Vote city. Votes are public, with call signs.'],
           ['📅', 'Mark your free dates', 'Meetings → Dates. Find the days that work for everyone.'],
           ['🛂', 'Collect your stamps', 'Passport → Stamps. Tap the meetings you lived.'],
-          ['📸', 'Add photos to the galleries', 'Meetings → Map. Tap a pin to open that meeting’s gallery and add your photos.'],
+          ['📸', 'Add photos to the galleries', 'Meetings → Map. Tap a pin to open that meeting’s gallery: add photos, react with emojis and comment.'],
           ['🌅', 'Open your Daily Booster', 'Tap the logo on the home page every day: a quote to start your day, and badges to earn.'],
           ['💬', 'Say hi in the Lagoon', 'Use @callsign to tag someone, and reply to messages.']
         ]],
         ['What’s where', [
           ['👥', 'Founders', 'The 13 founders of the team.'],
           ['🌊', 'Philosophy · Statute', 'What we believe, the experiences we share and our founding words.'],
-          ['📍', 'Meetings', 'Map of our meetings, city vote and dates. Tap a pin for its gallery and add your photos.'],
+          ['📍', 'Meetings', 'Map of our meetings, city vote and dates. Tap a pin for its gallery: add photos, react and comment.'],
           ['🎽', 'Memorabilia', 'Pieces and merch of the team: add yours too.'],
           ['📖', 'Blog', 'Post stories, photos and memories; comment and react.'],
           ['💬', 'Lagoon', 'The team chat.'],
@@ -2611,7 +2617,7 @@
         { ic: '🛂', t: 'Your stamps', d: 'Tap the Tsunami Meetings you lived: each one stamps your passport.', go: 'passport', tab: 'Stamps', sel: '#stamps', done: () => !!document.querySelector('#stamps .stamp.on'), ok: '✓ You have at least one stamp' },
         { ic: '📍', t: 'Where: vote the city', d: 'Vote the city for the next Tsunami Meeting. Votes are public, with call signs.', go: 'meetings', tab: 'Vote city', sel: '#meetings .vote-box' },
         { ic: '📅', t: 'When: your free dates', d: 'Mark the days you are free, so we can find the best dates for everyone.', go: 'meetings', tab: 'Dates', sel: '#meetings .when-box' },
-        { ic: '📸', t: 'Meeting galleries', d: 'Tap a pin on the map to open the gallery of that Tsunami Meeting: relive the trip and add your own photos.', go: 'meetings', tab: 'Map', sel: '#world-map', nofocus: true },
+        { ic: '📸', t: 'Meeting galleries', d: 'Tap a pin on the map to open the gallery of that Tsunami Meeting: add your photos, react with an emoji and comment.', go: 'meetings', tab: 'Map', sel: '#world-map', nofocus: true },
         { ic: '🌅', t: 'Your Daily Booster', d: 'Tap the logo for a quote to start your day. Read one every day to earn badges!', go: 'home', sel: '#booster-btn', act: () => { const bt = $('booster-btn'); if (bt) bt.click(); }, done: () => { const bt = $('booster-btn'); return !!bt && !bt.classList.contains('new'); }, ok: '✓ Today’s boost opened' },
         { ic: '🔔', t: 'Notifications & Face ID', d: 'Tap the bell: turn on push notifications to get alerts when someone mentions you, and the Face ID lock to protect the app.', go: null, sel: '#bell', panel: true, done: () => (window.ttPush && window.ttPush.state() === 'on') || (window.ttLock && window.ttLock.state() === 'on'), ok: '✓ Alerts or Face ID are on' },
         ...(INST.ok ? [{ ic: '📲', t: 'Use it like an app', d: 'Add the site to your Home Screen to open it like an app. On iPhone it is needed for push notifications. Tap Do it to see how.', go: 'home', sel: '#inst-banner, #logo-hint', act: () => instPop() }] : []),
@@ -2844,8 +2850,8 @@
       /* ---------------- ACTIVITY LOG ---------------- */
       let actAt = 0, ACT = null, actF = 'all', actM = '', actN = 60, actBusy = false;
       const ACTF = [['all', 'All'], ['badge', '🏅 Badges'], ['level', '⭐ Levels'], ['content', '📖 Content'], ['chat', '💬 Chat'], ['team', '🙋 Team']];
-      const ACTG = { badge: 'badge', level: 'level', post: 'content', comment: 'content', photo: 'content', mem: 'content', chat: 'chat', stamp: 'team', vote: 'team', days: 'team', bday: 'team', join: 'team' };
-      const ACTI = { badge: '🏅', level: '⭐', post: '📖', comment: '💭', photo: '📸', mem: '🎽', chat: '💬', stamp: '🛂', vote: '🗳', days: '📅', bday: '🎂', join: '🙋' };
+      const ACTG = { badge: 'badge', level: 'level', post: 'content', comment: 'content', photo: 'content', pcomm: 'content', preact: 'content', mem: 'content', chat: 'chat', stamp: 'team', vote: 'team', days: 'team', bday: 'team', join: 'team' };
+      const ACTI = { badge: '🏅', level: '⭐', post: '📖', comment: '💭', photo: '📸', pcomm: '🖼️', preact: '😍', mem: '🎽', chat: '💬', stamp: '🛂', vote: '🗳', days: '📅', bday: '🎂', join: '🙋' };
       const tsOf = r => { const t = Date.parse(r.created_at); return isNaN(t) ? 0 : t; };
       async function getTs(table, cols, extra) {
         let r = await get(table + '?select=' + cols + ',created_at' + (extra || ''));
@@ -2865,6 +2871,7 @@
         D.comments.forEach(c => add(c.ts, c.email, 'comment', 'commented on a Blog post'));
         D.photos.forEach(p => add(p.ts, p.email, 'photo', 'added a photo to the ' + esc(mName(p.meeting)) + ' gallery'));
         D.mem.forEach(m => add(m.ts, m.email, 'mem', 'added a Memorabilia piece'));
+        (D.pc || []).forEach(c => add(c.ts, c.email, 'pcomm', 'commented on a gallery photo'));
         D.att.forEach(a => add(a.ts, a.email, 'stamp', 'collected the ' + esc(mName(a.meeting)) + ' stamp'));
         D.votes.forEach(v => add(v.ts, v.email, 'vote', 'voted for ' + esc(v.city || 'a city') + (v.country ? ' (' + esc(v.country) + ')' : '')));
         D.bd.forEach(b => add(b.ts, b.email, 'bday', 'saved their birthday'));
@@ -2874,13 +2881,14 @@
           rows.forEach(r => { if (!r.ts) return; const k = r.email + '|' + dayKey(r.ts); (g[k] = g[k] || { e: r.email, ts: 0, n: 0 }); g[k].n++; if (r.ts > g[k].ts) g[k].ts = r.ts; });
           Object.keys(g).forEach(k => add(g[k].ts, g[k].e, type, fn(g[k].n)));
         };
+        grp(D.pr || [], 'preact', n => 'gave ' + n + ' emoji reaction' + (n > 1 ? 's' : '') + ' in the galleries');
         grp(D.chat, 'chat', n => 'wrote ' + n + ' message' + (n > 1 ? 's' : '') + ' in the Lagoon');
         grp(D.days, 'days', n => 'marked ' + n + ' free date' + (n > 1 ? 's' : '') + ' in the calendar');
         return ev;
       }
 
       function actReplay(D, onDone) {
-        const S = {}; ['att', 'photos', 'posts', 'mem', 'comments', 'chat', 'votes', 'days', 'bd', 'reactions', 'boost'].forEach(k => { S[k] = asc(D[k] || []); });
+        const S = {}; ['att', 'photos', 'posts', 'mem', 'comments', 'chat', 'votes', 'days', 'bd', 'reactions', 'boost', 'pr', 'pc'].forEach(k => { S[k] = asc(D[k] || []); });
         const upto = (arr, t) => { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m].ts <= t) lo = m + 1; else hi = m; } return arr.slice(0, lo); };
         const cps = {}, mark = (e, ts) => { if (e && ts) (cps[e] = cps[e] || new Set()).add(dayEnd(ts)); };
         let last = 0;
@@ -2916,13 +2924,14 @@
       async function actLoad() {
         if (actBusy) return; actBusy = true;
         const a = await Promise.all([
-          getTs('attendance', 'email,meeting'), getTs('meeting_photos', 'email,meeting'), getTs('posts', 'id,email,title'),
+          getTs('attendance', 'email,meeting'), getTs('meeting_photos', 'id,email,meeting'), getTs('posts', 'id,email,title'),
           getTs('memorabilia', 'id,email,meeting_key,meeting_year'), getTs('comments', 'id,email', '&limit=5000'),
           getTs('chat_messages', 'id,email,body,reply_to', '&order=id.desc&limit=5000'), getTs('meeting_votes', 'email,city,country'),
           getTs('meeting_days', 'email,day', '&limit=10000'), getTs('birthdays', 'email,day,month'), getTs('reactions', 'target,email', '&limit=10000'),
-          getTs('nicknames', 'email,nickname'), getTs('booster_reads', 'email,day,q', '&limit=20000')
+          getTs('nicknames', 'email,nickname'), getTs('booster_reads', 'email,day,q', '&limit=20000'),
+          getTs('photo_reactions', 'target,email,emoji', '&limit=20000'), getTs('photo_comments', 'id,photo_id,email', '&limit=5000')
         ]);
-        const D = { att: a[0], photos: a[1], posts: a[2], mem: a[3], comments: a[4], chat: a[5], votes: a[6], days: a[7], bd: a[8], reactions: a[9], boost: a[11] };
+        const D = { att: a[0], photos: a[1], posts: a[2], mem: a[3], comments: a[4], chat: a[5], votes: a[6], days: a[7], bd: a[8], reactions: a[9], boost: a[11], pr: a[12], pc: a[13] };
         const joins = a[10];
         const base = actBuild(D, joins);
         actReplay(D, function (rep) {
@@ -2983,17 +2992,18 @@
       window.ttReloadPass = function () { return loadPass(); };
       async function loadPass() {
         const a = await Promise.all([
-          get('attendance?select=email,meeting'), get('meeting_photos?select=email,meeting'),
+          get('attendance?select=email,meeting'), get('meeting_photos?select=id,email,meeting'),
           get('posts?select=id,email'), get('memorabilia?select=id,email,meeting_key,meeting_year'),
           get('comments?select=id,email&limit=5000'), get('chat_messages?select=id,email,body,created_at,reply_to&order=id.desc&limit=5000'),
           get('meeting_votes?select=email'), get('meeting_days?select=email,day&limit=10000'),
           get('birthdays?select=email,day,month'), get('reactions?select=target,email&limit=10000'),
-          get('booster_reads?select=email,day,q&limit=20000')
+          get('booster_reads?select=email,day,q&limit=20000'),
+          get('photo_reactions?select=target,email,emoji&limit=20000'), get('photo_comments?select=id,photo_id,email&limit=5000')
         ]);
         att = a[0]; photos = a[1] || [];
         if (att === null) { $('stamps').innerHTML = '<p class="vote-hint">Passport is not available yet (database table missing).</p>'; att = []; }
         else renderStamps();
-        DATA = { att: att, photos: photos, posts: a[2] || [], mem: a[3] || [], comments: a[4] || [], chat: a[5] || [], votes: a[6] || [], days: a[7] || [], bd: a[8] || [], reactions: a[9] || [], boost: a[10] || [] };
+        DATA = { att: att, photos: photos, posts: a[2] || [], mem: a[3] || [], comments: a[4] || [], chat: a[5] || [], votes: a[6] || [], days: a[7] || [], bd: a[8] || [], reactions: a[9] || [], boost: a[10] || [], pr: a[11] || [], pc: a[12] || [] };
         if (email) {
           myM = metricsFor(email, DATA);
           try {
@@ -3022,6 +3032,7 @@
       }
       /* ---------------- BADGES / LEVELS ---------------- */
       const FOUNDERS = ['Toro Loco', 'Biageo', 'Carlitos', 'The Boss', 'Frankie', 'Tronco', 'Jack Hammer', 'Uncle Peter', 'Rino', 'Kraken', 'Alaaf Kia', 'Don Simon', 'Tres Tess'];
+      const PALETTE = ['👍', '❤️', '😂', '😮', '😢', '😡'];
       const TI = ['🥉', '🥈', '🥇', '💎'], TN = ['Bronze', 'Silver', 'Gold', 'Platinum'], TP = [10, 25, 50, 100];
       const GREET = /(happy\s*b|b-?day|birthday|auguri|compleanno|cumple|feliz|geburtstag|alles gute|herzlichen|gefeliciteerd|verjaardag|joyeux|anniversaire)/i;
       const CATS = ['Journey', 'Memories', 'Social', 'Rhythm', 'Special'];
@@ -3045,6 +3056,10 @@
         { id: 'set', c: 'Rhythm', ic: '🧩', n: 'All Set', m: 'profile', t: [3, 4, 5], u: 'of 5 steps', d: 'Complete your profile: call sign, birthday, city vote, free dates, first stamp.' },
         { id: 'allr', c: 'Rhythm', ic: '🎨', n: 'All-Rounder', m: 'kinds', t: [3, 4, 5], u: 'of 5 activities', d: 'Use the whole site: publish a post, add a photo, add a Memorabilia piece, write in the Lagoon and comment on the Blog.' },
         { id: 'ritual', c: 'Rhythm', ic: '🌅', n: 'Morning Ritual', m: 'boostRun', t: [3, 7, 30, 100], u: 'days in a row', d: 'Open the Daily Booster on the home page on consecutive days.' },
+        { id: 'pfan', c: 'Social', ic: '😍', n: 'Photo Fan', m: 'pReact', t: [5, 25, 75, 200], u: 'reactions', d: 'React with emojis to photos and comments in the meeting galleries.' },
+        { id: 'ptalk', c: 'Memories', ic: '🖼️', n: 'Gallery Talker', m: 'pComm', t: [3, 15, 40, 100], u: 'comments', d: 'Comment on photos in the meeting galleries.' },
+        { id: 'pstar', c: 'Memories', ic: '🌟', n: 'Snapshot Star', m: 'pGot', t: [5, 25, 100, 300], u: 'reactions', d: 'Receive reactions on your gallery photos and comments.' },
+        { id: 'phop', c: 'Journey', ic: '🗺️', n: 'Gallery Hopper', m: 'pHop', t: [2, 3], u: 'galleries', d: 'React or comment in the galleries of different Tsunami Meetings.' },
         { id: 'found', c: 'Special', ic: '🏴', n: 'Founder', m: 'founder', t: [1], u: '', secret: true, hint: 'Reserved for the ones who started it all.', d: 'One of the thirteen founders of the Tsunami Team.' },
         { id: 'lucky', c: 'Special', ic: '🍀', n: 'Lucky Number', m: 'lucky', t: [1], u: '', secret: true, hint: 'Some say the Lagoon rewards perfect timing…', d: 'You wrote in the Lagoon at exactly 13:13.' },
         { id: 'insom', c: 'Special', ic: '🌙', n: 'Insomniac', m: 'nightDays', t: [7], u: '', secret: true, hint: 'The Lagoon never sleeps… and neither do you, apparently.', d: 'You wrote in the Lagoon at night (midnight to 5 AM) on 7 different days.' },
@@ -3056,6 +3071,8 @@
         { id: 'plat', c: 'Special', ic: '💠', n: 'Platinum Touch', m: 'plat', t: [1], u: '', secret: true, hint: 'Reach the very top of a badge.', d: 'You reached the Platinum level on at least one badge.' },
         { id: 'slam', c: 'Special', ic: '🧙', n: 'Grand Slam', m: 'slam', t: [5], u: '', secret: true, hint: 'Excellence, five times over.', d: 'You reached Gold or better on 5 different badges.' },
         { id: 'sage', c: 'Special', ic: '🏛️', n: 'Keeper of Wisdom', m: 'boostAll', t: [1], u: '', secret: true, hint: 'Every day brings a different voice… can you hear them all?', d: 'You read every single quote of the Daily Booster.' },
+        { id: 'pal', c: 'Special', ic: '🎭', n: 'Full Palette', m: 'pPal', t: [6], u: '', secret: true, hint: 'Every feeling has its emoji… have you tried them all?', d: 'You used all six reactions: 👍 ❤️ 😂 😮 😢 😡.' },
+        { id: 'mag', c: 'Special', ic: '🧲', n: 'Photo Magnet', m: 'pMag', t: [8], u: '', secret: true, hint: 'One shot that nobody could resist.', d: 'One of your gallery photos received reactions from 8 different members.' },
         { id: 'top', c: 'Special', ic: '🏆', n: 'Completionist', m: 'badges', t: [5, 10, 20, 30], u: 'badges unlocked', d: 'Unlock many different badges.' }
       ];
       const LEVELS = [
@@ -3122,6 +3139,18 @@
         M.boostRun = bb;
         const allQ = (window.TT_BOOST && window.TT_BOOST.hashes) || [], seenQ = new Set(bo.map(x => x.q));
         M.boostAll = allQ.length && allQ.every(h => seenQ.has(h)) ? 1 : 0;
+        const PR = D.pr || [], PC = D.pc || [], myPc = PC.filter(c => c.email === e), given = PR.filter(r => r.email === e);
+        const myPh = new Set(ph.map(p => String(p.id))), myT = new Set(ph.map(p => 'p' + p.id).concat(myPc.map(c => 'c' + c.id)));
+        M.pReact = given.length; M.pComm = myPc.length;
+        M.pGot = PR.filter(r => r.email !== e && myT.has(r.target)).length;
+        M.pPal = new Set(given.map(r => r.emoji).filter(x => PALETTE.indexOf(x) > -1)).size;
+        const perP = {}; PR.forEach(r => { if (r.email !== e && r.target.charAt(0) === 'p' && myPh.has(r.target.slice(1))) perP[r.target] = (perP[r.target] || 0) + 1; });
+        M.pMag = Math.max.apply(null, [0].concat(Object.values(perP)));
+        const phMeet = {}, cMeet = {}, gal = new Set();
+        D.photos.forEach(p => { phMeet[String(p.id)] = p.meeting; }); PC.forEach(c => { cMeet[String(c.id)] = phMeet[String(c.photo_id)]; });
+        given.forEach(r => { const mk = r.target.charAt(0) === 'p' ? phMeet[r.target.slice(1)] : cMeet[r.target.slice(1)]; if (mk) gal.add(mk); });
+        myPc.forEach(c => { const mk = phMeet[String(c.photo_id)]; if (mk) gal.add(mk); });
+        M.pHop = gal.size;
         M.kinds = (M.posts ? 1 : 0) + (M.photos ? 1 : 0) + (M.mem ? 1 : 0) + (M.msgs ? 1 : 0) + (M.comments ? 1 : 0);
         const META = ['top', 'plat', 'slam'];
         M.plat = BADGES.filter(b => META.indexOf(b.id) < 0 && b.t.length > 1 && lvlOf(b, M) === b.t.length).length;
