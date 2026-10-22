@@ -33,17 +33,20 @@
         '<ol><li>Tap <b>Share</b> <span class="su-share">⬆︎</span> in the Safari bar' + (/CriOS|FxiOS|EdgiOS/.test(ua) ? ' (open this site in <b>Safari</b> first)' : '') + '.</li>' +
         '<li>Scroll and tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>, then open Tsunami from the new icon.</li></ol>' +
         '<div class="su-arrow" aria-hidden="true">⬇︎</div>';
-      return '<div class="su-ic">📲</div><h3>Install the Tsunami app</h3><p>Full screen, notifications and fingerprint/face lock. One tap.</p>' +
+      return '<div class="su-ic">📲</div><h3>Install the Tsunami app</h3><p>Full screen, notifications and fingerprint lock.' + (installEv ? ' One tap.' : '') + '</p>' +
         (installEv ? '<button type="button" class="su-go" data-su="install">Install the app</button>'
-          : '<ol><li>Tap the <b>⋮</b> menu of Chrome.</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</li><li>Open Tsunami from the new icon.</li></ol>');
+          : /SamsungBrowser/.test(ua)
+            ? '<ol><li>Tap the <b>☰</b> menu at the bottom.</li><li>Tap <b>Add page to</b> → <b>Home screen</b>.</li><li>Open Tsunami from the new icon.</li></ol>'
+            : '<ol><li>Tap the <b>⋮</b> menu of Chrome (top right).</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</li><li>Open Tsunami from the new icon.</li></ol>');
     }
     if (s === 'push') {
       if (pushState() === 'denied') return '<div class="su-ic">🔕</div><h3>Notifications are blocked</h3><p>Allow them in your phone settings for Tsunami (Settings → Notifications → Tsunami), then come back.</p>';
       return '<div class="su-ic">🔔</div><h3>Turn on notifications</h3><p>Only when someone mentions you, replies to you or comments your posts. No spam.</p>' +
         '<button type="button" class="su-go" data-su="push">Turn on notifications</button>';
     }
-    return '<div class="su-ic">🔒</div><h3>Protect the app with Face ID</h3><p>Opening Tsunami will ask for your face or fingerprint, so nobody else can read the crew’s chat.</p>' +
-      '<button type="button" class="su-go" data-su="lock">Turn on Face ID</button>';
+    const bio = ios ? 'Face ID' : 'fingerprint lock';
+    return '<div class="su-ic">🔒</div><h3>Protect the app with ' + bio + '</h3><p>Opening Tsunami will ask for your face or fingerprint, so nobody else can read the crew’s chat.</p>' +
+      '<button type="button" class="su-go" data-su="lock">Turn on ' + bio + '</button>';
   }
 
   function render() {
@@ -73,7 +76,7 @@
       try {
         if (a === 'install' && installEv) { installEv.prompt(); await installEv.userChoice; installEv = null; render(); }
         else if (a === 'push') { await window.ttPush.toggle(); if (pushState() !== 'on' && msg()) msg().textContent = pushState() === 'denied' ? 'Notifications were blocked.' : 'Not turned on. Tap the button again and choose Allow.'; }
-        else if (a === 'lock') { await window.ttLock.toggle(); if (lockState() !== 'on' && msg()) msg().textContent = 'Face ID was not confirmed. Try again.'; }
+        else if (a === 'lock') { await window.ttLock.toggle(); if (lockState() !== 'on' && msg()) msg().textContent = 'Not confirmed. Try again.'; }
       } catch (x) {}
       busy = false; if (box) { const m = msg() ? msg().textContent : ''; render(); if (m && msg()) msg().textContent = m; }
     });
