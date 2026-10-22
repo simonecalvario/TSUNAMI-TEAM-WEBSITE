@@ -68,7 +68,7 @@
 
       function renderGrid() {
         const g = $('grid');
-        if (photos === null) { g.innerHTML = '<p class="empty">The gallery is not available yet (database table missing).</p>'; return; }
+        if (photos === null) { g.innerHTML = '<p class="empty">The gallery could not be loaded right now. Reload the page to retry.</p>'; return; }
         g.innerHTML = photos.length ? photos.map(p => {
           const n = ncm(p.id), t = 'p' + p.id;
           return '<div class="cell" data-ph="' + esc(p.id) + '"><img src="' + esc(p.image_url) + '" alt="Photo" loading="lazy">' + (p.email === email ? '<button data-del="' + esc(p.id) + '" title="Delete">✕</button>' : '') +

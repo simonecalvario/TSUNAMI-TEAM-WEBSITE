@@ -313,7 +313,8 @@
         if (Date.now() - nicksAt > 60000) { nicksAt = Date.now(); const n = await get('nicknames?select=email,nickname'); if (n) nicks = n; }
         const q = lastId ? 'chat_messages?select=*&id=gt.' + lastId + '&order=id.asc' : 'chat_messages?select=*&order=id.desc&limit=80';
         const rows = await get(q);
-        if (rows === null) { if (!chatBroken) { chatBroken = true; $('chat-note').style.display = 'block'; $('chat-note').textContent = 'Chat is not available yet (database table missing).'; } return; }
+        if (rows === null) { if (!chatBroken) { chatBroken = true; $('chat-note').style.display = 'block'; $('chat-note').textContent = 'Connection lost, reconnecting…'; } return; }
+        if (chatBroken) { chatBroken = false; if (nick) $('chat-note').style.display = 'none'; }
         if (!lastId) { rows.reverse(); lastDay = ''; byId = {}; }
         if (!rows.length) { if (!lastId && !list.children.length) list.innerHTML = '<div class="chat-day">No messages yet. Say hi 👋</div>'; return; }
         if (!lastId) list.innerHTML = '';
@@ -498,7 +499,7 @@
           get('birthday_waves?select=bday_email,year,email,emoji,created_at&limit=5000')
         ]);
         att = a[0]; photos = a[1] || [];
-        if (att === null) { $('stamps').innerHTML = '<p class="vote-hint">Passport is not available yet (database table missing).</p>'; att = []; }
+        if (att === null) { $('stamps').innerHTML = '<p class="vote-hint">Passport could not be loaded right now. It will retry shortly.</p>'; att = []; }
         else renderStamps();
         DATA = { att: att, photos: photos, posts: a[2] || [], mem: a[3] || [], comments: a[4] || [], chat: a[5] || [], votes: a[6] || [], days: a[7] || [], bd: a[8] || [], reactions: a[9] || [], boost: a[10] || [], pr: a[11] || [], pc: a[12] || [], waves: a[13] || [] };
         if (email) {

@@ -26,35 +26,49 @@
      /api/token is a Cloudflare Worker that checks the Access login and returns a short-lived
      Supabase token carrying the member's email, so the database knows who is writing.
      Until the Worker is deployed the call fails and requests keep using the public key. */
-  let tok = null, tokExp = 0, tokP = null;
-  function loadToken() {
-    tokP = new Promise(function (done) {
-      const t = setTimeout(() => done(null), 4000);
+  let tok = null, tokExp = 0, tokP = null, inflight = null, failAt = 0;
+  const valid = () => !!tok && Date.now() < tokExp - 60000;
+  // Phones pause timers in the background, so the token is checked on every request
+  // and renewed when it is about to expire (or after a 401), not only on a timer.
+  function loadToken(force) {
+    if (inflight) return inflight;
+    if (!force && Date.now() - failAt < 20000) return Promise.resolve(valid() ? tok : null);
+    inflight = new Promise(function (done) {
+      const t = setTimeout(() => done(valid() ? tok : null), 6000);
       _fetch('/api/token', { credentials: 'same-origin', cache: 'no-store' })
         .then(r => r.ok && /json/.test(r.headers.get('content-type') || '') ? r.json() : null)
         .then(j => {
           clearTimeout(t);
-          if (j && j.token) { tok = j.token; tokExp = (j.exp || 0) * 1000; setTimeout(loadToken, Math.max(60000, tokExp - Date.now() - 300000)); }
-          done(tok);
-        }).catch(() => { clearTimeout(t); done(null); });
-    });
-    return tokP;
+          if (j && j.token) { tok = j.token; tokExp = (j.exp || 0) * 1000; failAt = 0; } else failAt = Date.now();
+          done(valid() ? tok : null);
+        }).catch(() => { clearTimeout(t); failAt = Date.now(); done(valid() ? tok : null); });
+    }).finally(() => { inflight = null; });
+    tokP = inflight;
+    return inflight;
   }
   const _fetch = window.fetch.bind(window);
+  function authed(input, init, t) {
+    if (!t) return _fetch(input, init);
+    const o = Object.assign({}, init || {});
+    const h = new Headers(o.headers || (input instanceof Request ? input.headers : undefined));
+    h.set('Authorization', 'Bearer ' + t);
+    if (!h.get('apikey')) h.set('apikey', ANON);
+    o.headers = h;
+    return _fetch(input, o);
+  }
   window.fetch = function (input, init) {
     const url = typeof input === 'string' ? input : (input && input.url) || '';
     if (url.indexOf(BASE) !== 0) return _fetch(input, init);
-    const p = tok && Date.now() < tokExp - 30000 ? Promise.resolve(tok) : (tokP || loadToken());
-    return p.then(function (t) {
-      if (!t) return _fetch(input, init);
-      const o = Object.assign({}, init || {});
-      const h = new Headers(o.headers || (input instanceof Request ? input.headers : undefined));
-      h.set('Authorization', 'Bearer ' + t);
-      if (!h.get('apikey')) h.set('apikey', ANON);
-      o.headers = h;
-      return _fetch(input, o);
+    return (valid() ? Promise.resolve(tok) : loadToken()).then(function (t) {
+      return authed(input, init, t).then(function (r) {
+        if (r.status !== 401 || !t) return r;
+        tok = null; tokExp = 0; // expired or rejected: renew once and retry
+        return loadToken(true).then(t2 => t2 ? authed(input, init, t2) : r);
+      });
     });
   };
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && !valid()) loadToken(true); });
+  window.addEventListener('pageshow', function () { if (!valid()) loadToken(true); });
   loadToken();
 
   /* ---- database helpers ---- */
