@@ -224,3 +224,4 @@ html.su-open { overflow: hidden; }
 #bb-pop button[data-bb] { margin-top: 16px; width: 100%; padding: 13px; border: 0; border-radius: 12px; background: var(--yellow); color: #101010; font: inherit; font-weight: 900; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .bb-bar.full i { animation: none; } }
 #bb-pop .cf { position: absolute; top: -10%; z-index: 1; font-style: normal; animation: fall 2.6s linear forwards; }
+.nav-drop a .nbadge { top: 50%; right: 8px; transform: translateY(-50%); }
