@@ -50,7 +50,7 @@
 
       function render() {
         const g = $('mem-grid');
-        if (items === null) { g.innerHTML = '<p class="vote-hint">Memorabilia is not available yet (database table missing).</p>'; return; }
+        if (items === null) { g.innerHTML = '<p class="vote-hint">Memorabilia could not be loaded right now. It will retry shortly.</p>'; return; }
         const keyOf = m => (m.meeting_key && MEET.some(x => x.key === m.meeting_key)) ? m.meeting_key : 'other';
         const cnt = k => k === 'all' ? items.length : items.filter(m => keyOf(m) === k).length;
         $('mem-chips').innerHTML = [{ key: 'all', label: 'All' }].concat(MEET).map(x => '<button type="button" class="chip' + (filter === x.key ? ' on' : '') + '" data-f="' + x.key + '">' + x.label + ' (' + cnt(x.key) + ')</button>').join('');

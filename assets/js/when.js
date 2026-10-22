@@ -42,7 +42,7 @@
           if (!r.ok) throw 0;
           rows = await r.json();
           $('when-msg').textContent = '';
-        } catch (e) { rows = []; $('when-msg').textContent = 'Calendar not available yet (database table missing).'; }
+        } catch (e) { rows = []; $('when-msg').textContent = 'The calendar could not be loaded right now. It will retry shortly.'; }
         count = {}; voters = {}; saved = new Set();
         rows.forEach(x => {
           count[x.day] = (count[x.day] || 0) + 1;
