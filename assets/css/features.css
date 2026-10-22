@@ -164,3 +164,27 @@
 .trip-more .cap-seal { margin-top: 0; }
 .trip-det { margin-top: 10px; }
 .trip-det > summary { cursor: pointer; color: var(--yellow); font-size: .9rem; }
+
+/* ===== App setup (install, notifications, Face ID) ===== */
+#setup-pop { position: fixed; inset: 0; z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 18px; background: rgba(2,6,16,.94); overflow-y: auto; }
+html.su-open { overflow: hidden; }
+#setup-pop .su { width: min(400px, 100%); padding: 22px 20px 14px; background: var(--dark); border: 1px solid var(--yellow); border-radius: 18px; text-align: center; position: relative; }
+.su-top { display: flex; justify-content: space-between; align-items: center; color: var(--grey); font-size: .78rem; margin-bottom: 12px; }
+.su-dots { display: flex; gap: 5px; }
+.su-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.18); }
+.su-dots i.on { background: var(--yellow); }
+.su-dots i.ok { background: var(--blue); }
+.su-ic { font-size: 2.6rem; line-height: 1; margin-bottom: 8px; }
+#setup-pop h3 { color: var(--yellow); font-size: 1.25rem; margin-bottom: 6px; }
+#setup-pop p { color: var(--grey); font-size: .95rem; line-height: 1.45; }
+#setup-pop ol { text-align: left; margin: 14px 0 4px; padding-left: 22px; line-height: 1.55; }
+#setup-pop ol li { margin-bottom: 6px; }
+.su-share { display: inline-block; padding: 0 6px; border: 1px solid var(--line); border-radius: 6px; color: var(--blue); font-weight: 700; }
+.su-go { width: 100%; margin-top: 16px; padding: 15px; border: 0; border-radius: 12px; background: var(--yellow); color: #101010; font: inherit; font-weight: 900; font-size: 1.05rem; cursor: pointer; }
+.su-go:disabled { opacity: .6; }
+.su-msg { min-height: 1.2em; margin-top: 8px; color: var(--orange) !important; font-size: .85rem !important; }
+.su-later { background: none; border: 0; color: var(--grey); font: inherit; font-size: .85rem; padding: 6px 12px; cursor: pointer; text-decoration: underline; }
+.su-arrow { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); font-size: 2rem; color: var(--yellow); animation: su-bounce 1.2s ease-in-out infinite; }
+@keyframes su-bounce { 50% { transform: translate(-50%, 8px); } }
+@media (min-width: 768px) { .su-arrow { display: none; } }
+@media (prefers-reduced-motion: reduce) { .su-arrow { animation: none; } }
