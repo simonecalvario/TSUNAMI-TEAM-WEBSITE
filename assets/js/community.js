@@ -33,6 +33,7 @@
           ['📅', 'Mark your free dates', 'Meetings → Dates. Find the days that work for everyone.'],
           ['🛂', 'Collect your stamps', 'Passport → Stamps. Tap the meetings you lived.'],
           ['📸', 'Add photos to the galleries', 'Meetings → Map. Tap a pin to open that meeting’s gallery: add photos, react with emojis and comment.'],
+          ['🎂', 'Birthday waves', 'On a member’s birthday, tap an emoji on the home page: the crew fills their energy bar and unlocks their Birthday Boost.'],
           ['🌅', 'Open your Daily Booster', 'Tap the logo on the home page every day: a quote to start your day, and badges to earn.'],
           ['💬', 'Say hi in the Lagoon', 'Use @callsign to tag someone, and reply to messages.'],
           ['🏠', 'Add your city', 'Passport → Birthdays & city. It counts your kilometres in your Wrapped.']
@@ -338,8 +339,8 @@
       /* ---------------- ACTIVITY LOG ---------------- */
       let actAt = 0, ACT = null, actF = 'all', actM = '', actN = 60, actBusy = false;
       const ACTF = [['all', 'All'], ['badge', '🏅 Badges'], ['level', '⭐ Levels'], ['content', '📖 Content'], ['chat', '💬 Chat'], ['team', '🙋 Team']];
-      const ACTG = { rsvp: 'team', badge: 'badge', level: 'level', post: 'content', comment: 'content', photo: 'content', pcomm: 'content', preact: 'content', mem: 'content', chat: 'chat', stamp: 'team', vote: 'team', days: 'team', bday: 'team', join: 'team' };
-      const ACTI = { rsvp: '🧳', badge: '🏅', level: '⭐', post: '📖', comment: '💭', photo: '📸', pcomm: '🖼️', preact: '😍', mem: '🎽', chat: '💬', stamp: '🛂', vote: '🗳', days: '📅', bday: '🎂', join: '🙋' };
+      const ACTG = { wave: 'team', boost: 'team', rsvp: 'team', badge: 'badge', level: 'level', post: 'content', comment: 'content', photo: 'content', pcomm: 'content', preact: 'content', mem: 'content', chat: 'chat', stamp: 'team', vote: 'team', days: 'team', bday: 'team', join: 'team' };
+      const ACTI = { wave: '🌊', boost: '⚡', rsvp: '🧳', badge: '🏅', level: '⭐', post: '📖', comment: '💭', photo: '📸', pcomm: '🖼️', preact: '😍', mem: '🎽', chat: '💬', stamp: '🛂', vote: '🗳', days: '📅', bday: '🎂', join: '🙋' };
       const tsOf = r => { const t = Date.parse(r.created_at); return isNaN(t) ? 0 : t; };
       async function getTs(table, cols, extra) {
         let r = await get(table + '?select=' + cols + ',created_at' + (extra || ''));
@@ -366,6 +367,9 @@
         joins.forEach(j => add(j.ts, j.email, 'join', 'joined the crew as <b>' + esc(j.nickname) + '</b>'));
         const RS = { yes: 'is coming to the next Tsunami Meeting 🙌', maybe: 'might come to the next Tsunami Meeting', no: 'can’t make it to the next Tsunami Meeting' };
         (D.rsvp || []).forEach(r => add(r.ts, r.email, 'rsvp', RS[r.status] || 'answered the trip room'));
+        const wb = {};
+        (D.waves || []).forEach(w => { add(w.ts, w.email, 'wave', 'sent a ' + esc(w.emoji) + ' birthday wave to <b>' + esc(nickOf(w.bday_email) || 'a member') + '</b>'); (wb[w.bday_email + '|' + w.year] = wb[w.bday_email + '|' + w.year] || []).push(w); });
+        Object.keys(wb).forEach(k => { const l = wb[k].sort((x, y) => x.ts - y.ts), nd = Math.max(1, Math.ceil(Math.max(0, nicks.length - 1) * 2 / 3)); if (l[nd - 1]) add(l[nd - 1].ts, k.split('|')[0], 'boost', 'got the <b>Birthday Boost</b> ⚡ from the crew'); });
 
         const grp = (rows, type, fn) => {
           const g = {};
@@ -379,7 +383,7 @@
       }
 
       function actReplay(D, onDone) {
-        const S = {}; ['att', 'photos', 'posts', 'mem', 'comments', 'chat', 'votes', 'days', 'bd', 'reactions', 'boost', 'pr', 'pc'].forEach(k => { S[k] = asc(D[k] || []); });
+        const S = {}; ['att', 'photos', 'posts', 'mem', 'comments', 'chat', 'votes', 'days', 'bd', 'reactions', 'boost', 'pr', 'pc', 'waves'].forEach(k => { S[k] = asc(D[k] || []); });
         const upto = (arr, t) => { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m].ts <= t) lo = m + 1; else hi = m; } return arr.slice(0, lo); };
         const cps = {}, mark = (e, ts) => { if (e && ts) (cps[e] = cps[e] || new Set()).add(dayEnd(ts)); };
         let last = 0;
@@ -421,9 +425,9 @@
           getTs('meeting_days', 'email,day', '&limit=10000'), getTs('birthdays', 'email,day,month'), getTs('reactions', 'target,email', '&limit=10000'),
           getTs('nicknames', 'email,nickname'), getTs('booster_reads', 'email,day,q', '&limit=20000'),
           getTs('photo_reactions', 'target,email,emoji', '&limit=20000'), getTs('photo_comments', 'id,photo_id,email', '&limit=5000'),
-          getTs('trip_rsvp', 'email,status')
+          getTs('trip_rsvp', 'email,status'), getTs('birthday_waves', 'bday_email,year,email,emoji')
         ]);
-        const D = { att: a[0], photos: a[1], posts: a[2], mem: a[3], comments: a[4], chat: a[5], votes: a[6], days: a[7], bd: a[8], reactions: a[9], boost: a[11], pr: a[12], pc: a[13], rsvp: a[14] };
+        const D = { att: a[0], photos: a[1], posts: a[2], mem: a[3], comments: a[4], chat: a[5], votes: a[6], days: a[7], bd: a[8], reactions: a[9], boost: a[11], pr: a[12], pc: a[13], rsvp: a[14], waves: a[15] };
         const joins = a[10];
         const base = actBuild(D, joins);
         actReplay(D, function (rep) {
@@ -490,12 +494,13 @@
           get('meeting_votes?select=email'), get('meeting_days?select=email,day&limit=10000'),
           get('birthdays?select=email,day,month'), get('reactions?select=target,email&limit=10000'),
           get('booster_reads?select=email,day,q&limit=20000'),
-          get('photo_reactions?select=target,email,emoji&limit=20000'), get('photo_comments?select=id,photo_id,email&limit=5000')
+          get('photo_reactions?select=target,email,emoji&limit=20000'), get('photo_comments?select=id,photo_id,email&limit=5000'),
+          get('birthday_waves?select=bday_email,year,email,emoji,created_at&limit=5000')
         ]);
         att = a[0]; photos = a[1] || [];
         if (att === null) { $('stamps').innerHTML = '<p class="vote-hint">Passport is not available yet (database table missing).</p>'; att = []; }
         else renderStamps();
-        DATA = { att: att, photos: photos, posts: a[2] || [], mem: a[3] || [], comments: a[4] || [], chat: a[5] || [], votes: a[6] || [], days: a[7] || [], bd: a[8] || [], reactions: a[9] || [], boost: a[10] || [], pr: a[11] || [], pc: a[12] || [] };
+        DATA = { att: att, photos: photos, posts: a[2] || [], mem: a[3] || [], comments: a[4] || [], chat: a[5] || [], votes: a[6] || [], days: a[7] || [], bd: a[8] || [], reactions: a[9] || [], boost: a[10] || [], pr: a[11] || [], pc: a[12] || [], waves: a[13] || [] };
         if (email) {
           myM = metricsFor(email, DATA);
           try {
@@ -540,7 +545,9 @@
         { id: 'conn', c: 'Social', ic: '📣', n: 'Connector', m: 'mentions', t: [5, 25, 100, 300], u: 'mentions', d: 'Mention other members with @ in the Lagoon.' },
         { id: 'comm', c: 'Social', ic: '💭', n: 'Commentator', m: 'comments', t: [3, 15, 50, 150], u: 'comments', d: 'Comment on posts in the Blog.' },
         { id: 'fav', c: 'Social', ic: '❤️', n: 'Crowd Favorite', m: 'likes', t: [5, 25, 100, 300], u: 'reactions', d: 'Receive reactions on your posts and comments.' },
-        { id: 'party', c: 'Social', ic: '🎂', n: 'Party Animal', m: 'wishes', t: [1, 3, 6, 12], u: 'members greeted', d: 'Send birthday wishes in the Lagoon on a member’s birthday.' },
+        { id: 'party', c: 'Social', ic: '🎂', n: 'Party Animal', m: 'wishes', t: [1, 3, 6, 12], u: 'members greeted', d: 'Wish a member happy birthday on their birthday: a wave from the home page, or a message in the Lagoon.' },
+        { id: 'wave', c: 'Social', ic: '🌊', n: 'Birthday Wave', m: 'waves', t: [1, 3, 6, 12], u: 'waves sent', d: 'Send a birthday wave from the home page to fill a member’s energy bar.' },
+        { id: 'boosted', c: 'Memories', ic: '⚡', n: 'Birthday Boosted', m: 'boosted', t: [1, 2, 3, 5], u: 'Birthday Boosts', d: 'Your crew filled your energy bar on your birthday.' },
         { id: 'streak', c: 'Rhythm', ic: '🔥', n: 'On Fire', m: 'streak', t: [3, 7, 14, 30], u: 'days in a row', d: 'Write in the Lagoon on consecutive days.' },
         { id: 'owl', c: 'Rhythm', ic: '🦉', n: 'Night Owl', m: 'night', t: [1, 10, 50, 150], u: 'night messages', d: 'Write in the Lagoon between midnight and 5 AM.' },
         { id: 'early', c: 'Rhythm', ic: '🌅', n: 'Early Bird', m: 'early', t: [1, 10, 50, 150], u: 'morning messages', d: 'Write in the Lagoon between 5 and 8 AM.' },
@@ -559,6 +566,9 @@
         { id: 'thread', c: 'Special', ic: '🧵', n: 'Thread Starter', m: 'thread', t: [3], u: '', secret: true, hint: 'Say something that gets the whole crew talking.', d: 'One of your Lagoon messages got replies from 3 different members.' },
         { id: 'roll', c: 'Special', ic: '📋', n: 'Roll Call', m: 'roll', t: [1], u: '', secret: true, hint: 'Nobody gets left out.', d: 'You mentioned every other member with @ in the Lagoon.' },
         { id: 'midn', c: 'Special', ic: '🎆', n: 'Midnight Wish', m: 'midn', t: [1], u: '', secret: true, hint: 'The first wish of the day is the best one.', d: 'You wished a member happy birthday in the first minutes of their birthday (00:00–00:15).' },
+        { id: 'fpush', c: 'Special', ic: '🎯', n: 'Final Push', m: 'filler', t: [1], u: '', secret: true, hint: 'Some waves arrive exactly when they are needed.', d: 'Your wave was the one that unlocked a Birthday Boost.' },
+        { id: 'fwave', c: 'Special', ic: '🥇', n: 'First Wave', m: 'firstWave', t: [1], u: '', secret: true, hint: 'Be the first to wish.', d: 'You sent the first wave on a member’s birthday.' },
+        { id: 'fcrew', c: 'Special', ic: '🌐', n: 'Full Crew', m: 'fullCrew', t: [1], u: '', secret: true, hint: 'When everyone shows up for you…', d: 'Every other member sent you a birthday wave.' },
         { id: 'salt', c: 'Special', ic: '🧓', n: 'Old Salt', m: 'salt', t: [1], u: '', secret: true, hint: 'Only time can earn this one.', d: 'You have been writing in the Lagoon for over 90 days, with at least 100 messages.' },
         { id: 'plat', c: 'Special', ic: '💠', n: 'Platinum Touch', m: 'plat', t: [1], u: '', secret: true, hint: 'Reach the very top of a badge.', d: 'You reached the Platinum level on at least one badge.' },
         { id: 'slam', c: 'Special', ic: '🧙', n: 'Grand Slam', m: 'slam', t: [5], u: '', secret: true, hint: 'Excellence, five times over.', d: 'You reached Gold or better on 5 different badges.' },
@@ -617,6 +627,20 @@
         M.thread = Math.max.apply(null, [0].concat(Object.values(rep).map(v => v.size)));
         const tms = cm.map(x => new Date(x.created_at).getTime());
         M.salt = cm.length >= 100 && tms.length && (Math.max.apply(null, tms) - Math.min.apply(null, tms)) / 864e5 >= 90 ? 1 : 0;
+        // Birthday waves (home page): the crew's own way of wishing, no matter the language.
+        const W = D.waves || [], boostNeed = o => Math.max(1, Math.ceil(o * 2 / 3)), othersW = Math.max(0, nicks.length - 1);
+        const myW = W.filter(x => x.email === e);
+        M.waves = myW.length;
+        myW.forEach(x => { wish.add(x.bday_email); const t = new Date(x.created_at); if (t.getHours() === 0 && t.getMinutes() < 15) M.midn = 1; });
+        const byB = {}; W.forEach(x => { (byB[x.bday_email + '|' + x.year] = byB[x.bday_email + '|' + x.year] || []).push(x); });
+        M.boosted = 0; M.fullCrew = 0; M.filler = 0; M.firstWave = 0;
+        Object.keys(byB).forEach(k => {
+          const list = byB[k].slice().sort((a, b) => String(a.created_at).localeCompare(String(b.created_at))), who = k.split('|')[0], nd = boostNeed(othersW);
+          if (who === e && list.length >= nd) M.boosted++;
+          if (who === e && othersW > 0 && list.length >= othersW) M.fullCrew = 1;
+          if (list[nd - 1] && list[nd - 1].email === e) M.filler = 1;
+          if (list[0] && list[0].email === e) M.firstWave = 1;
+        });
         M.wishes = wish.size;
         const ts = Array.from(days).map(k => { const p = k.split('-'); return new Date(+p[0], +p[1], +p[2]).getTime(); }).sort((a, b) => a - b);
         let best = 0, run = 0;
@@ -670,8 +694,9 @@
       }
 
       function birthdayPop(name) {
+        if (document.getElementById('bb-pop')) return; // the Birthday Boost already greets
         const box = document.createElement('div'); box.id = 'bdg-pop';
-        box.innerHTML = '<div class="pop"><div class="pop-b"><span>🎂</span></div><div class="pop-t">Happy Birthday, ' + esc(name || 'friend') + '!</div><p class="pop-w">The whole Tsunami Team wishes you a day full of waves, friends and good vibes. 🌊🥳<br>Check the Lagoon: your crew will be sending you their wishes!</p><button type="button">Thank you! 🎉</button></div>';
+        box.innerHTML = '<div class="pop"><div class="pop-b"><span>🎂</span></div><div class="pop-t">Happy Birthday, ' + esc(name || 'friend') + '!</div><p class="pop-w">The whole Tsunami Team wishes you a day full of waves, friends and good vibes. 🌊🥳<br>Your crew is sending you their waves: when your energy bar on the home page is full, your Birthday Boost unlocks ⚡</p><button type="button">Thank you! 🎉</button></div>';
         for (let i = 0; i < 40; i++) { const s = document.createElement('i'); s.className = 'cf'; s.textContent = ['🎂', '🎉', '🎈', '🥳', '✨', '🎁'][i % 6]; s.style.left = Math.random() * 100 + '%'; s.style.animationDelay = (Math.random() * 1.8) + 's'; s.style.fontSize = (16 + Math.random() * 16) + 'px'; box.appendChild(s); }
         box.addEventListener('click', function (e) { if (e.target.tagName === 'BUTTON' || e.target === box) box.remove(); });
         document.body.appendChild(box);
@@ -774,12 +799,12 @@
           let d = new Date(now.getFullYear(), r.month - 1, r.day);
           if (d < now) d = new Date(now.getFullYear() + 1, r.month - 1, r.day);
           const diff = Math.round((d - now) / 864e5);
-          if (diff <= 7) out.push({ diff: diff, who: nameOf(r) });
+          if (diff <= 7) out.push({ diff: diff, who: nameOf(r), me: r.email === email });
         });
         out.sort((a, b) => a.diff - b.diff);
         const el = $('bday');
         if (!out.length) { el.classList.remove('show'); return; }
-        el.textContent = out.slice(0, 3).map(o => o.diff === 0 ? '🎂 Today is ' + o.who + '’s birthday! Send your wishes in the Lagoon' : '🎈 ' + o.who + '’s birthday in ' + o.diff + (o.diff === 1 ? ' day' : ' days')).join('  ·  ');
+        el.textContent = out.slice(0, 3).map(o => o.diff === 0 ? (o.me ? '🎂 Happy birthday, ' + o.who + '! Your crew is filling your energy bar ⚡' : '🎂 Today is ' + o.who + '’s birthday! Send your wave from the home page 🌊') : '🎈 ' + o.who + '’s birthday in ' + o.diff + (o.diff === 1 ? ' day' : ' days')).join('  ·  ');
         el.classList.add('show');
       }
 
@@ -791,6 +816,8 @@
         let seen = 0; try { seen = +localStorage.getItem(KEY) || 0; } catch (e) {}
         let chatSeen = 0; try { chatSeen = +localStorage.getItem(CK) || 0; } catch (e) {}
         let topChat = 0, lastBadge = -1;
+        let bdT = [], bdTk = '';
+        TT.when('bdayToday', function (v) { const k = JSON.stringify(v || []); bdT = v || []; if (k !== bdTk) { bdTk = k; check(); } });
 
         function badge(sel, n, hot) {
           document.querySelectorAll(sel).forEach(function (el) {
@@ -845,6 +872,7 @@
           if (myVote !== null && !myVote.length) todos.push({ href: '#meetings', ic: '🗳', txt: 'Vote the city of the next Tsunami Meeting' });
           if (myDays !== null && !myDays.length) todos.push({ href: '#meetings', ic: '📅', txt: 'Pick the dates you can attend' });
           if (myBd !== null && !myBd.length) todos.push({ href: '#passport', ic: '🎂', txt: 'Add your birthday in the Passport' });
+          bdT.filter(b => b.email !== email && !b.mine).forEach(b => todos.unshift({ href: '#home', ic: '🌊', txt: 'Send your birthday wave to ' + (nickOf(b.email) || 'a member') }));
           const unread = list.filter(c => c.t > seen).length;
           const total = unread + todos.length;
           btn.classList.toggle('has', total > 0); btn.querySelector('i').textContent = total > 9 ? '9+' : total;

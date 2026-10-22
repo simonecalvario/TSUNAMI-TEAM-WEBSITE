@@ -2,18 +2,24 @@ import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const esc = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const km = (a: number[], b: number[]) => {
-  const r = Math.PI / 180, dLat = (b[0] - a[0]) * r, dLng = (b[1] - a[1]) * r;
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLng / 2) ** 2;
-  return 2 * 6371 * Math.asin(Math.sqrt(h));
-};
-const day = (d: string) => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+// Public VAPID key used by the site (assets/js/push.js).
+const PUB = "BIZygphZe69F81urAeiXeObdY3I781Loy8UN4T6THbGQlNu_bbLDmF86rIvnKqPwBeB5tOWcyvi0_9W6dM1KhM0";
+const boostNeed = (others: number) => Math.max(1, Math.ceil(others * 2 / 3));
 
 Deno.serve(async (req) => {
-  if (req.headers.get("x-push-secret") !== Deno.env.get("PUSH_SECRET")) return new Response("no", { status: 401 });
-  const { table, record } = await req.json();
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT")!, Deno.env.get("VAPID_PUBLIC_KEY")!, Deno.env.get("VAPID_PRIVATE_KEY")!);
+  // Only the database (notify_push) knows this secret: it lives in public.tt_config, readable by the service role only.
+  const given = req.headers.get("x-push-secret") || "";
+  const { data: cfg } = await sb.from("tt_config").select("value").eq("name", "push_secret").maybeSingle();
+  if (!given || (given !== cfg?.value && given !== Deno.env.get("PUSH_SECRET"))) return new Response("no", { status: 401 });
+  const { table, record } = await req.json();
+  // Keys pasted with quotes, spaces or "=" padding would make web-push throw.
+  const clean = (v: string | undefined) => (v || "").replace(/[\s"'=]/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+  const subj = (Deno.env.get("VAPID_SUBJECT") || "").trim().replace(/^["']|["']$/g, "");
+  const pubK = clean(Deno.env.get("VAPID_PUBLIC_KEY")) || PUB, privK = clean(Deno.env.get("VAPID_PRIVATE_KEY"));
+  try { webpush.setVapidDetails(/^(mailto:|https:)/.test(subj) ? subj : "mailto:" + (subj || "tsunamiteambeliquid@gmail.com"), pubK, privK); }
+  catch (e) { return new Response(JSON.stringify({ vapid_error: String((e as Error).message), pub_len: pubK.length, priv_len: privK.length, subject_ok: /^(mailto:|https:)/.test(subj) }), { status: 500 }); }
+  if (table === "push_events" && record.kind === "ping") return new Response(JSON.stringify({ vapid: "ok", pub_matches_site: clean(Deno.env.get("VAPID_PUBLIC_KEY")) === PUB }));
 
   const to = new Map<string, { title: string; body: string; url: string }>();
   const clip = (t: string) => (t || "").slice(0, 120);
@@ -40,14 +46,26 @@ Deno.serve(async (req) => {
       target = p?.email ?? null;
     }
     if (target && target !== record.email) to.set(target, { title: record.author + " " + what, body: clip(record.body), url: "/#blog" });
-  } else if (table === "travel_pings") {
-    // Reconnect: tell the members who live near the city.
-    const { data: profs } = await sb.from("profiles").select("email,lat,lng,city");
-    for (const p of profs || []) {
-      if (p.email === record.email || p.lat == null || p.lng == null) continue;
-      if (km([p.lat, p.lng], [record.lat, record.lng]) > 250) continue;
-      const when = record.from_date === record.to_date ? day(record.from_date) : day(record.from_date) + " – " + day(record.to_date);
-      to.set(p.email, { title: "🌊 " + (record.nickname || "A member") + " is coming to " + record.city, body: when + (record.note ? " · " + clip(record.note) : "") + " · Time to reconnect?", url: "/#reconnect" });
+  } else if (table === "birthday_waves") {
+    // Tell the birthday member when the crew has filled the energy bar (two thirds of the others), and again if everyone joined.
+    const { data: nicks } = await sb.from("nicknames").select("email,nickname");
+    const others = (nicks || []).filter((n) => n.email !== record.bday_email).length;
+    const need = boostNeed(others);
+    const { count } = await sb.from("birthday_waves").select("email", { count: "exact", head: true }).eq("bday_email", record.bday_email).eq("year", record.year);
+    if (count === need) to.set(record.bday_email, { title: "⚡ Your Birthday Boost is ready!", body: "The crew filled your energy bar. Open it now 🎂", url: "/#home" });
+    else if (count === others && others > need) to.set(record.bday_email, { title: "🌐 Full crew!", body: "Every single member sent you a birthday wave 🌊", url: "/#home" });
+  } else if (table === "push_events" && record.kind === "birthday_morning") {
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Rome" }));
+    if (now.getHours() !== 9) return new Response(JSON.stringify({ skipped: "not 9 in Rome" }));
+    const { data: bds } = await sb.from("birthdays").select("email,day,month").eq("day", now.getDate()).eq("month", now.getMonth() + 1);
+    const { data: nicks } = await sb.from("nicknames").select("email,nickname");
+    const nameOf = (e: string) => (nicks || []).find((n) => n.email === e)?.nickname || "a member";
+    for (const b of bds || []) {
+      to.set(b.email, { title: "🎂 Happy birthday, " + nameOf(b.email) + "!", body: "The whole Tsunami Team is with you today. Your crew is charging your Birthday Boost ⚡", url: "/#home" });
+      for (const n of nicks || []) {
+        if (n.email === b.email || to.has(n.email)) continue;
+        to.set(n.email, { title: "🎂 Today is " + nameOf(b.email) + "’s birthday!", body: "Send your wave 🌊 from the home page and help fill the Birthday Boost.", url: "/#home" });
+      }
     }
   }
 
