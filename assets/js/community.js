@@ -817,6 +817,7 @@
         let seen = 0; try { seen = +localStorage.getItem(KEY) || 0; } catch (e) {}
         let chatSeen = 0; try { chatSeen = +localStorage.getItem(CK) || 0; } catch (e) {}
         let topChat = 0, lastBadge = -1;
+        const LAG = '#tabbar [data-v=lagoon], .nav-drop a[href="#lagoon"]';
         let bdT = [], bdTk = '';
         TT.when('bdayToday', function (v) { const k = JSON.stringify(v || []); bdT = v || []; if (k !== bdTk) { bdTk = k; check(); } });
 
@@ -831,7 +832,7 @@
         function markChatSeen() {
           if (!topChat) return;
           chatSeen = topChat; try { localStorage.setItem(CK, chatSeen); } catch (e) {}
-          badge('#tabbar [data-v=lagoon], .nav-links a[href="#lagoon"]', 0);
+          badge(LAG, 0);
         }
         const lag = document.getElementById('lagoon');
         if (lag && 'IntersectionObserver' in window) {
@@ -866,20 +867,22 @@
               if (mention || reply) items.push({ t: new Date(m.created_at).getTime(), href: '#lagoon', who: m.nickname, txt: mention ? 'mentioned you in the Lagoon' : 'replied to you in the Lagoon', at: m.created_at });
             });
           }
-          try { (JSON.parse(localStorage.getItem('tt_bnews_' + email)) || []).forEach(n => items.push({ t: n.t, href: '#passport', who: 'New badge', txt: n.txt, at: new Date(n.t).toISOString() })); } catch (x) {}
+          // New badges: one line in the bell, however many were unlocked.
+          let bnews = []; try { bnews = (JSON.parse(localStorage.getItem('tt_bnews_' + email)) || []).filter(n => n.t > seen); } catch (x) {}
           items.sort((x, y) => y.t - x.t);
-          const list = items.slice(0, 12);
+          const list = items.slice(0, 10);
           const todos = [];
           if (myVote !== null && !myVote.length) todos.push({ href: '#meetings', ic: '🗳', txt: 'Vote the city of the next Tsunami Meeting' });
           if (myDays !== null && !myDays.length) todos.push({ href: '#meetings', ic: '📅', txt: 'Pick the dates you can attend' });
           if (myBd !== null && !myBd.length) todos.push({ href: '#passport', ic: '🎂', txt: 'Add your birthday in the Passport' });
           bdT.filter(b => b.email !== email && !b.mine).forEach(b => todos.unshift({ href: '#home', ic: '🌊', txt: 'Send your birthday wave to ' + (nickOf(b.email) || 'a member') }));
-          const unread = list.filter(c => c.t > seen).length;
+          const unread = list.filter(c => c.t > seen).length + (bnews.length ? 1 : 0);
           const total = unread + todos.length;
           btn.classList.toggle('has', total > 0); btn.querySelector('i').textContent = total > 9 ? '9+' : total;
           let html = '';
           if (todos.length) html += '<h4>To do</h4>' + todos.map(t => '<a href="' + t.href + '">' + t.ic + ' ' + esc(t.txt) + '</a>').join('');
           if (chatNew) html += '<h4>Lagoon</h4><a href="#lagoon" class="' + (chatHot ? 'new' : '') + '">💬 ' + chatNew + ' new message' + (chatNew > 1 ? 's' : '') + (chatHot ? ' · ' + chatHot + ' for you' : '') + '</a>';
+          if (bnews.length) html += '<h4>Badges</h4><a href="#passport" class="new">🏅 <b>' + bnews.length + ' new badge' + (bnews.length > 1 ? 's' : '') + '</b><br><small>' + esc(bnews.map(n => n.txt).join(' · ')) + '</small></a>';
           if (list.length) html += '<h4>Mentions &amp; replies</h4>' + list.map(c => '<a href="' + c.href + '" class="' + (c.t > seen ? 'new' : '') + '"><b>' + esc(c.who) + '</b> ' + esc(c.txt) + '<br><small>' + new Date(c.at).toLocaleDateString('en-GB') + '</small></a>').join('');
           const ps2 = window.ttPush ? window.ttPush.state() : 'checking';
           const prow = ps2 === 'on' ? '<a href="#" data-push="1">🔔 Push notifications: <b>ON</b> <small>(tap to turn off)</small></a>'
@@ -890,11 +893,8 @@
           const lrow = ls === 'on' ? '<a href="#" data-lock="1">🔒 Face ID lock: <b>ON</b> <small>(tap to turn off)</small></a>'
             : ls === 'off' ? '<a href="#" data-lock="1">🔓 <b>Turn on Face ID lock</b><br><small>Ask Face ID whenever the app is opened</small></a>' : '';
           panel.innerHTML = (html || '<p>All caught up ✅ Nothing to do right now.</p>') + prow + lrow + '<a href="#" data-favs="1">❤️ <b>Favorite quotes</b><br><small>Your saved Daily Booster quotes</small></a>' + '<a href="#" data-guide="1">📖 <b>Site guide</b><br><small>What’s where and what to do</small></a>';
-          // tab badges
-          badge('#tabbar [data-v=lagoon], .nav-links a[href="#lagoon"]', chatNew, chatHot);
-          const mt = todos.filter(t => t.href === '#meetings').length, pt = todos.filter(t => t.href === '#passport').length;
-          badge('#tabbar [data-v=meetings], .nav-links a[href="#meetings"]', mt, false);
-          badge('#tabbar [data-v=passport], .nav-links a[href="#passport"]', pt, false);
+          // Only the Lagoon shows a number on the menu (new messages); everything else lives in the bell.
+          badge(LAG, chatNew, chatHot);
           const dot = total + chatNew;
           document.title = (dot ? '(' + dot + ') ' : '') + document.title.replace(/^\(\d+\)\s*/, '');
           try { if (navigator.setAppBadge) { dot ? navigator.setAppBadge(dot) : navigator.clearAppBadge(); } } catch (x) {}
