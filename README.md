@@ -33,3 +33,15 @@ One-time steps:
    When you add a table, give it member policies like the others and no anon access.
 
 `supabase/migrations/optional_cleanup_triggers.sql` (optional) removes others' comments and reactions when a photo or post is deleted.
+
+## What's new (site updates)
+
+Every structural change of the site (new sections or features) gets one row in `public.site_updates`.
+Inserting a row sends a push to the whole team and shows it in the bell for 30 days:
+
+```sql
+insert into public.site_updates (title, body, url)
+values ('New: Find the Team', 'Everyone on the map with the distances. More → Find the Team.', '/#findteam');
+```
+
+New Blog posts also send a push to every member except the author.

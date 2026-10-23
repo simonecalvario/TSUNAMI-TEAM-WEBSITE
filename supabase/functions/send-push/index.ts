@@ -46,6 +46,15 @@ Deno.serve(async (req) => {
       target = p?.email ?? null;
     }
     if (target && target !== record.email) to.set(target, { title: record.author + " " + what, body: clip(record.body), url: "/#blog" });
+  } else if (table === "posts") {
+    // A new Blog post: everyone but the author.
+    const { data: nicks } = await sb.from("nicknames").select("email");
+    for (const n of nicks || []) if (n.email !== record.email)
+      to.set(n.email, { title: "📖 New on the Blog: " + clip(record.title || "a new post"), body: (record.author || "A member") + " published a new post. Read it, react and comment.", url: "/#blog" });
+  } else if (table === "site_updates") {
+    // Something new on the site (a section, a feature): the whole team.
+    const { data: nicks } = await sb.from("nicknames").select("email");
+    for (const n of nicks || []) to.set(n.email, { title: "🆕 " + clip(record.title), body: clip(record.body), url: record.url || "/#home" });
   } else if (table === "birthday_waves") {
     // Tell the birthday member when the team has filled the energy bar (two thirds of the others), and again if everyone joined.
     const { data: nicks } = await sb.from("nicknames").select("email,nickname");
