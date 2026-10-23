@@ -50,7 +50,7 @@
     return { got: got, nd: nd, others: others, full: full, all: all, open: open,
       html: '<div class="bb-bar' + (full ? ' full' : '') + '"><i style="width:' + pct + '%"></i></div>' +
         '<div class="bb-count">' + (all ? '🌐 Full team! Every member sent a wave' : full ? '⚡ Birthday Boost unlocked · ' + got + ' waves'
-          : open ? '⚡ Birthday Boost unlocked at ' + OPEN_AT + ':00 · ' + got + ' wave' + (got === 1 ? '' : 's') + ' (waves keep coming in)'
+          : open ? '⚡ Birthday Boost unlocked at ' + OPEN_AT + ':00 · ' + got + ' wave' + (got === 1 ? '' : 's') + ' · waves are open until midnight'
           : got + ' / ' + nd + ' waves to unlock it now · otherwise it opens at ' + OPEN_AT + ':00') + '</div>' +
         (got ? '<div class="bb-who">' + waves[b.email].map(x => '<span title="' + esc(x.note || '') + '">' + x.emoji + ' ' + esc(name(x.email)) + '</span>').join('') + '</div>' : '') };
   }

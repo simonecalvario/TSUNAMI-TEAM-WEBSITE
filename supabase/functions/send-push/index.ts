@@ -57,6 +57,9 @@ Deno.serve(async (req) => {
     for (const n of nicks || []) to.set(n.email, { title: "🆕 " + clip(record.title), body: clip(record.body), url: record.url || "/#home" });
   } else if (table === "birthday_waves") {
     // Tell the birthday member when the team has filled the energy bar (two thirds of the others), and again if everyone joined.
+    // From 21:00 the Boost is already open: later waves only show inside it, no more pushes.
+    const romeH = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Rome" })).getHours();
+    if (romeH >= 21) return new Response(JSON.stringify({ skipped: "boost already open" }));
     const { data: nicks } = await sb.from("nicknames").select("email,nickname");
     const others = (nicks || []).filter((n) => n.email !== record.bday_email).length;
     const need = boostNeed(others);
