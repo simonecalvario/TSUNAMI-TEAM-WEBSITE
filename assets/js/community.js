@@ -36,18 +36,18 @@
           ['🎂', 'Birthday waves', 'On a member’s birthday, tap an emoji on the home page: the crew fills their energy bar and unlocks their Birthday Boost.'],
           ['🌅', 'Open your Daily Booster', 'Tap the logo on the home page every day: a quote to start your day, and badges to earn.'],
           ['💬', 'Say hi in the Lagoon', 'Use @callsign to tag someone, and reply to messages.'],
-          ['🏠', 'Add your city', 'Passport → Birthdays & city. It counts your kilometres in your Wrapped.']
+          ['🗺', 'Put yourself on the Crew map', 'Passport → Crew map: add your city, and where you will be on holidays or trips.']
         ]],
         ['What’s where', [
           ['👥', 'Founders', 'The 13 founders of the team.'],
           ['🌊', 'Philosophy · Statute', 'What we believe, the experiences we share and our founding words.'],
           ['📍', 'Meetings', 'Map of our meetings, city vote and dates. Tap a pin for its gallery: add photos, react and comment.'],
           ['🧳', 'Trip room', 'Meetings → Trip: say if you are coming, your arrival, the checklist, shared expenses and the time capsule.'],
-          ['🧭', 'Our journey', 'Every Tsunami Meeting so far, with the crew, photos and souvenirs.'],
+          ['🧭', 'Our journey', 'Every Tsunami Meeting so far, with the crew, photos and souvenirs, and your yearly Wrapped.'],
           ['🎽', 'Memorabilia', 'Pieces and merch of the team: add yours too.'],
           ['📖', 'Blog', 'Post stories, photos and memories; comment and react.'],
           ['💬', 'Lagoon', 'The team chat.'],
-          ['🛂', 'Passport', 'Stamps, badges and XP levels, the crew ranking (tap a name to see badges), birthdays and your yearly Wrapped.'],
+          ['🛂', 'Passport', 'Stamps, crew birthdays, the Crew map with everyone’s distances, badges and the Crew XP ranking.'],
           ['📋', 'Activity Log', 'Everything that happens, in order: transparency for all.'],
           ['🌅', 'Daily Booster', 'Tap the logo on the home page: one quote a day. Read it daily to earn badges!']
         ]],
@@ -101,7 +101,7 @@
         });
       }
       const TOUR = [
-        { ic: '🎂', t: 'Your birthday', d: 'Choose day and month, then tap Save. Your crew will celebrate with you!', go: 'passport', tab: 'Birthdays', sel: '.bday-form', done: () => /Saved/.test(($('bd-msg') || {}).textContent || ''), ok: '✓ Birthday saved' },
+        { ic: '🎂', t: 'Your birthday', d: 'Choose day and month, then tap Save. Your crew will celebrate with you!', go: 'passport', tab: 'birthdays', sel: '.bday-form', done: () => /Saved/.test(($('bd-msg') || {}).textContent || ''), ok: '✓ Birthday saved' },
         { ic: '🛂', t: 'Your stamps', d: 'Tap the Tsunami Meetings you lived: each one stamps your passport.', go: 'passport', tab: 'Stamps', sel: '#stamps', done: () => !!document.querySelector('#stamps .stamp.on'), ok: '✓ You have at least one stamp' },
         { ic: '📍', t: 'Where: vote the city', d: 'Vote the city for the next Tsunami Meeting. Votes are public, with call signs.', go: 'meetings', tab: 'Vote city', sel: '#meetings .vote-box' },
         { ic: '📅', t: 'When: your free dates', d: 'Mark the days you are free, so we can find the best dates for everyone.', go: 'meetings', tab: 'Dates', sel: '#meetings .when-box' },
