@@ -28,27 +28,28 @@
       /* ---------------- SITE GUIDE ---------------- */
       const GUIDE = [
         ['Your first steps', [
-          ['🎂', 'Save your birthday', 'Passport → Birthdays. Your crew will celebrate with you.'],
+          ['🎂', 'Birthday and city', 'Passport → My passport: tap Birthday and Home on the first page. The team will celebrate with you.'],
           ['🗳', 'Vote the next city', 'Meetings → Vote city. Votes are public, with call signs.'],
           ['📅', 'Mark your free dates', 'Meetings → Dates. Find the days that work for everyone.'],
           ['🛂', 'Collect your stamps', 'Passport → My passport. Swipe to the visa pages and tap the meetings you lived.'],
           ['📸', 'Add photos to the galleries', 'Meetings → Map. Tap a pin to open that meeting’s gallery: add photos, react with emojis and comment.'],
-          ['🎂', 'Birthday waves', 'On a member’s birthday, tap an emoji on the home page: the crew fills their energy bar and unlocks their Birthday Boost.'],
+          ['🎂', 'Birthday waves', 'On a member’s birthday, tap an emoji on the home page: the team fills their energy bar and unlocks their Birthday Boost.'],
           ['🌅', 'Open your Daily Booster', 'Tap the logo on the home page every day: a quote to start your day, and badges to earn.'],
           ['💬', 'Say hi in the Lagoon', 'Use @callsign to tag someone, and reply to messages.'],
-          ['🗺', 'Put yourself on the Crew map', 'Passport → Crew map: add your city, and where you will be on holidays or trips.']
+          ['📍', 'Find the Team', 'More → Find the Team: everyone on the map with the distances. Add where you will be on holidays or trips.']
         ]],
         ['What’s where', [
           ['👥', 'Founders', 'The 13 founders of the team.'],
           ['🌊', 'Philosophy · Statute', 'What we believe, the experiences we share and our founding words.'],
           ['📍', 'Meetings', 'Map of our meetings, city vote and dates. Tap a pin for its gallery: add photos, react and comment.'],
           ['🧳', 'Trip room', 'Meetings → Trip: say if you are coming, your arrival, the checklist, shared expenses and the time capsule.'],
-          ['🧭', 'Our journey', 'Every Tsunami Meeting so far, with the crew, photos and souvenirs, and your yearly Wrapped.'],
+          ['🧭', 'Our journey', 'Every Tsunami Meeting so far, with the team, photos and souvenirs, and your yearly Wrapped.'],
           ['🎽', 'Memorabilia', 'Pieces and merch of the team: add yours too.'],
           ['📖', 'Blog', 'Post stories, photos and memories; comment and react.'],
           ['💬', 'Lagoon', 'The team chat.'],
-          ['🛂', 'Passport', 'Your passport (photo, birthday, city, level, badges and meeting stamps), crew birthdays, the Crew map and the Crew XP ranking.'],
-          ['🏅', 'Badges & levels', 'More → Badges & levels: every badge, how to earn it and your progress.'],
+          ['🛂', 'Passport', 'Your passport (photo, birthday, city, level, badges and meeting stamps) and the passports of the team.'],
+          ['📍', 'Find the Team', 'Where everyone is today and how far apart we are.'],
+          ['🏅', 'Badges & levels', 'More → Badges & levels: the Team XP ranking, every badge, how to earn it and your progress.'],
           ['📋', 'Activity Log', 'Everything that happens, in order: transparency for all.'],
           ['🌅', 'Daily Booster', 'Tap the logo on the home page: one quote a day. Read it daily to earn badges!']
         ]],
@@ -102,15 +103,15 @@
         });
       }
       const TOUR = [
-        { ic: '🎂', t: 'Your birthday', d: 'Choose day and month, then tap Save. Your crew will celebrate with you!', go: 'passport', tab: 'birthdays', sel: '.bday-form', done: () => /Saved/.test(($('bd-msg') || {}).textContent || ''), ok: '✓ Birthday saved' },
-        { ic: '🛂', t: 'Your stamps', d: 'Tap the Tsunami Meetings you lived: each one stamps your passport.', go: 'passport', tab: 'passport', sel: '#pbook', done: () => !!document.querySelector('#pbook .stamp.on'), ok: '✓ You have at least one stamp' },
+        { ic: '🎂', t: 'Your birthday', d: 'On the first page of your passport tap Birthday, choose day and month and Save. The team will celebrate with you!', go: 'passport', tab: 'My passport', sel: '#pbook', act: () => { const c = $('tour-card'); if (c) c.classList.add('min', 'top'); if (window.ttPass) window.ttPass.edit('bd'); }, done: () => !!document.querySelector('#pbook [data-pe-open=bd][data-set]'), ok: '✓ Birthday saved' },
+        { ic: '🛂', t: 'Your stamps', d: 'Tap the Tsunami Meetings you lived: each one stamps your passport.', go: 'passport', tab: 'My passport', sel: '#pbook', done: () => !!document.querySelector('#pbook .stamp.on'), ok: '✓ You have at least one stamp' },
         { ic: '📍', t: 'Where: vote the city', d: 'Vote the city for the next Tsunami Meeting. Votes are public, with call signs.', go: 'meetings', tab: 'Vote city', sel: '#meetings .vote-box' },
         { ic: '📅', t: 'When: your free dates', d: 'Mark the days you are free, so we can find the best dates for everyone.', go: 'meetings', tab: 'Dates', sel: '#meetings .when-box' },
         { ic: '📸', t: 'Meeting galleries', d: 'Tap a pin on the map to open the gallery of that Tsunami Meeting: add your photos, react with an emoji and comment.', go: 'meetings', tab: 'Map', sel: '#world-map', nofocus: true },
         { ic: '🌅', t: 'Your Daily Booster', d: 'Tap the logo for a quote to start your day. Read one every day to earn badges!', go: 'home', sel: '#booster-btn', act: () => { const bt = $('booster-btn'); if (bt) bt.click(); }, done: () => { const bt = $('booster-btn'); return !!bt && !bt.classList.contains('new'); }, ok: '✓ Today’s boost opened' },
         { ic: '🔔', t: 'Notifications & Face ID', d: 'Tap the bell: turn on push notifications to get alerts when someone mentions you, and the Face ID lock to protect the app.', go: null, sel: '#bell', panel: true, done: () => (window.ttPush && window.ttPush.state() === 'on') || (window.ttLock && window.ttLock.state() === 'on'), ok: '✓ Alerts or Face ID are on' },
         ...(INST.ok ? [{ ic: '📲', t: 'Use it like an app', d: 'Add the site to your Home Screen to open it like an app. On iPhone it is needed for push notifications. Tap Do it to see how.', go: 'home', sel: '#inst-banner, #logo-hint', act: () => instPop() }] : []),
-        { ic: '💬', t: 'Say hi in the Lagoon', d: 'Write a greeting to the crew. Tip: type @ and a call sign to tag someone!', go: 'lagoon', sel: '#chat-form' }
+        { ic: '💬', t: 'Say hi in the Lagoon', d: 'Write a greeting to the team. Tip: type @ and a call sign to tag someone!', go: 'lagoon', sel: '#chat-form' }
       ];
       let tourOpen = false, tourI = -1, tourTimer = null, tourRaf = 0;
       function tourEl(st) { if (st.panel && tourOpen) return $('bell-panel'); return Array.from(document.querySelectorAll(st.sel)).find(e => e.offsetParent !== null) || document.querySelector(st.sel) || document.getElementById(st.go); }
@@ -366,12 +367,12 @@
         D.att.forEach(a => add(a.ts, a.email, 'stamp', 'collected the ' + esc(mName(a.meeting)) + ' stamp'));
         D.votes.forEach(v => add(v.ts, v.email, 'vote', 'voted for ' + esc(v.city || 'a city') + (v.country ? ' (' + esc(v.country) + ')' : '')));
         D.bd.forEach(b => add(b.ts, b.email, 'bday', 'saved their birthday'));
-        joins.forEach(j => add(j.ts, j.email, 'join', 'joined the crew as <b>' + esc(j.nickname) + '</b>'));
+        joins.forEach(j => add(j.ts, j.email, 'join', 'joined the team as <b>' + esc(j.nickname) + '</b>'));
         const RS = { yes: 'is coming to the next Tsunami Meeting 🙌', maybe: 'might come to the next Tsunami Meeting', no: 'can’t make it to the next Tsunami Meeting' };
         (D.rsvp || []).forEach(r => add(r.ts, r.email, 'rsvp', RS[r.status] || 'answered the trip room'));
         const wb = {};
         (D.waves || []).forEach(w => { add(w.ts, w.email, 'wave', 'sent a ' + esc(w.emoji) + ' birthday wave to <b>' + esc(nickOf(w.bday_email) || 'a member') + '</b>'); (wb[w.bday_email + '|' + w.year] = wb[w.bday_email + '|' + w.year] || []).push(w); });
-        Object.keys(wb).forEach(k => { const l = wb[k].sort((x, y) => x.ts - y.ts), nd = Math.max(1, Math.ceil(Math.max(0, nicks.length - 1) * 2 / 3)); if (l[nd - 1]) add(l[nd - 1].ts, k.split('|')[0], 'boost', 'got the <b>Birthday Boost</b> ⚡ from the crew'); });
+        Object.keys(wb).forEach(k => { const l = wb[k].sort((x, y) => x.ts - y.ts), nd = Math.max(1, Math.ceil(Math.max(0, nicks.length - 1) * 2 / 3)); if (l[nd - 1]) add(l[nd - 1].ts, k.split('|')[0], 'boost', 'got the <b>Birthday Boost</b> ⚡ from the team'); });
 
         const grp = (rows, type, fn) => {
           const g = {};
@@ -470,9 +471,6 @@
       }
 
       async function passInit() {
-        const mo = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        $('bd-d').innerHTML = Array.from({ length: 31 }, (_, i) => '<option>' + (i + 1) + '</option>').join('');
-        $('bd-m').innerHTML = mo.map((x, i) => '<option value="' + (i + 1) + '">' + x + '</option>').join('');
         loadPass();
         setInterval(function () { if (!document.hidden) loadPass(); }, 180000);
       }
@@ -509,10 +507,7 @@
             localStorage.setItem(key, JSON.stringify(now));
           } catch (x) {}
           renderBadges();
-          const sc = scoreOf(myM), got = BADGES.map(b => ({ b: b, l: lvlOf(b, myM) })).filter(x => x.l > 0 && x.b.id !== 'top');
-          TT.set('passport', { ok: attOk, email: email, nick: nickOf(email), att: att, bd: DATA.bd.find(x => x.email === email) || null,
-            xp: sc.xp, level: LEVELS[sc.L], next: LEVELS[sc.L + 1] || null,
-            badges: got.map(x => ({ ic: x.b.ic, n: x.b.n, tier: x.b.t.length > 1 ? TI[x.l - 1 + (4 - x.b.t.length)] : '' })) });
+          TT.set('passport', Object.assign({ ok: attOk }, passOf(email, myM)));
         }
         renderCrew();
       }
@@ -536,7 +531,7 @@
         { id: 'fav', c: 'Social', ic: '❤️', n: 'Crowd Favorite', m: 'likes', t: [5, 25, 100, 300], u: 'reactions', d: 'Receive reactions on your posts and comments.' },
         { id: 'party', c: 'Social', ic: '🎂', n: 'Party Animal', m: 'wishes', t: [1, 3, 6, 12], u: 'members greeted', d: 'Wish a member happy birthday on their birthday: a wave from the home page, or a message in the Lagoon.' },
         { id: 'wave', c: 'Social', ic: '🌊', n: 'Birthday Wave', m: 'waves', t: [1, 3, 6, 12], u: 'waves sent', d: 'Send a birthday wave from the home page to fill a member’s energy bar.' },
-        { id: 'boosted', c: 'Memories', ic: '⚡', n: 'Birthday Boosted', m: 'boosted', t: [1, 2, 3, 5], u: 'Birthday Boosts', d: 'Your crew filled your energy bar on your birthday.' },
+        { id: 'boosted', c: 'Memories', ic: '⚡', n: 'Birthday Boosted', m: 'boosted', t: [1, 2, 3, 5], u: 'Birthday Boosts', d: 'Your team filled your energy bar on your birthday.' },
         { id: 'streak', c: 'Rhythm', ic: '🔥', n: 'On Fire', m: 'streak', t: [3, 7, 14, 30], u: 'days in a row', d: 'Write in the Lagoon on consecutive days.' },
         { id: 'owl', c: 'Rhythm', ic: '🦉', n: 'Night Owl', m: 'night', t: [1, 10, 50, 150], u: 'night messages', d: 'Write in the Lagoon between midnight and 5 AM.' },
         { id: 'early', c: 'Rhythm', ic: '🌅', n: 'Early Bird', m: 'early', t: [1, 10, 50, 150], u: 'morning messages', d: 'Write in the Lagoon between 5 and 8 AM.' },
@@ -552,12 +547,12 @@
         { id: 'lucky', c: 'Special', ic: '🍀', n: 'Lucky Number', m: 'lucky', t: [1], u: '', secret: true, hint: 'Some say the Lagoon rewards perfect timing…', d: 'You wrote in the Lagoon at exactly 13:13.' },
         { id: 'insom', c: 'Special', ic: '🌙', n: 'Insomniac', m: 'nightDays', t: [7], u: '', secret: true, hint: 'The Lagoon never sleeps… and neither do you, apparently.', d: 'You wrote in the Lagoon at night (midnight to 5 AM) on 7 different days.' },
         { id: 'marat', c: 'Special', ic: '🎙️', n: 'Marathon', m: 'maxDay', t: [50], u: '', secret: true, hint: 'Some days you just can’t stop talking.', d: 'You wrote 50 messages in the Lagoon in a single day.' },
-        { id: 'thread', c: 'Special', ic: '🧵', n: 'Thread Starter', m: 'thread', t: [3], u: '', secret: true, hint: 'Say something that gets the whole crew talking.', d: 'One of your Lagoon messages got replies from 3 different members.' },
+        { id: 'thread', c: 'Special', ic: '🧵', n: 'Thread Starter', m: 'thread', t: [3], u: '', secret: true, hint: 'Say something that gets the whole team talking.', d: 'One of your Lagoon messages got replies from 3 different members.' },
         { id: 'roll', c: 'Special', ic: '📋', n: 'Roll Call', m: 'roll', t: [1], u: '', secret: true, hint: 'Nobody gets left out.', d: 'You mentioned every other member with @ in the Lagoon.' },
         { id: 'midn', c: 'Special', ic: '🎆', n: 'Midnight Wish', m: 'midn', t: [1], u: '', secret: true, hint: 'The first wish of the day is the best one.', d: 'You wished a member happy birthday in the first minutes of their birthday (00:00–00:15).' },
         { id: 'fpush', c: 'Special', ic: '🎯', n: 'Final Push', m: 'filler', t: [1], u: '', secret: true, hint: 'Some waves arrive exactly when they are needed.', d: 'Your wave was the one that unlocked a Birthday Boost.' },
         { id: 'fwave', c: 'Special', ic: '🥇', n: 'First Wave', m: 'firstWave', t: [1], u: '', secret: true, hint: 'Be the first to wish.', d: 'You sent the first wave on a member’s birthday.' },
-        { id: 'fcrew', c: 'Special', ic: '🌐', n: 'Full Crew', m: 'fullCrew', t: [1], u: '', secret: true, hint: 'When everyone shows up for you…', d: 'Every other member sent you a birthday wave.' },
+        { id: 'fcrew', c: 'Special', ic: '🌐', n: 'Full Team', m: 'fullCrew', t: [1], u: '', secret: true, hint: 'When everyone shows up for you…', d: 'Every other member sent you a birthday wave.' },
         { id: 'salt', c: 'Special', ic: '🧓', n: 'Old Salt', m: 'salt', t: [1], u: '', secret: true, hint: 'Only time can earn this one.', d: 'You have been writing in the Lagoon for over 90 days, with at least 100 messages.' },
         { id: 'plat', c: 'Special', ic: '💠', n: 'Platinum Touch', m: 'plat', t: [1], u: '', secret: true, hint: 'Reach the very top of a badge.', d: 'You reached the Platinum level on at least one badge.' },
         { id: 'slam', c: 'Special', ic: '🧙', n: 'Grand Slam', m: 'slam', t: [5], u: '', secret: true, hint: 'Excellence, five times over.', d: 'You reached Gold or better on 5 different badges.' },
@@ -616,7 +611,7 @@
         M.thread = Math.max.apply(null, [0].concat(Object.values(rep).map(v => v.size)));
         const tms = cm.map(x => new Date(x.created_at).getTime());
         M.salt = cm.length >= 100 && tms.length && (Math.max.apply(null, tms) - Math.min.apply(null, tms)) / 864e5 >= 90 ? 1 : 0;
-        // Birthday waves (home page): the crew's own way of wishing, no matter the language.
+        // Birthday waves (home page): the team's own way of wishing, no matter the language.
         const W = D.waves || [], boostNeed = o => Math.max(1, Math.ceil(o * 2 / 3)), othersW = Math.max(0, nicks.length - 1);
         const myW = W.filter(x => x.email === e);
         M.waves = myW.length;
@@ -663,6 +658,12 @@
         M.badges = BADGES.filter(b => b.id !== 'top' && lvlOf(b, M) > 0).length;
         return M;
       }
+      // What a passport shows: level, XP and badges (secret ones stay secret on other members' passports).
+      function passOf(e, M) {
+        const sc = scoreOf(M), got = BADGES.map(b => ({ b: b, l: lvlOf(b, M) })).filter(x => x.l > 0 && x.b.id !== 'top');
+        return { email: e, nick: nickOf(e), att: DATA.att, bd: DATA.bd.find(x => x.email === e) || null, xp: sc.xp, level: LEVELS[sc.L], next: LEVELS[sc.L + 1] || null,
+          badges: got.map(x => x.b.secret && e !== email ? { ic: '🔒', n: 'Secret badge', tier: '' } : { ic: x.b.ic, n: x.b.n, tier: x.b.t.length > 1 ? TI[x.l - 1 + (4 - x.b.t.length)] : '' }) };
+      }
       function scoreOf(M) {
         let xp = 0; BADGES.forEach(b => { xp += ptsOf(b, lvlOf(b, M)); });
         let L = 0; LEVELS.forEach((l, i) => { if (xp >= l.xp) L = i; });
@@ -685,7 +686,7 @@
       function birthdayPop(name) {
         if (document.getElementById('bb-pop')) return; // the Birthday Boost already greets
         const box = document.createElement('div'); box.id = 'bdg-pop';
-        box.innerHTML = '<div class="pop"><div class="pop-b"><span>🎂</span></div><div class="pop-t">Happy Birthday, ' + esc(name || 'friend') + '!</div><p class="pop-w">The whole Tsunami Team wishes you a day full of waves, friends and good vibes. 🌊🥳<br>Your crew is sending you their waves: when your energy bar on the home page is full, your Birthday Boost unlocks ⚡</p><button type="button">Thank you! 🎉</button></div>';
+        box.innerHTML = '<div class="pop"><div class="pop-b"><span>🎂</span></div><div class="pop-t">Happy Birthday, ' + esc(name || 'friend') + '!</div><p class="pop-w">The whole Tsunami Team wishes you a day full of waves, friends and good vibes. 🌊🥳<br>Your team is sending you their waves: when your energy bar on the home page is full, your Birthday Boost unlocks ⚡</p><button type="button">Thank you! 🎉</button></div>';
         for (let i = 0; i < 40; i++) { const s = document.createElement('i'); s.className = 'cf'; s.textContent = ['🎂', '🎉', '🎈', '🥳', '✨', '🎁'][i % 6]; s.style.left = Math.random() * 100 + '%'; s.style.animationDelay = (Math.random() * 1.8) + 's'; s.style.fontSize = (16 + Math.random() * 16) + 'px'; box.appendChild(s); }
         box.addEventListener('click', function (e) { if (e.target.tagName === 'BUTTON' || e.target === box) box.remove(); });
         document.body.appendChild(box);
@@ -737,6 +738,7 @@
         const emails = Array.from(new Set(nicks.map(x => x.email)));
         const rows = emails.map(e => { const M = metricsFor(e, DATA), s = scoreOf(M); CREWM[e] = M; return { e: e, nick: nickOf(e) || 'A member', xp: s.xp, L: s.L, st: M.stamps, b: M.badges }; }).sort((a, b) => b.xp - a.xp || b.st - a.st);
         TT.set('levels', rows.map(r => ({ e: r.e, xp: r.xp, ic: LEVELS[r.L].ic, n: LEVELS[r.L].n })));
+        TT.set('team', rows.map(r => passOf(r.e, CREWM[r.e])));
         $('crew').innerHTML = rows.length ? rows.map((r, i) => '<li class="cl" data-e="' + esc(r.e) + '" tabindex="0"><span>' + (i + 1) + '. ' + LEVELS[r.L].ic + ' ' + esc(r.nick) + (r.e === email ? ' (you)' : '') + ' <small style="color:var(--grey)">' + LEVELS[r.L].n + '</small></span><b>' + r.xp + ' XP ▾</b></li>').join('') : '<li>No members yet.</li>';
         Object.keys(CREWOPEN).forEach(e => { const li = Array.from($('crew').children).find(x => x.dataset && x.dataset.e === e); if (li) { delete CREWOPEN[e]; crewToggle(li); } });
         if (!$('crew').dataset.b) {
@@ -746,30 +748,10 @@
         }
       }
       /* ---------------- BIRTHDAYS ---------------- */
+      window.ttBdays = function () { return bdayInit(); };
       async function bdayInit() {
-        const raw = await get('birthdays?select=*');
-        const rows = raw || [];
+        const rows = (await get('birthdays?select=*')) || [];
         const mine = rows.find(r => r.email === email);
-        const MO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        if (mine) { $('bd-d').value = mine.day; $('bd-m').value = mine.month; }
-        if (raw === null) $('bd-msg').textContent = 'Birthdays are not available yet (database table or permissions missing).';
-        else if (mine) $('bd-msg').textContent = '✓ Saved: ' + mine.day + ' ' + MO[mine.month - 1];
-        else if (!$('bd-msg').textContent) $('bd-msg').textContent = 'Not set yet.';
-        $('bd-save').onclick = async function () {
-          if (!email) return;
-          const body = { email: email, nickname: nick || 'A member', day: +$('bd-d').value, month: +$('bd-m').value };
-          let ok = false, err = '';
-          try {
-            const r = await fetch(R + 'birthdays?on_conflict=email', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, HJ), body: JSON.stringify(body) });
-            ok = r.ok; if (!ok) err = await r.text();
-          } catch (e) { err = String(e); }
-          if (ok) { $('bd-msg').textContent = ''; await bdayInit(); }
-          else $('bd-msg').textContent = 'Could not save: ' + err.slice(0, 120);
-        };
-        $('bd-del').onclick = async function () {
-          await fetch(R + 'birthdays?email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H });
-          $('bd-msg').textContent = ''; bdayInit();
-        };
         const now = new Date(); now.setHours(0, 0, 0, 0);
         const out = [];
         if (mine && email && mine.day === now.getDate() && mine.month === now.getMonth() + 1) {
@@ -778,12 +760,6 @@
           if (seenY !== yr) { try { localStorage.setItem(k, yr); } catch (e) {} setTimeout(function () { birthdayPop(nickOf(email)); }, 1500); }
         }
         const nameOf = r => (nicks.find(x => x.email === r.email) || {}).nickname || r.nickname || 'A member';
-        const all = rows.map(r => {
-          let d = new Date(now.getFullYear(), r.month - 1, r.day);
-          if (d < now) d = new Date(now.getFullYear() + 1, r.month - 1, r.day);
-          return { diff: Math.round((d - now) / 864e5), r: r };
-        }).sort((a, b) => a.diff - b.diff);
-        $('bd-list').innerHTML = all.length ? all.map(o => '<li><span>' + esc(nameOf(o.r)) + (o.r.email === email ? ' (you)' : '') + '</span><b>' + o.r.day + ' ' + MO[o.r.month - 1] + (o.diff === 0 ? ' 🎂' : '') + '</b></li>').join('') : '<li>No birthdays saved yet.</li>';
         rows.forEach(r => {
           let d = new Date(now.getFullYear(), r.month - 1, r.day);
           if (d < now) d = new Date(now.getFullYear() + 1, r.month - 1, r.day);
@@ -793,7 +769,7 @@
         out.sort((a, b) => a.diff - b.diff);
         const el = $('bday');
         if (!out.length) { el.classList.remove('show'); return; }
-        el.textContent = out.slice(0, 3).map(o => o.diff === 0 ? (o.me ? '🎂 Happy birthday, ' + o.who + '! Your crew is filling your energy bar ⚡' : '🎂 Today is ' + o.who + '’s birthday! Send your wave from the home page 🌊') : '🎈 ' + o.who + '’s birthday in ' + o.diff + (o.diff === 1 ? ' day' : ' days')).join('  ·  ');
+        el.textContent = out.slice(0, 3).map(o => o.diff === 0 ? (o.me ? '🎂 Happy birthday, ' + o.who + '! Your team is filling your energy bar ⚡' : '🎂 Today is ' + o.who + '’s birthday! Send your wave from the home page 🌊') : '🎈 ' + o.who + '’s birthday in ' + o.diff + (o.diff === 1 ? ' day' : ' days')).join('  ·  ');
         el.classList.add('show');
       }
 

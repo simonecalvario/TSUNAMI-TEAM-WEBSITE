@@ -47,13 +47,13 @@ Deno.serve(async (req) => {
     }
     if (target && target !== record.email) to.set(target, { title: record.author + " " + what, body: clip(record.body), url: "/#blog" });
   } else if (table === "birthday_waves") {
-    // Tell the birthday member when the crew has filled the energy bar (two thirds of the others), and again if everyone joined.
+    // Tell the birthday member when the team has filled the energy bar (two thirds of the others), and again if everyone joined.
     const { data: nicks } = await sb.from("nicknames").select("email,nickname");
     const others = (nicks || []).filter((n) => n.email !== record.bday_email).length;
     const need = boostNeed(others);
     const { count } = await sb.from("birthday_waves").select("email", { count: "exact", head: true }).eq("bday_email", record.bday_email).eq("year", record.year);
-    if (count === need) to.set(record.bday_email, { title: "⚡ Your Birthday Boost is ready!", body: "The crew filled your energy bar. Open it now 🎂", url: "/#home" });
-    else if (count === others && others > need) to.set(record.bday_email, { title: "🌐 Full crew!", body: "Every single member sent you a birthday wave 🌊", url: "/#home" });
+    if (count === need) to.set(record.bday_email, { title: "⚡ Your Birthday Boost is ready!", body: "The team filled your energy bar. Open it now 🎂", url: "/#home" });
+    else if (count === others && others > need) to.set(record.bday_email, { title: "🌐 Full team!", body: "Every single member sent you a birthday wave 🌊", url: "/#home" });
   } else if (table === "push_events" && record.kind === "birthday_morning") {
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Rome" }));
     if (now.getHours() !== 9) return new Response(JSON.stringify({ skipped: "not 9 in Rome" }));
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     const { data: nicks } = await sb.from("nicknames").select("email,nickname");
     const nameOf = (e: string) => (nicks || []).find((n) => n.email === e)?.nickname || "a member";
     for (const b of bds || []) {
-      to.set(b.email, { title: "🎂 Happy birthday, " + nameOf(b.email) + "!", body: "The whole Tsunami Team is with you today. Your crew is charging your Birthday Boost ⚡", url: "/#home" });
+      to.set(b.email, { title: "🎂 Happy birthday, " + nameOf(b.email) + "!", body: "The whole Tsunami Team is with you today. Your team is charging your Birthday Boost ⚡", url: "/#home" });
       for (const n of nicks || []) {
         if (n.email === b.email || to.has(n.email)) continue;
         to.set(n.email, { title: "🎂 Today is " + nameOf(b.email) + "’s birthday!", body: "Send your wave 🌊 from the home page and help fill the Birthday Boost.", url: "/#home" });

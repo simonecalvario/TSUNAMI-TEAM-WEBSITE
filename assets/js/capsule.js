@@ -20,7 +20,7 @@
     const auto = next && next.first;
     let h = '<div class="cap-seal"><div class="cap-ic">' + (n ? '🔒' : '📭') + '</div><div><b>' + (n ? n + ' sealed message' + (n > 1 ? 's' : '') + ' from ' + sealed.length + ' member' + (sealed.length > 1 ? 's' : '') : 'The capsule is empty') + '</b>' +
       '<small>' + (n ? 'Opening on ' + nice(first) + (mine ? ' · you wrote ' + mine.n : '') : 'Be the first to leave something for the future crew.') + '</small></div></div>';
-    h += '<form id="cap-form" class="cap-form"><textarea id="cap-text" rows="3" maxlength="2000" placeholder="Dear crew of the future… a memory, a promise, a dare for the next meeting."></textarea>' +
+    h += '<form id="cap-form" class="cap-form"><textarea id="cap-text" rows="3" maxlength="2000" placeholder="Dear team of the future… a memory, a promise, a dare for the next meeting."></textarea>' +
       '<div class="cap-row">' + (auto ? '<span class="vote-hint">Opens on <b>' + nice(openDate()) + '</b>, the first day of the next meeting.</span>' : '<label class="vote-hint">Opens on <input type="date" id="cap-date" min="' + today + '" value="' + openDate() + '"></label>') +
       '<button class="button" type="submit">Seal it 🔒</button></div><span id="cap-msg" class="vote-hint"></span></form>';
     if (opened.length) h += '<h4 class="cap-h">📬 Opened capsules</h4>' + opened.slice().reverse().map(c => '<div class="cap-open"><p>' + esc(c.body) + '</p><small>— ' + esc(c.nickname || name(c.email)) + ', written ' + new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ' · opened ' + nice(c.open_at) + '</small></div>').join('');

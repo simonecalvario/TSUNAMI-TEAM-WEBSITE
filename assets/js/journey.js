@@ -1,4 +1,4 @@
-/* "Our journey": a timeline of every Tsunami Meeting with its crew, photos and memorabilia. */
+/* "Our journey": a timeline of every Tsunami Meeting with its team, photos and memorabilia. */
 (function () {
   const tl = document.getElementById('journey-tl'); if (!tl) return;
   const esc = TT.esc, M = TT.MEETINGS;
@@ -23,7 +23,7 @@
     const nxt = next && next.city ? next.city : null;
     stops.push('<li class="jr-stop jr-next"><div class="jr-dot">🔜</div><div class="jr-card"><div class="jr-top"><span class="jr-year">' +
       (next && next.first ? next.first.getFullYear() : 'Next') + '</span></div><h3>' + (nxt ? esc(nxt) + '?' : 'Where to next?') + '</h3>' +
-      '<div class="jr-crew">' + (next && next.first ? 'Dates chosen by the majority: ' + next.first.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) + '.' : 'The crew is still deciding. Your vote counts.') + '</div>' +
+      '<div class="jr-crew">' + (next && next.first ? 'Dates chosen by the majority: ' + next.first.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) + '.' : 'The team is still deciding. Your vote counts.') + '</div>' +
       '<div class="jr-f"><a class="jr-go" href="#meetings">🗳 Vote and plan →</a></div></div></li>');
     tl.innerHTML = stops.join('');
     const cc = new Set(M.map(m => m.cc)).size, people = new Set(D.att.map(a => a.email)).size;

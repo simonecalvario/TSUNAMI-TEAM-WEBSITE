@@ -1,5 +1,6 @@
-/* Passport → Crew map: every member's face where they are now (home city, or a shared stay),
-   the distances between us, and "I'll be at …" stays for holidays, trips and events. */
+/* Find the Team: every member's face where they are today (the city on their passport, or a shared stay),
+   the distances between us, and "I'll be at …" stays for holidays, trips and events.
+   A stay only moves you on this map: the passport keeps the home city. */
 (function () {
   const el = document.getElementById('cm-map'); if (!el || !window.L) return;
   const $ = id => document.getElementById(id), esc = TT.esc, enc = TT.enc, api = TT.api;
@@ -60,11 +61,11 @@
 
   function dist(W, from) {
     const box = $('cm-dist');
-    if (!from) { box.innerHTML = W.length ? '<p class="vote-hint">Add your city below to see how far you are from everyone.</p>' : '<p class="vote-hint">Nobody is on the map yet. Add your city below!</p>'; return; }
+    if (!from) { box.innerHTML = '<p class="vote-hint">' + (W.length ? 'Set your city' : 'Nobody is on the map yet. Set your city') + ' on <a href="#passport">your passport</a> (tap Home on the first page) to see how far you are from everyone.</p>'; return; }
     const rows = W.filter(w => w.e !== from.e).map(w => ({ w: w, d: TT.km([from.lat, from.lng], [w.lat, w.lng]) })).sort((a, b) => a.d - b.d);
     box.innerHTML = '<div class="cm-h">📏 Distances from <b>' + (from.e === email ? 'you' : esc(nameOf(from.e))) + '</b> · ' + (from.home ? '🏠 ' : '✈️ ') + esc(from.place) +
       (from.e !== email && W.some(w => w.e === email) ? ' <button type="button" data-cm-focus="' + esc(email) + '">back to me</button>' : '') + '</div>' +
-      (rows.length ? '<ul>' + rows.map(r => '<li><span>' + esc(nameOf(r.w.e)) + ' <small>' + (r.w.home ? '🏠 ' : '✈️ ') + esc(r.w.place) + '</small></span><b>' + (r.d < 15 ? 'same city' : km(r.d)) + '</b></li>').join('') + '</ul>' : '<p class="vote-hint">Nobody else on the map yet.</p>');
+      (rows.length ? '<ul>' + rows.map(r => '<li data-cm-focus="' + esc(r.w.e) + '"><span>' + esc(nameOf(r.w.e)) + ' <small>' + (r.w.home ? '🏠 ' : '✈️ ') + esc(r.w.place) + '</small></span><b>' + (r.d < 15 ? 'same city' : km(r.d)) + '</b></li>').join('') + '</ul>' : '<p class="vote-hint">Nobody else on the map yet.</p>');
   }
 
   /* ---- "I'll be at …" ---- */

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261023-062616">
+<meta name="tt-build" content="20261023-070701">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -18,8 +18,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <link rel="stylesheet" href="assets/css/site.css?v=20261023-062616">
-  <link rel="stylesheet" href="assets/css/features.css?v=20261023-062616">
+  <link rel="stylesheet" href="assets/css/site.css?v=20261023-070701">
+  <link rel="stylesheet" href="assets/css/features.css?v=20261023-070701">
 </head>
 
 <body>
@@ -30,8 +30,8 @@
   <p id="lock-msg"></p>
   <a href="/cdn-cgi/access/logout">Log out instead</a>
 </div></div>
-<script src="assets/js/tt-core.js?v=20261023-062616"></script>
-<script src="assets/js/lock.js?v=20261023-062616"></script>
+<script src="assets/js/tt-core.js?v=20261023-070701"></script>
+<script src="assets/js/lock.js?v=20261023-070701"></script>
 
   <header>
     <div class="container">
@@ -54,6 +54,7 @@
             <a href="#lagoon">Lagoon</a>
             <a href="#blog">Blog</a>
             <a href="#passport">Passport</a>
+            <a href="#findteam">Find the Team</a>
             <a href="#activity">Activity</a>
             <a href="#badgebook">Badges &amp; levels</a>
           </div></div>
@@ -259,14 +260,14 @@
             <img src="assets/images/founders/rinaldo.jpg" alt="Rinaldo — Founder">
             <h3>Rinaldo</h3>
             <p class="callsign">Call sign: Rino</p>
-            <p class="desc">Rinaldo is a true friend with an infectious smile and an always-positive attitude. A passionate AS Roma supporter, he lives every match with the heart of a true Romanista and every moment with unstoppable enthusiasm. Always ready to lend a hand, lift everyone’s spirits, and turn any gathering into an unforgettable party, he brings friendship and good vibes wherever he goes. For Rino, football is passion, friendship is everything, and life is always better when shared with the crew!</p>
+            <p class="desc">Rinaldo is a true friend with an infectious smile and an always-positive attitude. A passionate AS Roma supporter, he lives every match with the heart of a true Romanista and every moment with unstoppable enthusiasm. Always ready to lend a hand, lift everyone’s spirits, and turn any gathering into an unforgettable party, he brings friendship and good vibes wherever he goes. For Rino, football is passion, friendship is everything, and life is always better when shared with the team!</p>
           </article>
 
           <article class="founder-card">
             <img src="assets/images/founders/salvatore.jpg?v=2" alt="Salvatore — Founder">
             <h3>Salvatore</h3>
             <p class="callsign">Call sign: Kraken</p>
-            <p class="desc">Salvatore, aka Kraken, is the undisputed king of Ibiza and Italy’s hottest nightclubs. A true party legend, he brings infectious energy, wild spirit, and unstoppable charisma wherever he goes. When Kraken joins the crew, the atmosphere explodes and the night becomes unforgettable. For him, great music, legendary parties, and amazing friends are the perfect recipe for life. One crew, one energy, one king of the night!</p>
+            <p class="desc">Salvatore, aka Kraken, is the undisputed king of Ibiza and Italy’s hottest nightclubs. A true party legend, he brings infectious energy, wild spirit, and unstoppable charisma wherever he goes. When Kraken joins the team, the atmosphere explodes and the night becomes unforgettable. For him, great music, legendary parties, and amazing friends are the perfect recipe for life. One team, one energy, one king of the night!</p>
           </article>
 
           <article class="founder-card">
@@ -280,7 +281,7 @@
             <img src="assets/images/founders/simone.jpg" alt="Simone — Founder">
             <h3>Simone</h3>
             <p class="callsign">Call sign: Don Simon</p>
-            <p class="desc">Born in the Castelli Romani, Don Simon is a true rock soul, always chasing adventures, unforgettable experiences, and genuine friendships. A free spirit with an unstoppable energy, he knows how to turn an ordinary night into an epic story, fueled by rock music, good wine, spontaneous trips, and the right crew. A natural organizer, a loyal friend, and an endless source of enthusiasm, Simone believes that the best moments in life are the ones shared with people who truly matter. Energetic and impulsive, but always with a good heart, he is never afraid to go all in when a new adventure calls. His philosophy? Rock in his heart, adventure in his soul, and true friends by his side. Because life isn’t just about the places you go, but the people who make every journey unforgettable.</p>
+            <p class="desc">Born in the Castelli Romani, Don Simon is a true rock soul, always chasing adventures, unforgettable experiences, and genuine friendships. A free spirit with an unstoppable energy, he knows how to turn an ordinary night into an epic story, fueled by rock music, good wine, spontaneous trips, and the right team. A natural organizer, a loyal friend, and an endless source of enthusiasm, Simone believes that the best moments in life are the ones shared with people who truly matter. Energetic and impulsive, but always with a good heart, he is never afraid to go all in when a new adventure calls. His philosophy? Rock in his heart, adventure in his soul, and true friends by his side. Because life isn’t just about the places you go, but the people who make every journey unforgettable.</p>
           </article>
 
           <article class="founder-card">
@@ -371,7 +372,7 @@
           <details class="trip-more"><summary>✅ To do &amp; who brings what <small id="trip-items-n"></small></summary><div id="trip-items"></div></details>
           <details class="trip-more"><summary>💶 Shared expenses <small id="trip-exp-n"></small></summary><div id="trip-exp"></div></details>
           <details class="trip-more" id="capsule"><summary>⏳ Time capsule <small id="cap-n"></small></summary>
-            <p class="vote-hint" style="margin-top:0">A message to the crew, sealed until the first day of the next Tsunami Meeting.</p>
+            <p class="vote-hint" style="margin-top:0">A message to the team, sealed until the first day of the next Tsunami Meeting.</p>
             <div id="cap-body"></div>
           </details>
         </div>
@@ -455,7 +456,7 @@
       <div class="container">
         <div class="section-label">Our journeys</div>
         <h2 id="pass-heading">Tsunami <span>Passport</span></h2>
-        <p class="intro">Your Tsunami passport: who you are in the crew, your level and badges, and a stamp for every Tsunami Meeting you lived.</p>
+        <p class="intro">Your Tsunami passport: who you are in the team, your level and badges, and the stamp of every Tsunami Meeting you lived.</p>
 
         <div class="pp" data-pp="st" data-label="🛂 My passport">
           <div class="pbook-wrap">
@@ -464,40 +465,33 @@
             <button type="button" class="pb-nav next" data-pb="1" aria-label="Next page">›</button>
           </div>
           <div class="pb-dots" id="pb-dots"></div>
-          <p class="vote-hint pb-hint">Swipe the pages. On the visa pages, tap a meeting you lived to stamp it.</p>
+          <p class="vote-hint pb-hint">Swipe the pages. On the first page tap Birthday or Home to fill them in; on the visa pages tap a meeting you lived to stamp it.</p>
         </div>
 
-        <div class="pp" data-pp="bd" data-label="🎂 Crew birthdays">
-          <h3 class="sub">My birthday</h3>
-          <p class="vote-hint" style="margin-top:0">Optional: the team will celebrate with you on the home page. Only day and month are shown.</p>
-          <div class="bday-form">
-            <select id="bd-d"></select><select id="bd-m"></select>
-            <button class="button" id="bd-save" type="button">Save</button>
-            <button class="vote-del" id="bd-del" type="button" style="margin:0">Remove</button>
-            <span id="bd-msg"></span>
+        <div class="pp" data-pp="team" data-label="👥 Team passports">
+          <p class="vote-hint" style="margin-top:0">Tap a member to open their passport.</p>
+          <div class="tp-list" id="tp-list"></div>
+          <div class="pbook-wrap">
+            <button type="button" class="pb-nav prev" data-pb="-1" aria-label="Previous page">‹</button>
+            <div class="pbook" id="tbook"></div>
+            <button type="button" class="pb-nav next" data-pb="1" aria-label="Next page">›</button>
           </div>
-          <h3 class="sub">Crew birthdays</h3>
-          <ul class="crew" id="bd-list"><li>Loading…</li></ul>
+          <div class="pb-dots" id="tb-dots"></div>
         </div>
+      </div>
+    </section>
 
-        <div class="pp" data-pp="map" data-label="🗺 Crew map">
-          <h3 class="sub">Crew map</h3>
-          <p class="vote-hint" style="margin-top:0">Where everyone is right now, and how far apart we are. Tap a face to meet them.</p>
-          <div id="cm-map"></div>
-          <div id="cm-dist" class="cm-dist"></div>
-          <h3 class="sub">My city</h3>
-          <p class="vote-hint" style="margin-top:0">Where you live. The crew sees only the city.</p>
-          <div id="pass-city" class="pass-city"></div>
-          <h3 class="sub">I’ll be at…</h3>
-          <p class="vote-hint" style="margin-top:0">Holidays, trips, events: share where you will be and the map shows the updated distances.</p>
-          <div id="cm-stay" class="cm-stay"></div>
-          <div id="cm-stays" class="cm-stays"></div>
-        </div>
-
-        <div class="pp" data-pp="cr" data-label="⭐ Crew XP">
-          <h3 class="sub">Crew XP</h3>
-          <ul class="crew" id="crew"></ul>
-        </div>
+    <section id="findteam" aria-labelledby="ft-heading">
+      <div class="container">
+        <div class="section-label">Wherever we are</div>
+        <h2 id="ft-heading">Find <span>the Team</span></h2>
+        <p class="intro">Where everyone is today and how far apart we are. Each member is placed at the city on their passport, or where they said they would be today. Tap a face or a name for the distances from them.</p>
+        <div id="cm-map"></div>
+        <div id="cm-dist" class="cm-dist"></div>
+        <h3 class="sub">I’ll be at…</h3>
+        <p class="vote-hint" style="margin-top:0">Holidays, trips, events: for those days the map uses this place instead of your passport city. It is not written on your passport.</p>
+        <div id="cm-stay" class="cm-stay"></div>
+        <div id="cm-stays" class="cm-stays"></div>
       </div>
     </section>
 
@@ -572,7 +566,11 @@
       <div class="container">
         <div class="section-label">How to earn them</div>
         <h2 id="bb-heading">Badges <span>&amp; levels</span></h2>
-        <p class="intro">Every badge, what it takes and your progress. Each badge level gives XP: 🥉 10 · 🥈 25 · 🥇 50 · 💎 100. Tap a badge for details.</p>
+        <p class="intro">The team ranking, every badge, what it takes and your progress. Each badge level gives XP: 🥉 10 · 🥈 25 · 🥇 50 · 💎 100. Tap a badge for details.</p>
+        <h3 class="sub">⭐ Team XP</h3>
+        <p class="vote-hint" style="margin-top:0">The team ranking. Tap a name to see where the XP come from.</p>
+        <ul class="crew" id="crew"></ul>
+        <h3 class="sub">🏅 All badges</h3>
         <div class="badges" id="badges"></div>
       </div>
     </section>
@@ -624,6 +622,7 @@
     <button type="button" data-v="statute"><i>📜</i>Our Statute</button>
     <button type="button" data-v="blog"><i>📖</i>Blog</button>
     <button type="button" data-v="activity"><i>📋</i>Activity Log</button>
+    <button type="button" data-v="findteam"><i>📍</i>Find the Team</button>
     <button type="button" data-v="badgebook"><i>🏅</i>Badges &amp; levels</button>
     <a href="#" data-guide="1"><i>🧭</i>Site guide</a>
     <button type="button" data-v="join"><i>✉️</i>Join Us</button>
@@ -640,27 +639,27 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/js/map.js?v=20261023-062616"></script>
+  <script src="assets/js/map.js?v=20261023-070701"></script>
 
-  <script src="assets/js/home-scroll.js?v=20261023-062616"></script>
-  <script src="assets/js/ui.js?v=20261023-062616"></script>
-  <script src="assets/js/vote.js?v=20261023-062616"></script>
-  <script src="assets/js/blog.js?v=20261023-062616"></script>
-  <script src="assets/js/when.js?v=20261023-062616"></script>
-  <script src="assets/js/memorabilia.js?v=20261023-062616"></script>
-  <script src="assets/js/community.js?v=20261023-062616"></script>
-  <script src="assets/js/nav.js?v=20261023-062616"></script>
-  <script src="assets/js/profile.js?v=20261023-062616"></script>
-  <script src="assets/js/crewmap.js?v=20261023-062616"></script>
-  <script src="assets/js/passbook.js?v=20261023-062616"></script>
-  <script src="assets/js/founders.js?v=20261023-062616"></script>
-  <script src="assets/js/home.js?v=20261023-062616"></script>
-  <script src="assets/js/birthday.js?v=20261023-062616"></script>
-  <script src="assets/js/journey.js?v=20261023-062616"></script>
-  <script src="assets/js/trip.js?v=20261023-062616"></script>
-  <script src="assets/js/capsule.js?v=20261023-062616"></script>
-  <script src="assets/js/wrapped.js?v=20261023-062616"></script>
-<link rel="stylesheet" href="assets/css/gate.css?v=20261023-062616">
+  <script src="assets/js/home-scroll.js?v=20261023-070701"></script>
+  <script src="assets/js/ui.js?v=20261023-070701"></script>
+  <script src="assets/js/vote.js?v=20261023-070701"></script>
+  <script src="assets/js/blog.js?v=20261023-070701"></script>
+  <script src="assets/js/when.js?v=20261023-070701"></script>
+  <script src="assets/js/memorabilia.js?v=20261023-070701"></script>
+  <script src="assets/js/community.js?v=20261023-070701"></script>
+  <script src="assets/js/nav.js?v=20261023-070701"></script>
+  <script src="assets/js/profile.js?v=20261023-070701"></script>
+  <script src="assets/js/crewmap.js?v=20261023-070701"></script>
+  <script src="assets/js/passbook.js?v=20261023-070701"></script>
+  <script src="assets/js/founders.js?v=20261023-070701"></script>
+  <script src="assets/js/home.js?v=20261023-070701"></script>
+  <script src="assets/js/birthday.js?v=20261023-070701"></script>
+  <script src="assets/js/journey.js?v=20261023-070701"></script>
+  <script src="assets/js/trip.js?v=20261023-070701"></script>
+  <script src="assets/js/capsule.js?v=20261023-070701"></script>
+  <script src="assets/js/wrapped.js?v=20261023-070701"></script>
+<link rel="stylesheet" href="assets/css/gate.css?v=20261023-070701">
 <div id="cs-gate"><div class="box">
   <h2>Welcome aboard 🌊</h2>
   <p class="cs-who" id="cs-who"></p>
@@ -681,13 +680,13 @@
   </div>
   <div id="cs-msg"></div>
 </div></div>
-<script src="assets/js/gate.js?v=20261023-062616"></script>
+<script src="assets/js/gate.js?v=20261023-070701"></script>
 
-<script src="assets/js/booster.js?v=20261023-062616"></script>
-<script src="assets/js/onthisday.js?v=20261023-062616"></script>
-<script src="assets/js/mobile.js?v=20261023-062616"></script>
-<script src="assets/js/update.js?v=20261023-062616"></script>
-<script src="assets/js/push.js?v=20261023-062616"></script>
-<script src="assets/js/setup.js?v=20261023-062616"></script>
+<script src="assets/js/booster.js?v=20261023-070701"></script>
+<script src="assets/js/onthisday.js?v=20261023-070701"></script>
+<script src="assets/js/mobile.js?v=20261023-070701"></script>
+<script src="assets/js/update.js?v=20261023-070701"></script>
+<script src="assets/js/push.js?v=20261023-070701"></script>
+<script src="assets/js/setup.js?v=20261023-070701"></script>
 </body>
 </html>

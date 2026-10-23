@@ -305,19 +305,6 @@ html.su-open { overflow: hidden; }
 .pb-mrz { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 12px; font-family: "Courier New", monospace; font-size: .62rem; letter-spacing: 1.2px; line-height: 1.45; color: #3b3b3b; background: rgba(255,255,255,.4); border-top: 1px solid rgba(0,0,0,.08); overflow: hidden; white-space: nowrap; }
 .pb-data { padding-bottom: 54px; }
 .pb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 10px; padding-top: 8px; }
-#pbook .stamp { position: relative; min-height: 120px; border-radius: 12px; font: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; background: none; color: #1d2433; padding: 8px 6px; }
-#pbook .stamp.slot { border: 2px dashed rgba(107,90,51,.35); color: #6b5a33; }
-#pbook .stamp.slot span { font-size: 1.6rem; opacity: .6; }
-#pbook .stamp.slot b { font-family: inherit; font-size: .85rem; white-space: normal; color: #6b5a33; }
-#pbook .stamp.slot small { font-size: .7rem; opacity: .8; }
-#pbook .stamp.next { cursor: default; opacity: .7; }
-#pbook .stamp.on { color: var(--ink); border: 3px double var(--ink); opacity: .88; mix-blend-mode: multiply;
-  background: radial-gradient(circle at 30% 30%, transparent 60%, rgba(0,0,0,.03)); text-transform: uppercase; }
-#pbook .stamp.on.round { border-radius: 50%; aspect-ratio: 1; min-height: 0; width: 86%; justify-self: center; }
-#pbook .stamp.on.oval { border-radius: 50% / 40%; }
-#pbook .stamp.on b { font-family: Impact, "Arial Black", sans-serif; font-size: 1.15rem; letter-spacing: 1px; color: var(--ink); white-space: normal; }
-#pbook .stamp.on small { font-size: .55rem; letter-spacing: 1.5px; font-weight: 700; }
-#pbook .stamp.on span { font-size: .85rem; font-weight: 700; }
 .pb-nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: rgba(6,13,28,.85); color: var(--yellow); font-size: 1.3rem; cursor: pointer; }
 .pb-nav.prev { left: -44px; } .pb-nav.next { right: -44px; }
 @media (max-width: 560px) { .pb-nav { display: none; } }
@@ -325,7 +312,49 @@ html.su-open { overflow: hidden; }
 .pb-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.2); cursor: pointer; }
 .pb-dots i.on { background: var(--yellow); }
 .pb-hint { text-align: center; }
-#badgebook .badges { margin-top: 18px; }
+#badgebook .badges { margin-top: 10px; }
 .pb-cover b { color: #e8c766; font-family: inherit; white-space: normal; }
-#pbook .stamp.on span, #pbook .stamp.on small { color: var(--ink); }
-#pbook .stamp img { display: none; }
+
+/* Stamps: the Tsunami Meeting logo, inked like a rubber stamp (passbook.js draws the ink). */
+.pbook .stamp { position: relative; min-height: 150px; border: 0; border-radius: 12px; font: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-align: center; background: none; color: #1d2433; padding: 6px 4px; -webkit-tap-highlight-color: transparent; }
+div.stamp { cursor: default !important; }
+.pbook .stamp img.ink { display: block; width: 88%; max-width: 150px; height: auto; aspect-ratio: auto; margin: 0; filter: none; opacity: 1; transform: none; transition: none; }
+.pbook .stamp img.raw { filter: grayscale(1) contrast(1.4); opacity: .5; }
+.pbook .stamp.on { mix-blend-mode: multiply; opacity: .92; }
+.pbook .stamp.on b { font-family: Impact, "Arial Black", sans-serif; font-size: .95rem; letter-spacing: 1px; color: var(--ink); white-space: normal; opacity: .85; }
+.pbook .stamp.on small { font-size: .55rem; letter-spacing: 1.5px; font-weight: 700; color: var(--ink); opacity: .75; }
+.pbook .stamp.slot { border: 2px dashed rgba(107,90,51,.3); color: #6b5a33; }
+.pbook .stamp.slot img.ghost { opacity: .22; filter: grayscale(1); }
+.pbook .stamp.slot b { font-family: inherit; font-size: .82rem; white-space: normal; color: #6b5a33; }
+.pbook .stamp.slot small { font-size: .68rem; opacity: .8; }
+.pbook .stamp.slot span { font-size: 1.6rem; opacity: .6; }
+.pbook .stamp.next { cursor: default; opacity: .7; }
+/* Editable fields on my data page */
+.pb-ff { margin-top: 10px; }
+.pb-f { display: block; text-align: left; font: inherit; background: rgba(255,255,255,.45); border: 1px dashed rgba(107,90,51,.45); border-radius: 8px; padding: 2px 8px 6px; cursor: pointer; min-width: 0; color: inherit; }
+.pb-f label { cursor: pointer; }
+.pb-f label i { font-style: normal; color: #1d4ed8; }
+.pb-f.add b { color: #1d4ed8; font-family: inherit; font-weight: 700; font-size: .9rem; }
+.pb-edit { margin-top: 8px; padding: 10px; border-radius: 10px; background: #fffdf5; border: 1px solid rgba(107,90,51,.35); box-shadow: 0 4px 14px rgba(0,0,0,.12); }
+.pb-edit label { margin: 0 0 6px; }
+.pb-er { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.pb-edit select, .pb-edit input { flex: 1; min-width: 0; padding: 9px 10px; border-radius: 8px; border: 1px solid rgba(107,90,51,.4); background: #fff; color: #111827; font: inherit; font-size: 16px; }
+.pb-edit input { width: 100%; }
+.pb-edit button { padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(107,90,51,.4); background: #fff; color: #6b5a33; font: inherit; font-size: .85rem; cursor: pointer; }
+.pb-edit button.pb-ok { background: #1d4ed8; border-color: #1d4ed8; color: #fff; font-weight: 700; }
+.pb-edit .pc-res li { background: #fff; color: #1d2433; border-color: rgba(107,90,51,.3); }
+.pb-edit .pc-res li:hover { color: #1d4ed8; }
+.pb-msg { display: block; font-size: .78rem; color: #9a1b1b; margin-top: 4px; }
+/* Team passports */
+.tp-list { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px; margin: 0 auto; max-width: 720px; scrollbar-width: thin; }
+.tp { flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 82px; padding: 8px 4px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--white); font: inherit; cursor: pointer; }
+.tp.on { border-color: var(--yellow); background: rgba(245,210,27,.12); }
+.tp-f { position: relative; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--dark); display: grid; place-items: center; }
+.tp b { font-size: .74rem; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.tp small { font-size: .68rem; color: var(--grey); }
+/* Find the Team, Badges & levels: same look as the Passport */
+#findteam, #badgebook { padding: 80px 0; background: linear-gradient(160deg, rgba(39,184,255,0.06), transparent 55%); }
+#findteam h3.sub, #badgebook h3.sub { color: var(--yellow); margin: 34px 0 12px; }
+#badgebook h3.sub:first-of-type { margin-top: 18px; }
+.cm-dist li[data-cm-focus] { cursor: pointer; }
+.cm-dist li[data-cm-focus]:hover span { color: var(--yellow); }

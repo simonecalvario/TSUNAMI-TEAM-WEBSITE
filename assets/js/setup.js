@@ -45,7 +45,7 @@
         '<button type="button" class="su-go" data-su="push">Turn on notifications</button>';
     }
     const bio = ios ? 'Face ID' : 'fingerprint lock';
-    return '<div class="su-ic">🔒</div><h3>Protect the app with ' + bio + '</h3><p>Opening Tsunami will ask for your face or fingerprint, so nobody else can read the crew’s chat.</p>' +
+    return '<div class="su-ic">🔒</div><h3>Protect the app with ' + bio + '</h3><p>Opening Tsunami will ask for your face or fingerprint, so nobody else can read the team’s chat.</p>' +
       '<button type="button" class="su-go" data-su="lock">Turn on ' + bio + '</button>';
   }
 

@@ -1,4 +1,4 @@
-/* Tsunami Wrapped: your year with the crew, in numbers. */
+/* Tsunami Wrapped: your year with the team, in numbers. */
 (function () {
   const box = document.getElementById('wrapped'); if (!box) return;
   const esc = TT.esc, api = TT.api;
@@ -64,9 +64,9 @@
     if (S.posts || S.mem) cards.push(c('✍️', S.posts + S.mem, 'stories and memorabilia added'));
     if (S.boost) cards.push(c('🌅', S.boost, 'mornings with the Daily Booster'));
     const rank = crew.findIndex(x => x.e === email) + 1;
-    box.innerHTML = '<div class="wr-head"><div><b>' + year + '</b> with the crew</div><select id="wr-y" aria-label="Year">' + years.map(y => '<option' + (y === year ? ' selected' : '') + '>' + y + '</option>').join('') + '</select></div>' +
+    box.innerHTML = '<div class="wr-head"><div><b>' + year + '</b> with the team</div><select id="wr-y" aria-label="Year">' + years.map(y => '<option' + (y === year ? ' selected' : '') + '>' + y + '</option>').join('') + '</select></div>' +
       '<div class="wr-grid">' + cards.join('') + '</div>' +
-      '<p class="wr-crew">The whole crew in ' + year + ': <b>' + crewMsgs + '</b> messages · <b>' + crewPh + '</b> photos · ' + TT.MEETINGS.filter(m => m.year === year).length + ' meeting(s).' +
+      '<p class="wr-crew">The whole team in ' + year + ': <b>' + crewMsgs + '</b> messages · <b>' + crewPh + '</b> photos · ' + TT.MEETINGS.filter(m => m.year === year).length + ' meeting(s).' +
       (crew[0] && crew[0].s.score ? ' Most active wave: <b>' + esc(name(crew[0].e)) + '</b>' + (rank && crew[0].e !== email ? ' · you are #' + rank : crew[0].e === email ? ' (that’s you! 🏆)' : '') + '.' : '') + '</p>' +
       (navigator.share ? '<button type="button" class="button" id="wr-share">Share my Wrapped</button>' : '');
     document.getElementById('wr-y').onchange = function () { year = +this.value; render(); };
