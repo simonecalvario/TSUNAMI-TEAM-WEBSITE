@@ -285,8 +285,18 @@
         if (!email) { note.textContent = 'Could not identify your account. Reload the page.'; return; }
         if (!nick) { note.innerHTML = 'To chat, first choose your call sign. <a href="#" onclick="openCallsignGate();return false;">Choose now</a>'; }
         else { note.style.display = 'none'; form.style.display = 'flex'; }
-        list.addEventListener('scroll', function () { near = list.scrollHeight - list.scrollTop - list.clientHeight < 80; });
-        $('chat-in').addEventListener('input', suggest);
+        const down = $('chat-down'), inp = $('chat-in');
+        list.addEventListener('scroll', function () { near = list.scrollHeight - list.scrollTop - list.clientHeight < 80; if (near) down.classList.remove('show'); }, { passive: true });
+        down.addEventListener('click', function () { near = true; list.scrollTop = list.scrollHeight; down.classList.remove('show'); });
+        // The box grows with the text (up to ~5 lines). On a computer Enter sends and Shift+Enter is a new line;
+        // on phones Enter is a new line and the Send button sends, like in messaging apps.
+        const grow = function () { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 120) + 'px'; };
+        inp.addEventListener('input', function () { grow(); suggest(); });
+        inp.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && !matchMedia('(pointer: coarse)').matches) { e.preventDefault(); form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true })); }
+        });
+        inp.addEventListener('focus', function () { if (near) setTimeout(function () { list.scrollTop = list.scrollHeight; }, 300); });
+        window.ttChatBottom = function () { near = true; list.scrollTop = list.scrollHeight; };
         $('chat-sug').addEventListener('click', function (e) { const n = e.target.dataset.n; if (n) insertMention(n); });
         $('chat-reply-x').addEventListener('click', function () { setReply(null); });
         form.addEventListener('submit', async function (e) {
@@ -294,7 +304,7 @@
           const t = $('chat-in').value.trim(); if (!t || !nick) return;
           const body = { email: email, nickname: nick, body: t };
           if (replyTo) body.reply_to = replyTo.id;
-          $('chat-in').value = ''; $('chat-sug').style.display = 'none';
+          $('chat-in').value = ''; grow(); $('chat-sug').style.display = 'none';
           try {
             const r = await fetch(R + 'chat_messages', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, HJ), body: JSON.stringify(body) });
             if (!r.ok) throw 0;
@@ -303,7 +313,7 @@
         });
         list.addEventListener('click', async function (e) {
           const id = e.target.dataset.x;
-          if (id) { await fetch(R + 'chat_messages?id=eq.' + id + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H }); lastId = 0; byId = {}; list.innerHTML = ''; poll(); return; }
+          if (id) { if (!confirm('Delete this message?')) return; await fetch(R + 'chat_messages?id=eq.' + id + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H }); lastId = 0; byId = {}; list.innerHTML = ''; poll(); return; }
           if (e.target.dataset.re) { const m = byId[e.target.dataset.re]; if (m && nick) setReply(m); return; }
           if (e.target.dataset.m && nick) { const inp = $('chat-in'); inp.value = (inp.value + ' @' + e.target.dataset.m + ' ').trimStart(); inp.focus(); return; }
           const q = e.target.closest('.quote');
@@ -334,8 +344,10 @@
           lastId = Math.max(lastId, m.id);
           return out;
         }).join('');
+        const first = !list.children.length;
         list.insertAdjacentHTML('beforeend', frag);
-        if (near || list.children.length === rows.length) list.scrollTop = list.scrollHeight;
+        if (near || first) list.scrollTop = list.scrollHeight;
+        else if (rows.some(m => m.email !== email)) $('chat-down').classList.add('show');
       }
 
       /* ---------------- PASSPORT + ALBUMS ---------------- */

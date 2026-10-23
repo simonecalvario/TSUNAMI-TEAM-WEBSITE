@@ -20,6 +20,33 @@
     if (!inside || sheet.scrollHeight <= sheet.clientHeight) e.preventDefault();
   }, { passive: false });
 
+  /* ---- Lagoon as a full-screen chat on phones ----
+     The chat sits between the header and the tab bar and follows the keyboard (visualViewport),
+     so on Android and iPhone the input stays visible and only the messages scroll. */
+  const chat = document.querySelector('#lagoon .chat'), header = document.querySelector('header');
+  function fitChat() {
+    const on = mq.matches && cur === 'lagoon';
+    document.documentElement.classList.toggle('chat-on', on);
+    if (!on || !chat) return;
+    const vv = window.visualViewport, H = vv ? vv.height : window.innerHeight, off = vv ? vv.offsetTop : 0;
+    const kb = window.innerHeight - H > 120 || (document.activeElement && document.activeElement.id === 'chat-in' && window.innerHeight < screen.height * 0.6);
+    const top = kb ? 0 : (header ? header.getBoundingClientRect().bottom : 0), tb = kb ? 0 : bar.getBoundingClientRect().height;
+    chat.style.setProperty('--chat-top', Math.max(0, off + top) + 'px');
+    chat.style.setProperty('--chat-h', Math.max(160, H - top - tb) + 'px');
+  }
+  if (window.visualViewport) { visualViewport.addEventListener('resize', fitChat); visualViewport.addEventListener('scroll', fitChat); }
+  window.addEventListener('resize', fitChat);
+  window.addEventListener('orientationchange', function () { setTimeout(fitChat, 300); });
+  document.addEventListener('focusin', function (e) { if (e.target.id === 'chat-in') setTimeout(fitChat, 250); });
+  document.addEventListener('focusout', function (e) { if (e.target.id === 'chat-in') setTimeout(fitChat, 250); });
+  // iPhone ignores overflow: hidden on the page: stop drags on the chat frame, let the messages scroll.
+  document.addEventListener('touchmove', function (e) {
+    if (!document.documentElement.classList.contains('chat-on') || sheet.classList.contains('open')) return;
+    const t = e.target.closest ? e.target : null; if (!t) return;
+    if (t.closest('#chat-list, #chat-in, #chat-sug, #bell-panel, #tour-card, #bb-pop, #m-sheet')) return;
+    if (t.closest('#lagoon, header, #tabbar')) e.preventDefault();
+  }, { passive: false });
+
   function show(id, keepScroll) {
     if (!secs.some(s => s.id === id)) id = 'home';
     const target = id; id = GROUP[id] || id;
@@ -31,6 +58,8 @@
     Array.prototype.forEach.call(bar.children, b => b.classList.toggle('on', b.dataset.v === key));
     Array.prototype.forEach.call(sheet.querySelectorAll('button'), b => b.classList.toggle('on', b.dataset.v === id));
     sheetOpen(false);
+    fitChat();
+    if (id === 'lagoon') setTimeout(function () { fitChat(); if (window.ttChatBottom) window.ttChatBottom(); }, 80);
     if (target !== id) setTimeout(function () { const t = document.getElementById(target); if (t) t.scrollIntoView(); }, 30);
     else if (!keepScroll) window.scrollTo(0, 0);
     try { history.replaceState(null, '', '#' + target); } catch (e) {}
@@ -107,6 +136,7 @@
       if (footer) footer.classList.remove('m-off');
       sheetOpen(false);
     }
+    fitChat();
   }
   if (mq.addEventListener) mq.addEventListener('change', apply); else mq.addListener(apply);
   apply();
