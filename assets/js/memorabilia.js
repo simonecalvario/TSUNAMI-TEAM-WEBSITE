@@ -12,7 +12,7 @@
       ]);
       $('mem-meeting').insertAdjacentHTML('afterbegin', TT.MEETINGS.map(m => '<option value="' + m.key + '">' + m.icon + ' ' + esc(m.name) + ' ' + m.year + '</option>').join(''));
       $('mem-meeting').selectedIndex = 0;
-      let email = null, items = [], filter = 'all';
+      let email = null, items = [], filter = 'all', editing = null;
       const tagOf = m => {
         const k = MEET.find(x => x.key === m.meeting_key);
         if (k && k.key !== 'other') return k.label;
@@ -57,8 +57,15 @@
         const list = filter === 'all' ? items : items.filter(m => keyOf(m) === filter);
         if (!list.length) { g.innerHTML = '<p class="vote-hint">Nothing here yet. Be the first to add a piece of our history!</p>'; return; }
         g.innerHTML = list.map(m =>
-          '<article class="mem-card"><img src="' + esc(m.image_url) + '" alt="' + esc(m.title) + '" loading="lazy" data-zoom="1"><div class="mem-info"><h3>' + esc(m.title) + '</h3><span class="mem-tag">' + tagOf(m) + '</span><p>' + esc(m.description) + '</p>' +
-          (m.email === email ? '<button class="vote-del" data-del="' + esc(m.id) + '">Delete</button>' : '') + '</div></article>').join('');
+          '<article class="mem-card"><img src="' + esc(m.image_url) + '" alt="' + esc(m.title) + '" loading="lazy" data-zoom="1"><div class="mem-info">' +
+          (editing === m.id
+            // The author fixes title and description in place.
+            ? '<input class="mem-ed-t" maxlength="120" value="' + esc(m.title) + '" aria-label="Title"><span class="mem-tag">' + tagOf(m) + '</span>' +
+              '<textarea class="mem-ed-d" rows="4" maxlength="1000" aria-label="Description">' + esc(m.description) + '</textarea>' +
+              '<div class="mem-ed-b"><button type="button" class="button" data-save="' + esc(m.id) + '">Save</button><button type="button" class="vote-del" data-cancel="1">Cancel</button></div>'
+            : '<h3>' + esc(m.title) + '</h3><span class="mem-tag">' + tagOf(m) + '</span><p>' + esc(m.description) + '</p>' +
+              (m.email === email ? '<div class="mem-ed-b"><button type="button" class="vote-del" data-edit="' + esc(m.id) + '">✏️ Edit</button><button class="vote-del" data-del="' + esc(m.id) + '">Delete</button></div>' : '')) +
+          '</div></article>').join('');
       }
 
       $('mem-chips').addEventListener('click', function (e) { const f = e.target.dataset.f; if (f) { filter = f; render(); } });
@@ -72,6 +79,18 @@
 
       $('mem-grid').addEventListener('click', async function (e) {
         if (e.target.dataset.zoom) { $('mem-lb').querySelector('img').src = e.target.src; $('mem-lb').classList.add('open'); return; }
+        const ed = e.target.dataset.edit;
+        if (ed) { editing = ed; render(); const t = $('mem-grid').querySelector('.mem-ed-d'); if (t) t.focus(); return; }
+        if (e.target.dataset.cancel) { editing = null; render(); return; }
+        const sv = e.target.dataset.save;
+        if (sv && email) {
+          const card = e.target.closest('.mem-info'), title = card.querySelector('.mem-ed-t').value.trim(), description = card.querySelector('.mem-ed-d').value.trim();
+          if (!title) { card.querySelector('.mem-ed-t').focus(); return; }
+          e.target.disabled = true;
+          const r = await fetch(T + '?id=eq.' + encodeURIComponent(sv) + '&email=eq.' + encodeURIComponent(email), { method: 'PATCH', headers: Object.assign({ 'Content-Type': 'application/json', Prefer: 'return=minimal' }, H), body: JSON.stringify({ title: title, description: description }) }).catch(() => null);
+          if (!r || !r.ok) { e.target.disabled = false; alert('Not saved, please try again.'); return; }
+          editing = null; load(); return;
+        }
         const id = e.target.dataset.del;
         if (id && email && confirm('Delete this piece?')) {
           await fetch(T + '?id=eq.' + encodeURIComponent(id) + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H });
