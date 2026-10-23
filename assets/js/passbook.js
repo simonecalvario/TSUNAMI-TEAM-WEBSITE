@@ -240,7 +240,10 @@
     });
   });
 
-  window.ttPass = { edit: function (k) { openEdit(k); own.scrollIntoView({ block: 'center', behavior: 'smooth' }); } };
+  window.ttPass = {
+    edit: function (k) { openEdit(k); own.scrollIntoView({ block: 'center', behavior: 'smooth' }); },
+    page: function (i) { if (mine.edit) closeEdit(); mine.go(i); own.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  };
   TT.identity().then(function (e) { me = e; renderTeam(); });
   TT.when('passport', function (d) { mine.P = d; mine.render(); });
   TT.when('team', function (list) { team = list || []; renderTeam(); });

@@ -28,7 +28,7 @@
       /* ---------------- SITE GUIDE ---------------- */
       const GUIDE = [
         ['Your first steps', [
-          ['🎂', 'Birthday and city', 'Passport → My passport: tap Birthday and Home on the first page. The team will celebrate with you.'],
+          ['🎂', 'Birthday and city', 'Passport → My passport: on the first page tap Birthday and Home. The team will celebrate with you, and Find the Team will show how far you are.'],
           ['🗳', 'Vote the next city', 'Meetings → Vote city. Votes are public, with call signs.'],
           ['📅', 'Mark your free dates', 'Meetings → Dates. Find the days that work for everyone.'],
           ['🛂', 'Collect your stamps', 'Passport → My passport. Swipe to the visa pages and tap the meetings you lived.'],
@@ -39,18 +39,18 @@
           ['📍', 'Find the Team', 'More → Find the Team: everyone on the map with the distances. Add where you will be on holidays or trips.']
         ]],
         ['What’s where', [
-          ['👥', 'Founders', 'The 13 founders of the team.'],
-          ['🌊', 'Philosophy · Statute', 'What we believe, the experiences we share and our founding words.'],
+          ['📖', 'Blog', 'More → Blog: post stories, photos and memories; comment and react.'],
+          ['👥', 'Founders', 'More → Founders: the 13 founders of the team.'],
+          ['🌊', 'Philosophy & Statute', 'More → Philosophy & Statute: what we believe, the experiences we share and our founding words.'],
           ['📍', 'Meetings', 'Map of our meetings, city vote and dates. Tap a pin for its gallery: add photos, react and comment.'],
           ['🧳', 'Trip room', 'Meetings → Trip: say if you are coming, your arrival, the checklist, shared expenses and the time capsule.'],
-          ['🧭', 'Our journey', 'Every Tsunami Meeting so far, with the team, photos and souvenirs, and your yearly Wrapped.'],
+          ['🧭', 'Our journey', 'More → Our journey: every Tsunami Meeting so far, with the team, photos and souvenirs, and your yearly Wrapped.'],
           ['🎽', 'Memorabilia', 'Pieces and merch of the team: add yours too.'],
-          ['📖', 'Blog', 'Post stories, photos and memories; comment and react.'],
           ['💬', 'Lagoon', 'The team chat.'],
-          ['🛂', 'Passport', 'Your passport (photo, birthday, city, level, badges and meeting stamps) and the passports of the team.'],
-          ['📍', 'Find the Team', 'Where everyone is today and how far apart we are.'],
+          ['🛂', 'Passport', 'My passport: photo, birthday, city, level, badges and meeting stamps. Team passports: open the passport of any member (read only).'],
+          ['📍', 'Find the Team', 'More → Find the Team: where everyone is today and how far apart we are. Tap a name for the distances from them.'],
           ['🏅', 'Badges & levels', 'More → Badges & levels: the Team XP ranking, every badge, how to earn it and your progress.'],
-          ['📋', 'Activity Log', 'Everything that happens, in order: transparency for all.'],
+          ['📋', 'Activity Log', 'More → Activity Log: everything that happens, in order: transparency for all.'],
           ['🌅', 'Daily Booster', 'Tap the logo on the home page: one quote a day. Read it daily to earn badges!']
         ]],
         ['Good to know', [
@@ -104,10 +104,12 @@
       }
       const TOUR = [
         { ic: '🎂', t: 'Your birthday', d: 'On the first page of your passport tap Birthday, choose day and month and Save. The team will celebrate with you!', go: 'passport', tab: 'My passport', sel: '#pbook', act: () => { const c = $('tour-card'); if (c) c.classList.add('min', 'top'); if (window.ttPass) window.ttPass.edit('bd'); }, done: () => !!document.querySelector('#pbook [data-pe-open=bd][data-set]'), ok: '✓ Birthday saved' },
-        { ic: '🛂', t: 'Your stamps', d: 'Tap the Tsunami Meetings you lived: each one stamps your passport.', go: 'passport', tab: 'My passport', sel: '#pbook', done: () => !!document.querySelector('#pbook .stamp.on'), ok: '✓ You have at least one stamp' },
+        { ic: '🏠', t: 'Your city', d: 'Now tap Home on the same page and search your city: the team sees where you live and how far apart we are.', go: 'passport', tab: 'My passport', sel: '#pbook', act: () => { const c = $('tour-card'); if (c) c.classList.add('min', 'top'); if (window.ttPass) window.ttPass.edit('city'); }, done: () => !!document.querySelector('#pbook [data-pe-open=city][data-set]'), ok: '✓ City saved' },
+        { ic: '🛂', t: 'Your stamps', d: 'On the visa pages, tap the Tsunami Meetings you lived: each one stamps the meeting logo on your passport.', go: 'passport', tab: 'My passport', sel: '#pbook', act: () => { const c = $('tour-card'); if (c) c.classList.add('min', 'top'); if (window.ttPass) window.ttPass.page(2); }, done: () => !!document.querySelector('#pbook .stamp.on'), ok: '✓ You have at least one stamp' },
         { ic: '📍', t: 'Where: vote the city', d: 'Vote the city for the next Tsunami Meeting. Votes are public, with call signs.', go: 'meetings', tab: 'Vote city', sel: '#meetings .vote-box' },
         { ic: '📅', t: 'When: your free dates', d: 'Mark the days you are free, so we can find the best dates for everyone.', go: 'meetings', tab: 'Dates', sel: '#meetings .when-box' },
         { ic: '📸', t: 'Meeting galleries', d: 'Tap a pin on the map to open the gallery of that Tsunami Meeting: add your photos, react with an emoji and comment.', go: 'meetings', tab: 'Map', sel: '#world-map', nofocus: true },
+        { ic: '📍', t: 'Find the Team', d: 'Everyone on the map, with the distances. Going on holiday or on a trip? Add it in “I’ll be at…” and the map uses that place for those days.', go: 'findteam', sel: '#findteam #cm-map', nofocus: true },
         { ic: '🌅', t: 'Your Daily Booster', d: 'Tap the logo for a quote to start your day. Read one every day to earn badges!', go: 'home', sel: '#booster-btn', act: () => { const bt = $('booster-btn'); if (bt) bt.click(); }, done: () => { const bt = $('booster-btn'); return !!bt && !bt.classList.contains('new'); }, ok: '✓ Today’s boost opened' },
         { ic: '🔔', t: 'Notifications & Face ID', d: 'Tap the bell: turn on push notifications to get alerts when someone mentions you, and the Face ID lock to protect the app.', go: null, sel: '#bell', panel: true, done: () => (window.ttPush && window.ttPush.state() === 'on') || (window.ttLock && window.ttLock.state() === 'on'), ok: '✓ Alerts or Face ID are on' },
         ...(INST.ok ? [{ ic: '📲', t: 'Use it like an app', d: 'Add the site to your Home Screen to open it like an app. On iPhone it is needed for push notifications. Tap Do it to see how.', go: 'home', sel: '#inst-banner, #logo-hint', act: () => instPop() }] : []),
