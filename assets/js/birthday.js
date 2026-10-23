@@ -1,5 +1,5 @@
 /* Birthday Boost (home page): on a member's birthday every other member sends one emoji "wave".
-   Two thirds of the crew fill the energy bar and unlock the Birthday Boost for the birthday member. */
+   Two thirds of the team fill the energy bar and unlock the Birthday Boost for the birthday member. */
 (function () {
   const cont = document.querySelector('.hero-content'); if (!cont) return;
   const esc = TT.esc, enc = TT.enc, api = TT.api;
@@ -44,7 +44,7 @@
     const pct = Math.min(100, Math.round(got / nd * 100)), full = got >= nd, all = got >= others && others > 0;
     return { got: got, nd: nd, others: others, full: full, all: all,
       html: '<div class="bb-bar' + (full ? ' full' : '') + '"><i style="width:' + pct + '%"></i></div>' +
-        '<div class="bb-count">' + (all ? '🌐 Full crew! Every member sent a wave' : full ? '⚡ Birthday Boost unlocked · ' + got + ' waves' : got + ' / ' + nd + ' waves to unlock the Birthday Boost') + '</div>' +
+        '<div class="bb-count">' + (all ? '🌐 Full team! Every member sent a wave' : full ? '⚡ Birthday Boost unlocked · ' + got + ' waves' : got + ' / ' + nd + ' waves to unlock the Birthday Boost') + '</div>' +
         (got ? '<div class="bb-who">' + waves[b.email].map(x => '<span title="' + esc(x.note || '') + '">' + x.emoji + ' ' + esc(name(x.email)) + '</span>').join('') + '</div>' : '') };
   }
 
@@ -52,7 +52,7 @@
     const B = bar(b), me = b.email === email, mine = waves[b.email].find(x => x.email === email);
     if (me) {
       return '<div class="bb-card me"><div class="bb-t">🎂 Happy birthday, ' + esc(name(b.email)) + '!</div>' +
-        '<p class="bb-s">' + (B.full ? 'Your crew filled your energy bar.' : 'Your crew is charging your energy bar. When it is full, your Birthday Boost unlocks.') + '</p>' +
+        '<p class="bb-s">' + (B.full ? 'Your team filled your energy bar.' : 'Your team is charging your energy bar. When it is full, your Birthday Boost unlocks.') + '</p>' +
         B.html + (B.full ? '<button type="button" class="bb-open" data-bb="open">⚡ Open your Birthday Boost</button>' : '') + '</div>';
     }
     return '<div class="bb-card" data-e="' + esc(b.email) + '"><div class="bb-t">🎂 Today is ' + esc(name(b.email)) + '’s birthday!</div>' +
@@ -80,11 +80,11 @@
     const pop = document.createElement('div'); pop.id = 'bb-pop';
     pop.innerHTML = '<div class="bb-p"><div class="bb-big">⚡</div><div class="bb-k">Your Birthday Boost</div>' +
       '<h3>Happy birthday, ' + esc(nm) + '!</h3>' +
-      '<p class="bb-msg">' + B.got + ' member' + (B.got > 1 ? 's' : '') + ' of the crew sent you their wave' + (B.all ? ': the whole crew!' : '.') + ' Wherever you are today, the connection is here. Stay liquid, keep making waves. 🌊</p>' +
+      '<p class="bb-msg">' + B.got + ' member' + (B.got > 1 ? 's' : '') + ' of the team sent you their wave' + (B.all ? ': the whole team!' : '.') + ' Wherever you are today, the connection is here. Stay liquid, keep making waves. 🌊</p>' +
       '<div class="bb-row">' + waves[b.email].map(x => '<span>' + x.emoji + '</span>').join('') + '</div>' +
       '<p class="bq-t">“' + esc(q[0]) + '”</p><div class="bq-a">— ' + esc(q[1]) + '</div><div class="bq-s">' + esc(q[2]) + '</div>' +
       (notes.length ? '<div class="bb-notes">' + notes.map(x => '<p>' + x.emoji + ' <b>' + esc(name(x.email)) + ':</b> ' + esc(x.note) + '</p>').join('') + '</div>' : '') +
-      '<button type="button" data-bb="close">Thank you, crew! 🎉</button></div>';
+      '<button type="button" data-bb="close">Thank you, team! 🎉</button></div>';
     for (let i = 0; i < 40; i++) { const s = document.createElement('i'); s.className = 'cf'; s.textContent = ['🎂', '🌊', '⚡', '🎉', '🏄', '🥂'][i % 6]; s.style.left = Math.random() * 100 + '%'; s.style.animationDelay = (Math.random() * 1.8) + 's'; s.style.fontSize = (16 + Math.random() * 16) + 'px'; pop.appendChild(s); }
     pop.addEventListener('click', function (e) { if (e.target === pop || (e.target.dataset && e.target.dataset.bb === 'close')) pop.remove(); });
     document.body.appendChild(pop);
