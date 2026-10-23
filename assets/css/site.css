@@ -894,6 +894,7 @@
 
       /* Lagoon on phones: a full-screen chat like a messaging app (no scroll inside a scrolling page). */
       html.chat-on, html.chat-on body { overflow: hidden; overscroll-behavior: none; }
+      html.chat-on header { z-index: 35; } /* the bell panel opens above the full-screen chat */
       body.m #lagoon .chat { position: fixed; left: 0; right: 0; top: var(--chat-top, 60px); height: var(--chat-h, 70vh); z-index: 30; margin: 0; max-width: none; border-radius: 0; border-left: 0; border-right: 0; display: flex; flex-direction: column; }
       body.m #lagoon .chat-top { display: flex; align-items: baseline; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
       body.m #lagoon .chat-top b { color: var(--yellow); }
