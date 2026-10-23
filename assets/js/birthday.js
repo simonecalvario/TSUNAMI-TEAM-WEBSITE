@@ -1,5 +1,6 @@
 /* Birthday Boost (home page): on a member's birthday every other member sends one emoji "wave".
-   Two thirds of the team fill the energy bar and unlock the Birthday Boost for the birthday member. */
+   Two thirds of the team fill the energy bar and unlock the Birthday Boost early; at 21:00 it unlocks anyway,
+   with every wave and message received, so the birthday member always gets it. */
 (function () {
   const cont = document.querySelector('.hero-content'); if (!cont) return;
   const esc = TT.esc, enc = TT.enc, api = TT.api;
@@ -19,6 +20,10 @@
     ['The good life is one inspired by love and guided by knowledge.', 'Bertrand Russell', 'What I Believe (1925)']
   ];
   const need = others => Math.max(1, Math.ceil(others * 2 / 3));
+  const OPEN_AT = 21;
+  // 21:00 on the member's phone, or in Rome (where the evening push is sent), whichever comes first.
+  const romeHour = () => { try { return +new Intl.DateTimeFormat('en-GB', { hour: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Rome' }).format(new Date()); } catch (e) { return 0; } };
+  const evening = () => new Date().getHours() >= OPEN_AT || romeHour() >= OPEN_AT;
   const hash = t => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return h >>> 0; };
 
   const box = document.createElement('div'); box.id = 'bday-boost';
@@ -41,10 +46,12 @@
 
   function bar(b) {
     const others = nk.filter(n => n.email !== b.email).length, nd = need(others), got = waves[b.email].length;
-    const pct = Math.min(100, Math.round(got / nd * 100)), full = got >= nd, all = got >= others && others > 0;
-    return { got: got, nd: nd, others: others, full: full, all: all,
+    const pct = Math.min(100, Math.round(got / nd * 100)), full = got >= nd, all = got >= others && others > 0, open = full || evening();
+    return { got: got, nd: nd, others: others, full: full, all: all, open: open,
       html: '<div class="bb-bar' + (full ? ' full' : '') + '"><i style="width:' + pct + '%"></i></div>' +
-        '<div class="bb-count">' + (all ? '🌐 Full team! Every member sent a wave' : full ? '⚡ Birthday Boost unlocked · ' + got + ' waves' : got + ' / ' + nd + ' waves to unlock the Birthday Boost') + '</div>' +
+        '<div class="bb-count">' + (all ? '🌐 Full team! Every member sent a wave' : full ? '⚡ Birthday Boost unlocked · ' + got + ' waves'
+          : open ? '⚡ Birthday Boost unlocked at ' + OPEN_AT + ':00 · ' + got + ' wave' + (got === 1 ? '' : 's') + ' (waves keep coming in)'
+          : got + ' / ' + nd + ' waves to unlock it now · otherwise it opens at ' + OPEN_AT + ':00') + '</div>' +
         (got ? '<div class="bb-who">' + waves[b.email].map(x => '<span title="' + esc(x.note || '') + '">' + x.emoji + ' ' + esc(name(x.email)) + '</span>').join('') + '</div>' : '') };
   }
 
@@ -52,8 +59,8 @@
     const B = bar(b), me = b.email === email, mine = waves[b.email].find(x => x.email === email);
     if (me) {
       return '<div class="bb-card me"><div class="bb-t">🎂 Happy birthday, ' + esc(name(b.email)) + '!</div>' +
-        '<p class="bb-s">' + (B.full ? 'Your team filled your energy bar.' : 'Your team is charging your energy bar. When it is full, your Birthday Boost unlocks.') + '</p>' +
-        B.html + (B.full ? '<button type="button" class="bb-open" data-bb="open">⚡ Open your Birthday Boost</button>' : '') + '</div>';
+        '<p class="bb-s">' + (B.full ? 'Your team filled your energy bar.' : B.open ? 'Your Birthday Boost is open, with every wave and message from your team.' : 'Your team is charging your energy bar. When it is full your Birthday Boost unlocks, and at ' + OPEN_AT + ':00 it opens anyway.') + '</p>' +
+        B.html + (B.open ? '<button type="button" class="bb-open" data-bb="open">⚡ Open your Birthday Boost</button>' : '') + '</div>';
     }
     return '<div class="bb-card" data-e="' + esc(b.email) + '"><div class="bb-t">🎂 Today is ' + esc(name(b.email)) + '’s birthday!</div>' +
       '<p class="bb-s">' + (mine ? 'You sent ' + mine.emoji + '. Tap another one to change it.' : 'Send your wave: one tap fills the energy bar.') + '</p>' +
@@ -65,7 +72,7 @@
   function render() {
     box.innerHTML = today.map(card).join('');
     const mine = today.find(b => b.email === email);
-    if (mine && bar(mine).full) {
+    if (mine && bar(mine).open) {
       const k = 'tt_bboost_' + year;
       let seen = null; try { seen = localStorage.getItem(k); } catch (e) {}
       if (!seen) { try { localStorage.setItem(k, '1'); } catch (e) {} setTimeout(openBoost, 900); }
@@ -76,14 +83,12 @@
     const b = today.find(x => x.email === email); if (!b || document.getElementById('bb-pop')) return;
     const greet = document.getElementById('bdg-pop'); if (greet) greet.remove();
     const B = bar(b), q = QUOTES[hash(email + year) % QUOTES.length], nm = name(email);
-    const notes = waves[b.email].filter(x => x.note);
     const pop = document.createElement('div'); pop.id = 'bb-pop';
     pop.innerHTML = '<div class="bb-p"><div class="bb-big">⚡</div><div class="bb-k">Your Birthday Boost</div>' +
       '<h3>Happy birthday, ' + esc(nm) + '!</h3>' +
-      '<p class="bb-msg">' + B.got + ' member' + (B.got > 1 ? 's' : '') + ' of the team sent you their wave' + (B.all ? ': the whole team!' : '.') + ' Wherever you are today, the connection is here. Stay liquid, keep making waves. 🌊</p>' +
-      '<div class="bb-row">' + waves[b.email].map(x => '<span>' + x.emoji + '</span>').join('') + '</div>' +
-      '<p class="bq-t">“' + esc(q[0]) + '”</p><div class="bq-a">— ' + esc(q[1]) + '</div><div class="bq-s">' + esc(q[2]) + '</div>' +
-      (notes.length ? '<div class="bb-notes">' + notes.map(x => '<p>' + x.emoji + ' <b>' + esc(name(x.email)) + ':</b> ' + esc(x.note) + '</p>').join('') + '</div>' : '') +
+      '<p class="bb-msg">' + (B.got ? B.got + ' member' + (B.got > 1 ? 's' : '') + ' of the team sent you their wave' + (B.all ? ': the whole team!' : '.') : 'Your team is with you today.') + ' Wherever you are today, the connection is here. Stay liquid, keep making waves. 🌊</p>' +
+      '<div class="bb-k2">Your quote for today</div><p class="bq-t">“' + esc(q[0]) + '”</p><div class="bq-a">— ' + esc(q[1]) + '</div><div class="bq-s">' + esc(q[2]) + '</div>' +
+      (B.got ? '<div class="bb-k2">Waves from your team</div><div class="bb-notes">' + waves[b.email].map(x => '<p><span class="bb-e">' + x.emoji + '</span> <b>' + esc(name(x.email)) + '</b>' + (x.note ? ': ' + esc(x.note) : '') + '</p>').join('') + '</div>' : '') +
       '<button type="button" data-bb="close">Thank you, team! 🎉</button></div>';
     for (let i = 0; i < 40; i++) { const s = document.createElement('i'); s.className = 'cf'; s.textContent = ['🎂', '🌊', '⚡', '🎉', '🏄', '🥂'][i % 6]; s.style.left = Math.random() * 100 + '%'; s.style.animationDelay = (Math.random() * 1.8) + 's'; s.style.fontSize = (16 + Math.random() * 16) + 'px'; pop.appendChild(s); }
     pop.addEventListener('click', function (e) { if (e.target === pop || (e.target.dataset && e.target.dataset.bb === 'close')) pop.remove(); });

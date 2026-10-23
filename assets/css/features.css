@@ -358,3 +358,6 @@ div.stamp { cursor: default !important; }
 #badgebook h3.sub:first-of-type { margin-top: 18px; }
 .cm-dist li[data-cm-focus] { cursor: pointer; }
 .cm-dist li[data-cm-focus]:hover span { color: var(--yellow); }
+
+.bb-k2 { margin: 16px 0 6px; font-size: .7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--yellow); }
+.bb-notes .bb-e { font-size: 1.15rem; }
