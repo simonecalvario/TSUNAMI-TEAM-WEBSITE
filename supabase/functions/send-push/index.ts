@@ -61,7 +61,12 @@ Deno.serve(async (req) => {
     const others = (nicks || []).filter((n) => n.email !== record.bday_email).length;
     const need = boostNeed(others);
     const { count } = await sb.from("birthday_waves").select("email", { count: "exact", head: true }).eq("bday_email", record.bday_email).eq("year", record.year);
-    if (count === need) to.set(record.bday_email, { title: "⚡ Your Birthday Boost is ready!", body: "The team filled your energy bar. Open it now 🎂", url: "/#home" });
+    if (count === need) {
+      to.set(record.bday_email, { title: "⚡ Your Birthday Boost is ready!", body: "The team filled your energy bar. Open it now 🎂", url: "/#home" });
+      const nm = (nicks || []).find((n) => n.email === record.bday_email)?.nickname || "A member";
+      for (const n of nicks || []) if (n.email !== record.bday_email)
+        to.set(n.email, { title: "⚡ " + nm + "’s Birthday Boost is unlocked!", body: "The team filled the energy bar. See all the waves and messages on the home page 🎂", url: "/#home" });
+    }
     else if (count === others && others > need) to.set(record.bday_email, { title: "🌐 Full team!", body: "Every single member sent you a birthday wave 🌊", url: "/#home" });
   } else if (table === "push_events" && record.kind === "birthday_morning") {
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Rome" }));
@@ -79,13 +84,18 @@ Deno.serve(async (req) => {
   } else if (table === "push_events" && record.kind === "birthday_evening") {
     // 21:00: the Birthday Boost opens anyway for whoever did not reach two thirds of the team.
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Rome" }));
-    if (now.getHours() !== 21) return new Response(JSON.stringify({ skipped: "not 21 in Rome" }));
+    if (now.getHours() !== 21 && !record.target) return new Response(JSON.stringify({ skipped: "not 21 in Rome" }));
     const { data: bds } = await sb.from("birthdays").select("email").eq("day", now.getDate()).eq("month", now.getMonth() + 1);
-    const { data: nicks } = await sb.from("nicknames").select("email");
+    const { data: nicks } = await sb.from("nicknames").select("email,nickname");
     for (const b of bds || []) {
       const others = (nicks || []).filter((n) => n.email !== b.email).length;
       const { count } = await sb.from("birthday_waves").select("email", { count: "exact", head: true }).eq("bday_email", b.email).eq("year", now.getFullYear());
       if ((count || 0) >= boostNeed(others)) continue; // already unlocked and notified
+      // The rest of the team: the Boost is open for everyone to see, and there is still time to wave.
+      const nm = (nicks || []).find((n) => n.email === b.email)?.nickname || "A member";
+      for (const n of nicks || []) if (n.email !== b.email && !to.has(n.email))
+        to.set(n.email, { title: "⚡ " + nm + "’s Birthday Boost is open!", body: "See the waves and messages from the team on the home page. There is still time to send yours 🌊", url: "/#home" });
+      if (record.target === "others") continue;
       to.set(b.email, { title: "⚡ Your Birthday Boost is here!", body: (count ? count + " member" + (count > 1 ? "s" : "") + " sent you a wave and a few words." : "Your team is with you today.") + " Open it with your quote of the day 🎂", url: "/#home" });
     }
   }
@@ -102,5 +112,6 @@ Deno.serve(async (req) => {
       }
     }
   }
+  console.log(JSON.stringify({ table, kind: record.kind, to: to.size, sent }));
   return new Response(JSON.stringify({ sent }), { headers: { "Content-Type": "application/json" } });
 });
