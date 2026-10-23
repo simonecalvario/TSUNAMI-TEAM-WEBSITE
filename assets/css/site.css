@@ -613,18 +613,22 @@
     /* ---- Chat ---- */
     #lagoon { padding: 80px 0; }
     .chat { max-width: 720px; margin-top: 24px; border: 1px solid var(--line); border-radius: 14px; background: var(--dark); overflow: hidden; }
-    #chat-list { height: 420px; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; overscroll-behavior: contain; }
+    #chat-list { height: min(62vh, 520px); overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+    .chat-top { display: none; }
+    .chat-wrap { position: relative; }
+    #chat-down { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: none; padding: 8px 14px; border: 0; border-radius: 999px; background: var(--yellow); color: #101010; font: inherit; font-size: .85rem; font-weight: 700; box-shadow: 0 6px 18px rgba(0,0,0,.45); cursor: pointer; }
+    #chat-down.show { display: block; }
     .msg { max-width: 82%; padding: 8px 12px; border-radius: 14px; background: rgba(255,255,255,.07); align-self: flex-start; word-break: break-word; white-space: pre-wrap; }
     .msg.me { align-self: flex-end; background: rgba(39,184,255,.28); }
     .msg small { display: block; font-size: .7rem; color: var(--grey); margin-bottom: 2px; }
     .msg small b { color: var(--yellow); }
-    .msg .x { background: none; border: 0; color: var(--grey); cursor: pointer; font-size: .75rem; margin-left: 6px; }
+    .msg .x { background: none; border: 0; color: var(--grey); cursor: pointer; font-size: .85rem; margin-left: 4px; padding: 4px 6px; }
     .chat-day { align-self: center; font-size: .7rem; color: var(--grey); }
-    #chat-form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
-    #chat-in { flex: 1; min-width: 0; padding: 12px 14px; font: inherit; color: var(--white); background: var(--black); border: 1px solid var(--line); border-radius: 22px; }
+    #chat-form { display: flex; gap: 8px; align-items: flex-end; padding: 10px; border-top: 1px solid var(--line); }
+    #chat-in { flex: 1; min-width: 0; padding: 11px 14px; font: inherit; font-size: 16px; line-height: 1.35; color: var(--white); background: var(--black); border: 1px solid var(--line); border-radius: 22px; resize: none; max-height: 120px; overflow-y: auto; display: block; }
     #chat-form .button { border: 0; cursor: pointer; padding: 10px 18px; font-size: .95rem; }
     .msg { position: relative; }
-    .msg small .re { background: none; border: 0; color: var(--grey); cursor: pointer; font-size: .85rem; margin-left: 8px; padding: 0 2px; }
+    .msg small .re { background: none; border: 0; color: var(--grey); cursor: pointer; font-size: 1rem; margin-left: 6px; padding: 4px 8px; }
     .msg small b[data-m] { cursor: pointer; }
     .msg .quote { display: block; margin: 2px 0 6px; padding: 5px 8px; border-left: 3px solid var(--yellow); border-radius: 4px; background: rgba(0,0,0,.25); font-size: .8rem; color: var(--grey); cursor: pointer; white-space: normal; overflow: hidden; text-overflow: ellipsis; }
     .msg .quote b { color: var(--yellow); }
@@ -887,6 +891,16 @@
       #m-sheet a.on, #m-sheet button.on { color: var(--yellow); background: rgba(245,210,27,.08); }
       #m-sheet i { font-style: normal; width: 1.5em; text-align: center; }
       #m-sheet hr { border: 0; border-top: 1px solid var(--line); margin: 6px 10px; }
+
+      /* Lagoon on phones: a full-screen chat like a messaging app (no scroll inside a scrolling page). */
+      html.chat-on, html.chat-on body { overflow: hidden; overscroll-behavior: none; }
+      body.m #lagoon .chat { position: fixed; left: 0; right: 0; top: var(--chat-top, 60px); height: var(--chat-h, 70vh); z-index: 30; margin: 0; max-width: none; border-radius: 0; border-left: 0; border-right: 0; display: flex; flex-direction: column; }
+      body.m #lagoon .chat-top { display: flex; align-items: baseline; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+      body.m #lagoon .chat-top b { color: var(--yellow); }
+      body.m #lagoon .chat-top small { color: var(--grey); font-size: .8rem; }
+      body.m #lagoon .chat-wrap { flex: 1; min-height: 0; display: flex; }
+      body.m #chat-list { flex: 1; height: auto; min-height: 0; }
+      body.m .msg { max-width: 88%; }
 
       body.m .subtabs { display: flex; gap: 6px; margin: 4px 0 18px; padding: 4px; background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 10px; }
       .subtabs button { flex: 1; padding: 10px 4px; background: none; border: 0; border-radius: 7px; color: var(--grey); font: inherit; font-weight: 700; font-size: .88rem; cursor: pointer; }
