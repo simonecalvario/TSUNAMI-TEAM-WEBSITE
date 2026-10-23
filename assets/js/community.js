@@ -807,14 +807,17 @@
 
         async function check() {
           const e = encodeURIComponent(email);
-          const [cs, ps, chat, myVote, myDays, myBd] = await Promise.all([
+          const [cs, ps, chat, myVote, myDays, myBd, ups] = await Promise.all([
             get('comments?select=id,post_id,parent_id,email,author,created_at&order=created_at.desc&limit=300'),
             get('posts?select=id,title,email&email=eq.' + e),
             get('chat_messages?select=*&order=id.desc&limit=100'),
             get('meeting_votes?select=email&email=eq.' + e + '&limit=1'),
             get('meeting_days?select=email&email=eq.' + e + '&limit=1'),
-            get('birthdays?select=email&email=eq.' + e + '&limit=1')
+            get('birthdays?select=email&email=eq.' + e + '&limit=1'),
+            get('site_updates?select=title,body,url,created_at&order=id.desc&limit=3')
           ]);
+          // What's new on the site: the latest updates, highlighted until the bell is opened.
+          const news = (ups || []).filter(u => Date.now() - new Date(u.created_at).getTime() < 30 * 864e5).map(u => ({ t: new Date(u.created_at).getTime(), u: u }));
           const items = [];
           if (cs) {
             const myC = new Set(cs.filter(c => c.email === email).map(c => c.id)), myP = new Set((ps || []).map(p => p.id));
@@ -842,10 +845,11 @@
           if (myDays !== null && !myDays.length) todos.push({ href: '#meetings', ic: '📅', txt: 'Pick the dates you can attend' });
           if (myBd !== null && !myBd.length) todos.push({ href: '#passport', ic: '🎂', txt: 'Add your birthday in the Passport' });
           bdT.filter(b => b.email !== email && !b.mine).forEach(b => todos.unshift({ href: '#home', ic: '🌊', txt: 'Send your birthday wave to ' + (nickOf(b.email) || 'a member') }));
-          const unread = list.filter(c => c.t > seen).length + (bnews.length ? 1 : 0);
+          const unread = list.filter(c => c.t > seen).length + (bnews.length ? 1 : 0) + news.filter(n => n.t > seen).length;
           const total = unread + todos.length;
           btn.classList.toggle('has', total > 0); btn.querySelector('i').textContent = total > 9 ? '9+' : total;
           let html = '';
+          if (news.length) html += '<h4>What’s new</h4>' + news.map(n => '<a href="' + esc((n.u.url || '/#home').replace(/^\//, '')) + '" class="' + (n.t > seen ? 'new' : '') + '">🆕 <b>' + esc(n.u.title) + '</b><br><small>' + esc(n.u.body) + '</small></a>').join('');
           if (todos.length) html += '<h4>To do</h4>' + todos.map(t => '<a href="' + t.href + '">' + t.ic + ' ' + esc(t.txt) + '</a>').join('');
           if (chatNew) html += '<h4>Lagoon</h4><a href="#lagoon" class="' + (chatHot ? 'new' : '') + '">💬 ' + chatNew + ' new message' + (chatNew > 1 ? 's' : '') + (chatHot ? ' · ' + chatHot + ' for you' : '') + '</a>';
           if (bnews.length) html += '<h4>Badges</h4><a href="#passport" class="new">🏅 <b>' + bnews.length + ' new badge' + (bnews.length > 1 ? 's' : '') + '</b><br><small>' + esc(bnews.map(n => n.txt).join(' · ')) + '</small></a>';
