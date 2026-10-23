@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261023-005315">
+<meta name="tt-build" content="20261023-011515">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -18,8 +18,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <link rel="stylesheet" href="assets/css/site.css?v=20261023-005315">
-  <link rel="stylesheet" href="assets/css/features.css?v=20261023-005315">
+  <link rel="stylesheet" href="assets/css/site.css?v=20261023-011515">
+  <link rel="stylesheet" href="assets/css/features.css?v=20261023-011515">
 </head>
 
 <body>
@@ -30,8 +30,8 @@
   <p id="lock-msg"></p>
   <a href="/cdn-cgi/access/logout">Log out instead</a>
 </div></div>
-<script src="assets/js/tt-core.js?v=20261023-005315"></script>
-<script src="assets/js/lock.js?v=20261023-005315"></script>
+<script src="assets/js/tt-core.js?v=20261023-011515"></script>
+<script src="assets/js/lock.js?v=20261023-011515"></script>
 
   <header>
     <div class="container">
@@ -299,6 +299,9 @@
         <p class="intro">Every Tsunami Meeting, in order: who was there, the photos, the souvenirs. Tap a stop to relive it.</p>
         <div class="jr-sum" id="journey-sum"></div>
         <ol class="timeline" id="journey-tl"></ol>
+
+        <h3 class="sub">Your Tsunami Wrapped</h3>
+        <div id="wrapped"></div>
       </div>
     </section>
 
@@ -453,33 +456,45 @@
         <h2 id="pass-heading">Tsunami <span>Passport</span></h2>
         <p class="intro">Collect a stamp for every Tsunami Meeting you lived. Tap a stamp to add or remove it.</p>
 
-        <div class="stamps" id="stamps"></div>
-        <div class="badges" id="badges"></div>
-
-        <h3 class="sub">The crew</h3>
-        <ul class="crew" id="crew"></ul>
-
-        <h3 class="sub">My birthday</h3>
-        <p class="vote-hint" style="margin-top:0">Optional: the team will celebrate with you on the home page. Only day and month are shown.</p>
-        <div class="bday-form">
-          <select id="bd-d"></select><select id="bd-m"></select>
-          <button class="button" id="bd-save" type="button">Save</button>
-          <button class="vote-del" id="bd-del" type="button" style="margin:0">Remove</button>
-          <span id="bd-msg"></span>
+        <div class="pp" data-pp="st" data-label="🛂 Stamps">
+          <div class="stamps" id="stamps"></div>
         </div>
 
-        <h3 class="sub">My city</h3>
-        <p class="vote-hint" style="margin-top:0">Optional: where you live. The crew sees only the city, and it counts your kilometres in your Wrapped.</p>
-        <div id="pass-city" class="pass-city"></div>
+        <div class="pp" data-pp="bd" data-label="🎂 Crew birthdays">
+          <h3 class="sub">My birthday</h3>
+          <p class="vote-hint" style="margin-top:0">Optional: the team will celebrate with you on the home page. Only day and month are shown.</p>
+          <div class="bday-form">
+            <select id="bd-d"></select><select id="bd-m"></select>
+            <button class="button" id="bd-save" type="button">Save</button>
+            <button class="vote-del" id="bd-del" type="button" style="margin:0">Remove</button>
+            <span id="bd-msg"></span>
+          </div>
+          <h3 class="sub">Crew birthdays</h3>
+          <ul class="crew" id="bd-list"><li>Loading…</li></ul>
+        </div>
 
-        <h3 class="sub">Team cities</h3>
-        <ul class="crew" id="city-list"><li>Loading…</li></ul>
+        <div class="pp" data-pp="map" data-label="🗺 Crew map">
+          <h3 class="sub">Crew map</h3>
+          <p class="vote-hint" style="margin-top:0">Where everyone is right now, and how far apart we are. Tap a face to meet them.</p>
+          <div id="cm-map"></div>
+          <div id="cm-dist" class="cm-dist"></div>
+          <h3 class="sub">My city</h3>
+          <p class="vote-hint" style="margin-top:0">Where you live. The crew sees only the city.</p>
+          <div id="pass-city" class="pass-city"></div>
+          <h3 class="sub">I’ll be at…</h3>
+          <p class="vote-hint" style="margin-top:0">Holidays, trips, events: share where you will be and the map shows the updated distances.</p>
+          <div id="cm-stay" class="cm-stay"></div>
+          <div id="cm-stays" class="cm-stays"></div>
+        </div>
 
-        <h3 class="sub">Team birthdays</h3>
-        <ul class="crew" id="bd-list"><li>Loading…</li></ul>
+        <div class="pp" data-pp="bg" data-label="🏅 Badges">
+          <div class="badges" id="badges"></div>
+        </div>
 
-        <h3 class="sub">Your Tsunami Wrapped</h3>
-        <div id="wrapped"></div>
+        <div class="pp" data-pp="cr" data-label="⭐ Crew XP">
+          <h3 class="sub">Crew XP</h3>
+          <ul class="crew" id="crew"></ul>
+        </div>
       </div>
     </section>
 
@@ -612,25 +627,26 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/js/map.js?v=20261023-005315"></script>
+  <script src="assets/js/map.js?v=20261023-011515"></script>
 
-  <script src="assets/js/home-scroll.js?v=20261023-005315"></script>
-  <script src="assets/js/ui.js?v=20261023-005315"></script>
-  <script src="assets/js/vote.js?v=20261023-005315"></script>
-  <script src="assets/js/blog.js?v=20261023-005315"></script>
-  <script src="assets/js/when.js?v=20261023-005315"></script>
-  <script src="assets/js/memorabilia.js?v=20261023-005315"></script>
-  <script src="assets/js/community.js?v=20261023-005315"></script>
-  <script src="assets/js/nav.js?v=20261023-005315"></script>
-  <script src="assets/js/profile.js?v=20261023-005315"></script>
-  <script src="assets/js/founders.js?v=20261023-005315"></script>
-  <script src="assets/js/home.js?v=20261023-005315"></script>
-  <script src="assets/js/birthday.js?v=20261023-005315"></script>
-  <script src="assets/js/journey.js?v=20261023-005315"></script>
-  <script src="assets/js/trip.js?v=20261023-005315"></script>
-  <script src="assets/js/capsule.js?v=20261023-005315"></script>
-  <script src="assets/js/wrapped.js?v=20261023-005315"></script>
-<link rel="stylesheet" href="assets/css/gate.css?v=20261023-005315">
+  <script src="assets/js/home-scroll.js?v=20261023-011515"></script>
+  <script src="assets/js/ui.js?v=20261023-011515"></script>
+  <script src="assets/js/vote.js?v=20261023-011515"></script>
+  <script src="assets/js/blog.js?v=20261023-011515"></script>
+  <script src="assets/js/when.js?v=20261023-011515"></script>
+  <script src="assets/js/memorabilia.js?v=20261023-011515"></script>
+  <script src="assets/js/community.js?v=20261023-011515"></script>
+  <script src="assets/js/nav.js?v=20261023-011515"></script>
+  <script src="assets/js/profile.js?v=20261023-011515"></script>
+  <script src="assets/js/crewmap.js?v=20261023-011515"></script>
+  <script src="assets/js/founders.js?v=20261023-011515"></script>
+  <script src="assets/js/home.js?v=20261023-011515"></script>
+  <script src="assets/js/birthday.js?v=20261023-011515"></script>
+  <script src="assets/js/journey.js?v=20261023-011515"></script>
+  <script src="assets/js/trip.js?v=20261023-011515"></script>
+  <script src="assets/js/capsule.js?v=20261023-011515"></script>
+  <script src="assets/js/wrapped.js?v=20261023-011515"></script>
+<link rel="stylesheet" href="assets/css/gate.css?v=20261023-011515">
 <div id="cs-gate"><div class="box">
   <h2>Welcome aboard 🌊</h2>
   <p class="cs-who" id="cs-who"></p>
@@ -651,13 +667,13 @@
   </div>
   <div id="cs-msg"></div>
 </div></div>
-<script src="assets/js/gate.js?v=20261023-005315"></script>
+<script src="assets/js/gate.js?v=20261023-011515"></script>
 
-<script src="assets/js/booster.js?v=20261023-005315"></script>
-<script src="assets/js/onthisday.js?v=20261023-005315"></script>
-<script src="assets/js/mobile.js?v=20261023-005315"></script>
-<script src="assets/js/update.js?v=20261023-005315"></script>
-<script src="assets/js/push.js?v=20261023-005315"></script>
-<script src="assets/js/setup.js?v=20261023-005315"></script>
+<script src="assets/js/booster.js?v=20261023-011515"></script>
+<script src="assets/js/onthisday.js?v=20261023-011515"></script>
+<script src="assets/js/mobile.js?v=20261023-011515"></script>
+<script src="assets/js/update.js?v=20261023-011515"></script>
+<script src="assets/js/push.js?v=20261023-011515"></script>
+<script src="assets/js/setup.js?v=20261023-011515"></script>
 </body>
 </html>

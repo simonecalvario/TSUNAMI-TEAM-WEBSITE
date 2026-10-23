@@ -67,20 +67,9 @@
   ], document.getElementById('countdown'));
 
   (function () {
-    const cont = document.querySelector('#passport .container');
-    const kids = Array.prototype.slice.call(cont.children);
-    const start = kids.indexOf(document.getElementById('stamps'));
-    const crewAt = kids.findIndex(k => k.tagName === 'H3' && /crew/i.test(k.textContent));
-    const bdAt = kids.findIndex(k => k.tagName === 'H3' && /birthday/i.test(k.textContent));
-    const badgesAt = kids.indexOf(document.getElementById('badges'));
-    const wrAt = kids.findIndex(k => k.tagName === 'H3' && /wrapped/i.test(k.textContent));
-    makeTabs('passport', [
-      { key: 'st', label: '🛂 Stamps', els: kids.slice(start, badgesAt) },
-      { key: 'bg', label: '🏅 Badges', els: [kids[badgesAt]] },
-      { key: 'cr', label: '👥 Crew', els: kids.slice(crewAt, bdAt) },
-      { key: 'bd', label: '🎂 Birthdays', els: kids.slice(bdAt, wrAt > -1 ? wrAt : undefined) },
-      { key: 'wr', label: '🎁 Wrapped', els: wrAt > -1 ? kids.slice(wrAt) : [] }
-    ], kids[start - 1]);
+    const parts = Array.prototype.slice.call(document.querySelectorAll('#passport .pp'));
+    if (!parts.length) return;
+    makeTabs('passport', parts.map(p => ({ key: p.dataset.pp, label: p.dataset.label, els: [p] })), parts[0].previousElementSibling);
   })();
 
   /* ---- founders swipe hint ---- */

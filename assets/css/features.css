@@ -225,3 +225,39 @@ html.su-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .bb-bar.full i { animation: none; } }
 #bb-pop .cf { position: absolute; top: -10%; z-index: 1; font-style: normal; animation: fall 2.6s linear forwards; }
 .nav-drop a .nbadge { top: 50%; right: 8px; transform: translateY(-50%); }
+
+/* ===== Passport: Crew map ===== */
+#cm-map { height: 380px; margin: 8px 0 12px; border-radius: 14px; border: 1px solid var(--line); z-index: 0; }
+.cm-pin { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid var(--yellow); background: var(--dark); box-shadow: 0 4px 12px rgba(0,0,0,.5); display: grid; place-items: center; color: var(--yellow); font-weight: 900; }
+.cm-pin.me { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(39,184,255,.35), 0 4px 12px rgba(0,0,0,.5); }
+.cm-pin { position: relative; }
+.cm-pin img, .cm-face img { position: absolute; max-width: none; }
+.cm-km { background: rgba(6,13,28,.85) !important; color: var(--white) !important; border: 1px solid var(--line) !important; border-radius: 999px !important; font-size: .7rem !important; padding: 1px 6px !important; box-shadow: none !important; }
+.cm-km::before { display: none; }
+.cm-pop { display: grid; gap: 3px; text-align: center; min-width: 170px; }
+.cm-face { position: relative; width: 72px; height: 72px; border-radius: 50%; overflow: hidden; margin: 0 auto 4px; border: 2px solid var(--yellow); }
+.cm-pop span { font-size: .8rem; color: #444; }
+.cm-pop button { margin-top: 6px; border: 1px solid #ccc; background: #f5f5f5; border-radius: 6px; padding: 5px 8px; font: inherit; font-size: .8rem; cursor: pointer; }
+.cm-pop a { display: block; margin-top: 4px; padding: 7px 10px; background: var(--yellow); color: #101010 !important; border-radius: 6px; font-weight: 700; text-decoration: none; }
+.cm-dist { margin-bottom: 8px; }
+.cm-h { font-size: .9rem; margin-bottom: 6px; color: var(--grey); }
+.cm-h b { color: var(--white); }
+.cm-h button { margin-left: 6px; background: none; border: 1px solid var(--line); color: var(--yellow); border-radius: 6px; font: inherit; font-size: .78rem; padding: 2px 8px; cursor: pointer; }
+.cm-dist ul { list-style: none; margin: 0; padding: 0; max-width: 520px; }
+.cm-dist li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.035); font-size: .92rem; }
+.cm-dist li small { color: var(--grey); }
+.cm-dist li b { color: var(--yellow); white-space: nowrap; }
+.cm-stay { display: grid; gap: 8px; max-width: 520px; }
+.cm-stay input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--dark); color: var(--white); font: inherit; font-size: 16px; color-scheme: dark; }
+.cm-dates { display: flex; gap: 8px; }
+.cm-dates label { flex: 1; display: grid; gap: 3px; font-size: .8rem; color: var(--grey); }
+#cm-save { border: 0; cursor: pointer; justify-self: start; font-size: .85rem; padding: 10px 16px; }
+.cm-stays { max-width: 520px; margin-top: 12px; }
+.cm-stays h4 { color: var(--yellow); font-size: .85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.cm-st { position: relative; padding: 9px 30px 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.035); margin-bottom: 6px; font-size: .9rem; }
+.cm-st.now { border-color: rgba(39,184,255,.6); }
+.cm-st small { display: block; color: var(--grey); font-size: .78rem; }
+.cm-st .ti-x { position: absolute; top: 8px; right: 6px; }
+.founder-card.cm-flash { animation: cm-flash 1.6s ease; }
+@keyframes cm-flash { 0%, 60% { box-shadow: 0 0 0 3px var(--yellow); } 100% { box-shadow: none; } }
+@media (max-width: 700px) { #cm-map { height: 320px; } }
