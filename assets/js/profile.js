@@ -19,7 +19,18 @@
   TT.profile = { save: save, mine: mine, all: () => rows, reload: load };
 
   let editing = false, found = [], t = null;
+  // Everyone's city, grouped, like the team birthdays list.
+  async function renderList() {
+    const ul = document.getElementById('city-list'); if (!ul) return;
+    const nk = await TT.nicks(), name = e => (nk.find(x => x.email === e) || {}).nickname || 'A member';
+    const g = {};
+    rows.filter(r => r.city).forEach(r => { const k = r.city + (r.country ? ', ' + r.country : ''); (g[k] = g[k] || []).push(r.email); });
+    const keys = Object.keys(g).sort((a, b) => g[b].length - g[a].length || a.localeCompare(b));
+    ul.innerHTML = keys.length ? keys.map(k => '<li><span>📍 ' + esc(k) + '</span><b>' + g[k].map(e => esc(name(e)) + (e === email ? ' (you)' : '')).join(', ') + '</b></li>').join('')
+      : '<li>No cities saved yet. Add yours above!</li>';
+  }
   function render() {
+    renderList();
     const box = document.getElementById('pass-city'); if (!box) return;
     const me = mine();
     if (me && me.city && !editing) {
