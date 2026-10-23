@@ -1,4 +1,4 @@
-/* Site texts: fixes made by the owner from the site itself ("✏️ Edit texts").
+/* Site texts: fixes made by the owner from the site itself (the small ✏️ next to each text).
    Every static text of the page has a data-tx key (tools/tag-texts.py). A saved fix replaces it for everyone,
    as long as the original text in the page is still the same one it was written for. */
 (function () {
@@ -37,50 +37,76 @@
       const el = document.querySelector('[data-tx="' + r.key + '"]'), o = orig[r.key];
       if (!el || !o || o.text !== r.orig) return; // the page text changed since: the fix no longer applies
       saved[r.key] = r.html;
-      if (!editing) el.innerHTML = clean(r.html);
+      if (!open || open.el !== el) { el.innerHTML = clean(r.html); pen(el); }
     });
   }
   TT.api.get('site_texts?select=key,orig,html').then(apply);
 
-  /* ---- owner only: edit mode ---- */
-  let editing = false, btn = null, toastT = null;
+  /* ---- owner only: a small ✏️ next to every text ---- */
+  let owner = false, toastT = null;
   function toast(t) {
     let el = document.getElementById('tx-toast');
     if (!el) { el = document.createElement('div'); el.id = 'tx-toast'; document.body.appendChild(el); }
     el.textContent = t; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2200);
   }
-  function setMode(on) {
-    editing = on;
-    document.body.classList.toggle('tx-edit', on);
-    btn.textContent = on ? '✓ Done editing' : '✏️ Edit texts';
-    els.forEach(el => { if (on) el.setAttribute('contenteditable', 'true'); else el.removeAttribute('contenteditable'); el.spellcheck = on; });
-    // Founder bios are cut short until "Read more": open them all while editing.
-    document.querySelectorAll('.founder-card').forEach(c => c.classList.toggle('tx-open', on));
-    if (on) toast('Tap a text, fix it, then tap outside it to save.');
+  // The pencil lives inside the text but is never part of what gets saved.
+  const body = el => { const c = el.cloneNode(true); c.querySelectorAll('.tx-pen').forEach(x => x.remove()); return c.innerHTML; };
+  function pen(el) {
+    if (!owner || el.querySelector('.tx-pen')) return;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tx-pen'; b.textContent = '✏️';
+    b.setAttribute('contenteditable', 'false'); b.setAttribute('aria-label', 'Edit this text');
+    // Founder bios are cut short until "Read more": put their pencil first so it is always visible.
+    if (el.classList.contains('desc')) el.insertBefore(b, el.firstChild); else el.appendChild(b);
   }
-  async function save(el) {
-    const k = el.dataset.tx, o = orig[k], html = clean(el.innerHTML);
-    if (html === clean(saved[k] != null ? saved[k] : o.html)) return;
+  let open = null;
+  function start(el) {
+    if (open) stop(open, false);
+    open = { el: el, before: body(el) };
+    el.querySelectorAll('.tx-pen').forEach(x => x.remove());
+    const card = el.closest('.founder-card'); if (card) card.classList.add('tx-open');
+    el.setAttribute('contenteditable', 'true'); el.spellcheck = true; el.classList.add('tx-on');
+    const bar = document.createElement('div'); bar.className = 'tx-bar';
+    bar.innerHTML = '<button type="button" data-tx-a="save">Save</button><button type="button" data-tx-a="cancel">Cancel</button>' + (saved[el.dataset.tx] != null ? '<button type="button" data-tx-a="orig">Original text</button>' : '');
+    el.insertAdjacentElement('afterend', bar);
+    el.focus();
+    try { const r = document.createRange(); r.selectNodeContents(el); r.collapse(false); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); } catch (x) {}
+  }
+  async function stop(o, action) {
+    const el = o.el, k = el.dataset.tx, base = orig[k];
+    let html = clean(body(el));
+    if (action === 'orig') html = clean(base.html);
+    el.removeAttribute('contenteditable'); el.classList.remove('tx-on');
+    const bar = el.nextElementSibling; if (bar && bar.classList.contains('tx-bar')) bar.remove();
+    const card = el.closest('.founder-card'); if (card) card.classList.remove('tx-open');
+    open = null;
+    if (!action) { el.innerHTML = o.before; pen(el); return; } // cancel
+    el.innerHTML = html; pen(el);
+    if (html === clean(o.before)) return;
     try {
-      if (html === clean(o.html)) { await TT.api.remove('site_texts?key=eq.' + encodeURIComponent(k)); delete saved[k]; toast('Back to the original ✓'); }
-      else { await TT.api.upsert('site_texts', { key: k, orig: o.text, html: html, updated_at: new Date().toISOString() }, 'key'); saved[k] = html; toast('Saved ✓ Everyone sees the new text'); }
-    } catch (x) { toast('Not saved: try again in a moment.'); }
+      if (html === clean(base.html)) { await TT.api.remove('site_texts?key=eq.' + encodeURIComponent(k)); delete saved[k]; toast('Back to the original ✓'); }
+      else { await TT.api.upsert('site_texts', { key: k, orig: base.text, html: html, updated_at: new Date().toISOString() }, 'key'); saved[k] = html; toast('Saved ✓ Everyone sees the new text'); }
+    } catch (x) { el.innerHTML = o.before; pen(el); toast('Not saved: try again in a moment.'); }
   }
   TT.identity().then(function (e) {
     if (e !== OWNER) return;
-    btn = document.createElement('button'); btn.type = 'button'; btn.id = 'tx-btn'; btn.textContent = '✏️ Edit texts';
-    btn.addEventListener('click', function () { setMode(!editing); });
-    document.body.appendChild(btn);
-    document.addEventListener('focusout', function (ev) { const el = editing && ev.target.closest && ev.target.closest('[data-tx]'); if (el) save(el); });
-    // While editing, links and taps inside a text must not navigate away.
-    document.addEventListener('click', function (ev) { if (editing && ev.target.closest('[data-tx]')) { const a = ev.target.closest('a'); if (a) ev.preventDefault(); } }, true);
+    owner = true; document.body.classList.add('tx-owner');
+    els.forEach(pen);
+    document.addEventListener('click', function (ev) {
+      const t = ev.target.closest && ev.target;
+      if (!t) return;
+      const p = t.closest('.tx-pen');
+      if (p) { ev.preventDefault(); ev.stopPropagation(); start(p.closest('[data-tx]')); return; }
+      const a = t.closest('[data-tx-a]');
+      if (a && open) { ev.preventDefault(); ev.stopPropagation(); stop(open, a.dataset.txA === 'cancel' ? null : a.dataset.txA); return; }
+      if (open && t.closest('.tx-on')) { const l = t.closest('a'); if (l) ev.preventDefault(); } // no navigation while editing
+    }, true);
     document.addEventListener('keydown', function (ev) {
-      if (!editing || !ev.target.closest || !ev.target.closest('[data-tx]')) return;
-      if (ev.key === 'Enter') { ev.preventDefault(); document.execCommand('insertLineBreak'); }
-      if (ev.key === 'Escape') ev.target.blur();
+      if (!open || !ev.target.closest || !ev.target.closest('.tx-on')) return;
+      if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); document.execCommand('insertLineBreak'); }
+      if (ev.key === 'Escape') stop(open, null);
     });
     document.addEventListener('paste', function (ev) {
-      if (!editing || !ev.target.closest || !ev.target.closest('[data-tx]')) return;
+      if (!open || !ev.target.closest || !ev.target.closest('.tx-on')) return;
       ev.preventDefault(); document.execCommand('insertText', false, (ev.clipboardData || window.clipboardData).getData('text/plain'));
     });
   });
