@@ -3,25 +3,43 @@
   const secs = Array.prototype.slice.call(document.querySelectorAll('main > section'));
   const MAIN = ['home', 'meetings', 'lagoon', 'memorabilia', 'passport'];
   const bar = document.getElementById('tabbar'), sheet = document.getElementById('m-sheet'), footer = document.querySelector('footer');
+  // Sections shown together on phones: the Statute lives under Philosophy.
+  const GROUP = { statute: 'philosophy' }, WITH = { philosophy: ['statute'] };
   let cur = 'home';
+
+  // While the More menu is open the page behind it must not scroll.
+  function sheetOpen(on) {
+    sheet.classList.toggle('open', on);
+    document.documentElement.classList.toggle('sheet-open', on);
+  }
+
+  // iPhone ignores overflow: hidden on the page, so drags outside the menu (or on a menu that fits) are stopped here.
+  document.addEventListener('touchmove', function (e) {
+    if (!sheet.classList.contains('open')) return;
+    const inside = e.target.closest && e.target.closest('#m-sheet');
+    if (!inside || sheet.scrollHeight <= sheet.clientHeight) e.preventDefault();
+  }, { passive: false });
 
   function show(id, keepScroll) {
     if (!secs.some(s => s.id === id)) id = 'home';
+    const target = id; id = GROUP[id] || id;
     cur = id;
-    secs.forEach(s => s.classList.toggle('m-off', s.id !== id));
+    const vis = [id].concat(WITH[id] || []);
+    secs.forEach(s => s.classList.toggle('m-off', vis.indexOf(s.id) < 0));
     if (footer) footer.classList.toggle('m-off', id !== 'home');
     const key = MAIN.indexOf(id) > -1 ? id : 'more';
     Array.prototype.forEach.call(bar.children, b => b.classList.toggle('on', b.dataset.v === key));
     Array.prototype.forEach.call(sheet.querySelectorAll('button'), b => b.classList.toggle('on', b.dataset.v === id));
-    sheet.classList.remove('open');
-    if (!keepScroll) window.scrollTo(0, 0);
-    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+    sheetOpen(false);
+    if (target !== id) setTimeout(function () { const t = document.getElementById(target); if (t) t.scrollIntoView(); }, 30);
+    else if (!keepScroll) window.scrollTo(0, 0);
+    try { history.replaceState(null, '', '#' + target); } catch (e) {}
     setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 60);
   }
 
   bar.addEventListener('click', function (e) {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.v === 'more') { sheet.classList.toggle('open'); return; }
+    if (b.dataset.v === 'more') { sheetOpen(!sheet.classList.contains('open')); return; }
     show(b.dataset.v);
   });
   sheet.addEventListener('click', function (e) {
@@ -29,7 +47,7 @@
   });
   document.addEventListener('click', function (e) {
     if (!mq.matches) return;
-    if (!e.target.closest('#m-sheet, #tabbar')) sheet.classList.remove('open');
+    if (!e.target.closest('#m-sheet, #tabbar') && sheet.classList.contains('open')) sheetOpen(false);
     const a = e.target.closest('a[href^="#"]'); if (!a) return;
     const id = a.getAttribute('href').slice(1);
     if (id && secs.some(s => s.id === id)) { e.preventDefault(); show(id); }
@@ -37,7 +55,7 @@
   window.addEventListener('hashchange', function () {
     if (!mq.matches) return;
     const id = location.hash.slice(1);
-    if (id && id !== cur && secs.some(s => s.id === id)) show(id);
+    if (id && id !== cur && secs.some(s => s.id === id) && GROUP[id] !== cur) show(id);
   });
 
   /* ---- sub-tabs inside long sections ---- */
@@ -87,7 +105,7 @@
     } else {
       secs.forEach(s => s.classList.remove('m-off'));
       if (footer) footer.classList.remove('m-off');
-      sheet.classList.remove('open');
+      sheetOpen(false);
     }
   }
   if (mq.addEventListener) mq.addEventListener('change', apply); else mq.addListener(apply);

@@ -881,6 +881,8 @@
 
       body.m #m-sheet { display: block; position: fixed; left: 0; right: 0; bottom: calc(60px + env(safe-area-inset-bottom)); z-index: 39; background: var(--dark); border-top: 1px solid var(--yellow); border-radius: 14px 14px 0 0; padding: 8px 6px 10px; box-shadow: 0 -14px 40px rgba(0,0,0,.55); transform: translateY(110%); visibility: hidden; transition: transform .22s ease, visibility .22s; }
       body.m #m-sheet.open { transform: none; visibility: visible; }
+      body.m #m-sheet { max-height: calc(100vh - 80px - env(safe-area-inset-bottom)); max-height: calc(100dvh - 80px - env(safe-area-inset-bottom)); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+      html.sheet-open, html.sheet-open body { overflow: hidden; overscroll-behavior: none; }
       #m-sheet a, #m-sheet button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; background: none; border: 0; border-radius: 8px; color: var(--white); font: inherit; font-size: 1rem; text-align: left; cursor: pointer; }
       #m-sheet a.on, #m-sheet button.on { color: var(--yellow); background: rgba(245,210,27,.08); }
       #m-sheet i { font-style: normal; width: 1.5em; text-align: center; }

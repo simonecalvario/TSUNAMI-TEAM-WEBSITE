@@ -214,7 +214,7 @@
         instBanner();
         document.addEventListener('click', function (e) {
           const t = e.target.closest && e.target.closest('[data-guide]'); if (!t) return;
-          e.preventDefault(); const sh = $('m-sheet'); if (sh) sh.classList.remove('open');
+          e.preventDefault(); const sh = $('m-sheet'); if (sh) sh.classList.remove('open'); document.documentElement.classList.remove('sheet-open');
           const bp = $('bell-panel'); if (bp) bp.classList.remove('open');
           guideShow();
         });
