@@ -261,3 +261,71 @@ html.su-open { overflow: hidden; }
 .founder-card.cm-flash { animation: cm-flash 1.6s ease; }
 @keyframes cm-flash { 0%, 60% { box-shadow: 0 0 0 3px var(--yellow); } 100% { box-shadow: none; } }
 @media (max-width: 700px) { #cm-map { height: 320px; } }
+
+/* ===== Passport booklet ===== */
+.pbook-wrap { position: relative; max-width: 440px; margin: 10px auto 0; }
+.pbook { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 14px; box-shadow: 0 18px 40px rgba(0,0,0,.5); -webkit-overflow-scrolling: touch; }
+.pbook::-webkit-scrollbar { display: none; }
+.pb-page { flex: 0 0 100%; scroll-snap-align: start; min-height: 560px; padding: 18px 16px 14px; position: relative; color: #1d2433; overflow: hidden;
+  background:
+    repeating-radial-gradient(circle at 30% 40%, rgba(39,120,200,.06) 0 2px, transparent 2px 9px),
+    repeating-linear-gradient(120deg, rgba(200,150,60,.05) 0 1px, transparent 1px 7px),
+    linear-gradient(160deg, #f6f0de, #efe5c9 70%, #e9dcbb); }
+.pb-page + .pb-page { border-left: 1px dashed rgba(0,0,0,.12); }
+.pb-cover { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; cursor: pointer; color: #e8c766;
+  background: radial-gradient(circle at 50% 35%, #173a73, #0b1f45 70%), #0b1f45; letter-spacing: 4px; }
+.pb-cover::after { content: ""; position: absolute; inset: 10px; border: 1px solid rgba(232,199,102,.35); border-radius: 10px; pointer-events: none; }
+.pb-emb img { width: 120px; filter: sepia(1) saturate(2.4) hue-rotate(5deg) brightness(1.05); opacity: .9; }
+.pb-emb { font-size: 3rem; }
+.pb-cover b { font-size: 1.5rem; margin-top: 10px; }
+.pb-cover span { font-size: 1.05rem; letter-spacing: 8px; }
+.pb-cover small { letter-spacing: 2px; font-size: .78rem; color: rgba(232,199,102,.8); margin-top: 18px; }
+.pb-cover em { position: absolute; bottom: 22px; font-style: normal; font-size: .72rem; letter-spacing: 1px; color: rgba(232,199,102,.65); }
+.pb-top { display: flex; justify-content: space-between; font-size: .62rem; letter-spacing: 2px; color: #6b5a33; border-bottom: 1px solid rgba(107,90,51,.3); padding-bottom: 6px; margin-bottom: 12px; font-weight: 700; }
+.pb-id { display: flex; gap: 12px; }
+.pb-photo { flex: none; position: relative; width: 104px; height: 128px; overflow: hidden; border-radius: 6px; border: 1px solid rgba(0,0,0,.25); background: #d8cfb6; filter: saturate(.85) contrast(1.05); }
+.pb-photo img { top: 0; }
+.pb-fields { flex: 1; min-width: 0; display: grid; align-content: start; }
+.pb-page label, .pb-lab { display: block; font-size: .58rem; letter-spacing: 1.5px; text-transform: uppercase; color: #6b5a33; margin-top: 6px; }
+.pb-page b { display: block; font-family: "Courier New", monospace; font-size: .98rem; color: #111827; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pb-page b.cs { color: #9a1b1b; }
+.pb-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pb-lvl { display: flex; gap: 10px; align-items: center; margin-top: 14px; padding: 10px; border: 1px solid rgba(107,90,51,.3); border-radius: 8px; background: rgba(255,255,255,.35); }
+.pb-lvl .ic { font-size: 2rem; }
+.pb-lvl > div { flex: 1; min-width: 0; }
+.pb-lvl label { margin-top: 0; }
+.pb-bar { height: 7px; border-radius: 999px; background: rgba(0,0,0,.1); overflow: hidden; margin: 5px 0 3px; }
+.pb-bar i { display: block; height: 100%; background: linear-gradient(90deg, #1d4ed8, #c8102e); }
+.pb-lvl small { color: #6b5a33; font-size: .7rem; }
+.pb-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.pb-badges span { position: relative; width: 36px; height: 36px; display: grid; place-items: center; font-size: 1.25rem; border-radius: 50%; background: rgba(255,255,255,.55); border: 1px solid rgba(107,90,51,.3); }
+.pb-badges span i { position: absolute; right: -4px; bottom: -4px; font-size: .62rem; font-style: normal; }
+.pb-badges em { font-size: .8rem; color: #6b5a33; }
+.pb-more { display: inline-block; margin-top: 8px; font-size: .78rem; color: #1d4ed8; font-weight: 700; }
+.pb-mrz { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 12px; font-family: "Courier New", monospace; font-size: .62rem; letter-spacing: 1.2px; line-height: 1.45; color: #3b3b3b; background: rgba(255,255,255,.4); border-top: 1px solid rgba(0,0,0,.08); overflow: hidden; white-space: nowrap; }
+.pb-data { padding-bottom: 54px; }
+.pb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 10px; padding-top: 8px; }
+#pbook .stamp { position: relative; min-height: 120px; border-radius: 12px; font: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; background: none; color: #1d2433; padding: 8px 6px; }
+#pbook .stamp.slot { border: 2px dashed rgba(107,90,51,.35); color: #6b5a33; }
+#pbook .stamp.slot span { font-size: 1.6rem; opacity: .6; }
+#pbook .stamp.slot b { font-family: inherit; font-size: .85rem; white-space: normal; color: #6b5a33; }
+#pbook .stamp.slot small { font-size: .7rem; opacity: .8; }
+#pbook .stamp.next { cursor: default; opacity: .7; }
+#pbook .stamp.on { color: var(--ink); border: 3px double var(--ink); opacity: .88; mix-blend-mode: multiply;
+  background: radial-gradient(circle at 30% 30%, transparent 60%, rgba(0,0,0,.03)); text-transform: uppercase; }
+#pbook .stamp.on.round { border-radius: 50%; aspect-ratio: 1; min-height: 0; width: 86%; justify-self: center; }
+#pbook .stamp.on.oval { border-radius: 50% / 40%; }
+#pbook .stamp.on b { font-family: Impact, "Arial Black", sans-serif; font-size: 1.15rem; letter-spacing: 1px; color: var(--ink); white-space: normal; }
+#pbook .stamp.on small { font-size: .55rem; letter-spacing: 1.5px; font-weight: 700; }
+#pbook .stamp.on span { font-size: .85rem; font-weight: 700; }
+.pb-nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: rgba(6,13,28,.85); color: var(--yellow); font-size: 1.3rem; cursor: pointer; }
+.pb-nav.prev { left: -44px; } .pb-nav.next { right: -44px; }
+@media (max-width: 560px) { .pb-nav { display: none; } }
+.pb-dots { display: flex; justify-content: center; gap: 6px; margin: 12px 0 4px; }
+.pb-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.2); cursor: pointer; }
+.pb-dots i.on { background: var(--yellow); }
+.pb-hint { text-align: center; }
+#badgebook .badges { margin-top: 18px; }
+.pb-cover b { color: #e8c766; font-family: inherit; white-space: normal; }
+#pbook .stamp.on span, #pbook .stamp.on small { color: var(--ink); }
+#pbook .stamp img { display: none; }
