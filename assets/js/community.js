@@ -33,7 +33,7 @@
           ['📅', 'Mark your free dates', 'Meetings → Dates. Find the days that work for everyone.'],
           ['🛂', 'Collect your stamps', 'Passport → My passport. Swipe to the visa pages and tap the meetings you lived.'],
           ['📸', 'Add photos to the galleries', 'Meetings → Map. Tap a pin to open that meeting’s gallery: add photos, react with emojis and comment.'],
-          ['🎂', 'Birthday waves', 'On a member’s birthday, tap an emoji on the home page: the team fills their energy bar and unlocks their Birthday Boost.'],
+          ['🎂', 'Birthday waves', 'On a member’s birthday, tap an emoji on the home page: the team fills their energy bar and unlocks their Birthday Boost (at 21:00 it opens anyway, with every wave and message).'],
           ['🌅', 'Open your Daily Booster', 'Tap the logo on the home page every day: a quote to start your day, and badges to earn.'],
           ['💬', 'Say hi in the Lagoon', 'Use @callsign to tag someone, and reply to messages.'],
           ['📍', 'Find the Team', 'More → Find the Team: everyone on the map with the distances. Add where you will be on holidays or trips.']
@@ -688,7 +688,7 @@
       function birthdayPop(name) {
         if (document.getElementById('bb-pop')) return; // the Birthday Boost already greets
         const box = document.createElement('div'); box.id = 'bdg-pop';
-        box.innerHTML = '<div class="pop"><div class="pop-b"><span>🎂</span></div><div class="pop-t">Happy Birthday, ' + esc(name || 'friend') + '!</div><p class="pop-w">The whole Tsunami Team wishes you a day full of waves, friends and good vibes. 🌊🥳<br>Your team is sending you their waves: when your energy bar on the home page is full, your Birthday Boost unlocks ⚡</p><button type="button">Thank you! 🎉</button></div>';
+        box.innerHTML = '<div class="pop"><div class="pop-b"><span>🎂</span></div><div class="pop-t">Happy Birthday, ' + esc(name || 'friend') + '!</div><p class="pop-w">The whole Tsunami Team wishes you a day full of waves, friends and good vibes. 🌊🥳<br>Your team is sending you their waves: when your energy bar on the home page is full your Birthday Boost unlocks, and at 21:00 it opens anyway ⚡</p><button type="button">Thank you! 🎉</button></div>';
         for (let i = 0; i < 40; i++) { const s = document.createElement('i'); s.className = 'cf'; s.textContent = ['🎂', '🎉', '🎈', '🥳', '✨', '🎁'][i % 6]; s.style.left = Math.random() * 100 + '%'; s.style.animationDelay = (Math.random() * 1.8) + 's'; s.style.fontSize = (16 + Math.random() * 16) + 'px'; box.appendChild(s); }
         box.addEventListener('click', function (e) { if (e.target.tagName === 'BUTTON' || e.target === box) box.remove(); });
         document.body.appendChild(box);

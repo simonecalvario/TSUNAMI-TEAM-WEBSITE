@@ -76,6 +76,18 @@ Deno.serve(async (req) => {
         to.set(n.email, { title: "🎂 Today is " + nameOf(b.email) + "’s birthday!", body: "Send your wave 🌊 from the home page and help fill the Birthday Boost.", url: "/#home" });
       }
     }
+  } else if (table === "push_events" && record.kind === "birthday_evening") {
+    // 21:00: the Birthday Boost opens anyway for whoever did not reach two thirds of the team.
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Rome" }));
+    if (now.getHours() !== 21) return new Response(JSON.stringify({ skipped: "not 21 in Rome" }));
+    const { data: bds } = await sb.from("birthdays").select("email").eq("day", now.getDate()).eq("month", now.getMonth() + 1);
+    const { data: nicks } = await sb.from("nicknames").select("email");
+    for (const b of bds || []) {
+      const others = (nicks || []).filter((n) => n.email !== b.email).length;
+      const { count } = await sb.from("birthday_waves").select("email", { count: "exact", head: true }).eq("bday_email", b.email).eq("year", now.getFullYear());
+      if ((count || 0) >= boostNeed(others)) continue; // already unlocked and notified
+      to.set(b.email, { title: "⚡ Your Birthday Boost is here!", body: (count ? count + " member" + (count > 1 ? "s" : "") + " sent you a wave and a few words." : "Your team is with you today.") + " Open it with your quote of the day 🎂", url: "/#home" });
+    }
   }
 
   let sent = 0;
