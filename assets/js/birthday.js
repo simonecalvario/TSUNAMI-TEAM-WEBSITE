@@ -66,7 +66,7 @@
       '<p class="bb-s">' + (mine ? 'You sent ' + mine.emoji + '. Tap another one to change it.' : 'Send your wave: one tap fills the energy bar.') + '</p>' +
       '<div class="bb-emo">' + EMOJI.map(x => '<button type="button" data-w="' + x[0] + '" class="' + (mine && mine.emoji === x[0] ? 'on' : '') + '" aria-label="' + x[1] + '">' + x[0] + '</button>').join('') + '</div>' +
       '<input class="bb-note" maxlength="140" placeholder="Add a few words (optional)" value="' + esc(mine && mine.note || '') + '">' +
-      B.html + '</div>';
+      B.html + (B.open ? '<button type="button" class="bb-open" data-bb="see" data-e="' + esc(b.email) + '">⚡ See ' + esc(name(b.email)) + '’s Birthday Boost</button>' : '') + '</div>';
   }
 
   function render() {
@@ -79,17 +79,19 @@
     }
   }
 
-  function openBoost() {
-    const b = today.find(x => x.email === email); if (!b || document.getElementById('bb-pop')) return;
-    const greet = document.getElementById('bdg-pop'); if (greet) greet.remove();
-    const B = bar(b), q = QUOTES[hash(email + year) % QUOTES.length], nm = name(email);
+  // The birthday member's Boost; the others can open it too (read only) once it is unlocked.
+  function openBoost(who) {
+    const b = today.find(x => x.email === (who || email)); if (!b || document.getElementById('bb-pop')) return;
+    const me = b.email === email;
+    if (me) { const greet = document.getElementById('bdg-pop'); if (greet) greet.remove(); }
+    const B = bar(b), q = QUOTES[hash(b.email + year) % QUOTES.length], nm = name(b.email);
     const pop = document.createElement('div'); pop.id = 'bb-pop';
-    pop.innerHTML = '<div class="bb-p"><div class="bb-big">⚡</div><div class="bb-k">Your Birthday Boost</div>' +
+    pop.innerHTML = '<div class="bb-p"><div class="bb-big">⚡</div><div class="bb-k">' + (me ? 'Your Birthday Boost' : esc(nm) + '’s Birthday Boost') + '</div>' +
       '<h3>Happy birthday, ' + esc(nm) + '!</h3>' +
-      '<p class="bb-msg">' + (B.got ? B.got + ' member' + (B.got > 1 ? 's' : '') + ' of the team sent you their wave' + (B.all ? ': the whole team!' : '.') : 'Your team is with you today.') + ' Wherever you are today, the connection is here. Stay liquid, keep making waves. 🌊</p>' +
-      '<div class="bb-k2">Your quote for today</div><p class="bq-t">“' + esc(q[0]) + '”</p><div class="bq-a">— ' + esc(q[1]) + '</div><div class="bq-s">' + esc(q[2]) + '</div>' +
-      (B.got ? '<div class="bb-k2">Waves from your team</div><div class="bb-notes">' + waves[b.email].map(x => '<p><span class="bb-e">' + x.emoji + '</span> <b>' + esc(name(x.email)) + '</b>' + (x.note ? ': ' + esc(x.note) : '') + '</p>').join('') + '</div>' : '') +
-      '<button type="button" data-bb="close">Thank you, team! 🎉</button></div>';
+      '<p class="bb-msg">' + (B.got ? B.got + ' member' + (B.got > 1 ? 's' : '') + ' of the team sent ' + (me ? 'you their wave' : esc(nm) + ' their wave') + (B.all ? ': the whole team!' : '.') : (me ? 'Your team is with you today.' : 'The team is with ' + esc(nm) + ' today.')) + ' Wherever you are today, the connection is here. Stay liquid, keep making waves. 🌊</p>' +
+      '<div class="bb-k2">' + (me ? 'Your quote for today' : 'The quote of the day for ' + esc(nm)) + '</div><p class="bq-t">“' + esc(q[0]) + '”</p><div class="bq-a">— ' + esc(q[1]) + '</div><div class="bq-s">' + esc(q[2]) + '</div>' +
+      (B.got ? '<div class="bb-k2">Waves from the team</div><div class="bb-notes">' + waves[b.email].map(x => '<p><span class="bb-e">' + x.emoji + '</span> <b>' + esc(name(x.email)) + '</b>' + (x.note ? ': ' + esc(x.note) : '') + '</p>').join('') + '</div>' : '') +
+      (me ? '<button type="button" data-bb="close">Thank you, team! 🎉</button>' : '<button type="button" data-bb="close">Close</button>') + '</div>';
     for (let i = 0; i < 40; i++) { const s = document.createElement('i'); s.className = 'cf'; s.textContent = ['🎂', '🌊', '⚡', '🎉', '🏄', '🥂'][i % 6]; s.style.left = Math.random() * 100 + '%'; s.style.animationDelay = (Math.random() * 1.8) + 's'; s.style.fontSize = (16 + Math.random() * 16) + 'px'; pop.appendChild(s); }
     pop.addEventListener('click', function (e) { if (e.target === pop || (e.target.dataset && e.target.dataset.bb === 'close')) pop.remove(); });
     document.body.appendChild(pop);
@@ -97,6 +99,7 @@
 
   box.addEventListener('click', async function (e) {
     if (e.target.closest('[data-bb=open]')) { openBoost(); return; }
+    const see = e.target.closest('[data-bb=see]'); if (see) { openBoost(see.dataset.e); return; }
     const w = e.target.closest('[data-w]'); if (!w || !email) return;
     const c = w.closest('.bb-card'), bd = c.dataset.e, note = (c.querySelector('.bb-note').value || '').trim() || null;
     c.querySelectorAll('[data-w]').forEach(x => { x.disabled = true; });
