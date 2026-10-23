@@ -12,19 +12,7 @@
   const nameOf = e => (nk.find(x => x.email === e) || {}).nickname || 'A member';
   const member = e => TT.MEMBERS.find(m => m[1].toLowerCase() === String(nameOf(e)).toLowerCase());
   const photo = e => { const m = member(e); return m ? 'assets/images/founders/' + m[0].toLowerCase() + '.jpg' : null; };
-  // Where the face is in each founder poster: centre x, centre y (fractions), face width (fraction), height/width.
-  const FACES = {
-    antonio: [0.49, 0.22, 0.19, 1.5], biagio: [0.47, 0.30, 0.17, 1.5], carlos: [0.36, 0.26, 0.15, 1.5], donato: [0.52, 0.21, 0.19, 1.5],
-    francesco: [0.54, 0.17, 0.18, 1.5], marcos: [0.48, 0.25, 0.2, 1.5], massimo: [0.49, 0.24, 0.2, 1.5], pietro: [0.46, 0.27, 0.15, 1.5],
-    rinaldo: [0.49, 0.24, 0.18, 1.067], salvatore: [0.49, 0.24, 0.12, 1.2], saskia: [0.47, 0.22, 0.2, 1.067], simone: [0.53, 0.21, 0.22, 1.066], tessa: [0.44, 0.29, 0.2, 1.067]
-  };
-  // A round crop of the face, `size` px wide.
-  function face(e, size) {
-    const m = member(e), src = photo(e);
-    if (!src) return '<span>' + esc(String(nameOf(e)).slice(0, 1)) + '</span>';
-    const f = FACES[m[0].toLowerCase()] || [0.5, 0.25, 0.2, 1.5], W = Math.round(size * 0.7 / f[2]), H = Math.round(W * f[3]);
-    return '<img src="' + esc(src) + '" alt="" style="width:' + W + 'px;height:' + H + 'px;left:' + Math.round(size / 2 - f[0] * W) + 'px;top:' + Math.round(size / 2 - f[1] * H) + 'px">';
-  }
+  const face = (e, size) => TT.face(nameOf(e), size);
 
   // Where each member is today: an active stay wins over the home city.
   function where() {

@@ -11,6 +11,19 @@
   ];
   const MEMBERS = [['Antonio', 'Toro Loco'], ['Biagio', 'Biageo'], ['Carlos', 'Carlitos'], ['Donato', 'The Boss'], ['Francesco', 'Frankie'], ['Marcos', 'Tronco'], ['Massimo', 'Jack Hammer'], ['Pietro', 'Uncle Peter'], ['Rinaldo', 'Rino'], ['Salvatore', 'Kraken'], ['Saskia', 'Alaaf Kia'], ['Simone', 'Don Simon'], ['Tessa', 'Tres Tess']];
 
+  // Where the face is in each founder poster: centre x, centre y (fractions), face width (fraction), height/width.
+  const FACES = {
+    antonio: [0.49, 0.22, 0.19, 1.5], biagio: [0.47, 0.30, 0.17, 1.5], carlos: [0.36, 0.26, 0.15, 1.5], donato: [0.52, 0.21, 0.19, 1.5],
+    francesco: [0.54, 0.17, 0.18, 1.5], marcos: [0.48, 0.25, 0.2, 1.5], massimo: [0.49, 0.24, 0.2, 1.5], pietro: [0.46, 0.27, 0.15, 1.5],
+    rinaldo: [0.49, 0.24, 0.18, 1.067], salvatore: [0.49, 0.24, 0.12, 1.2], saskia: [0.47, 0.22, 0.2, 1.067], simone: [0.53, 0.21, 0.22, 1.066], tessa: [0.44, 0.29, 0.2, 1.067]
+  };
+  // A crop of a founder's face, `size` px wide (wrap it in a positioned box with overflow hidden).
+  function face(callsign, size) {
+    const m = MEMBERS.find(x => x[1].toLowerCase() === String(callsign || '').toLowerCase());
+    if (!m) return '<span>' + esc(String(callsign || '?').slice(0, 1)) + '</span>';
+    const f = FACES[m[0].toLowerCase()] || [0.5, 0.25, 0.2, 1.5], W = Math.round(size * 0.7 / f[2]), H = Math.round(W * f[3]);
+    return '<img src="assets/images/founders/' + m[0].toLowerCase() + '.jpg" alt="" style="position:absolute;max-width:none;width:' + W + 'px;height:' + H + 'px;left:' + Math.round(size / 2 - f[0] * W) + 'px;top:' + Math.round(size / 2 - f[1] * H) + 'px">';
+  }
   const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const enc = encodeURIComponent;
 
@@ -131,5 +144,5 @@
   function set(n, d) { last[n] = d; emit(n, d); }
   function when(n, f) { if (n in last) f(last[n]); on(n, f); }
 
-  window.TT = { BASE, ANON, H, HJ, R, MEETINGS, MEMBERS, esc, enc, identity, api, nicks, shrink, upload, km, on, emit, set, when, token: () => tokP };
+  window.TT = { BASE, ANON, H, HJ, R, MEETINGS, MEMBERS, face, esc, enc, identity, api, nicks, shrink, upload, km, on, emit, set, when, token: () => tokP };
 })();

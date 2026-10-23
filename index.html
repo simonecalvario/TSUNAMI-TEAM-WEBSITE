@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="tt-build" content="20261023-011515">
+<meta name="tt-build" content="20261023-062616">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -18,8 +18,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <link rel="stylesheet" href="assets/css/site.css?v=20261023-011515">
-  <link rel="stylesheet" href="assets/css/features.css?v=20261023-011515">
+  <link rel="stylesheet" href="assets/css/site.css?v=20261023-062616">
+  <link rel="stylesheet" href="assets/css/features.css?v=20261023-062616">
 </head>
 
 <body>
@@ -30,8 +30,8 @@
   <p id="lock-msg"></p>
   <a href="/cdn-cgi/access/logout">Log out instead</a>
 </div></div>
-<script src="assets/js/tt-core.js?v=20261023-011515"></script>
-<script src="assets/js/lock.js?v=20261023-011515"></script>
+<script src="assets/js/tt-core.js?v=20261023-062616"></script>
+<script src="assets/js/lock.js?v=20261023-062616"></script>
 
   <header>
     <div class="container">
@@ -55,6 +55,7 @@
             <a href="#blog">Blog</a>
             <a href="#passport">Passport</a>
             <a href="#activity">Activity</a>
+            <a href="#badgebook">Badges &amp; levels</a>
           </div></div>
           <a href="#join">Join Us</a>
           <span class="bell-wrap"><button id="bell" type="button" aria-label="Notifications">🔔<i></i></button><div id="bell-panel"></div></span>
@@ -454,10 +455,16 @@
       <div class="container">
         <div class="section-label">Our journeys</div>
         <h2 id="pass-heading">Tsunami <span>Passport</span></h2>
-        <p class="intro">Collect a stamp for every Tsunami Meeting you lived. Tap a stamp to add or remove it.</p>
+        <p class="intro">Your Tsunami passport: who you are in the crew, your level and badges, and a stamp for every Tsunami Meeting you lived.</p>
 
-        <div class="pp" data-pp="st" data-label="🛂 Stamps">
-          <div class="stamps" id="stamps"></div>
+        <div class="pp" data-pp="st" data-label="🛂 My passport">
+          <div class="pbook-wrap">
+            <button type="button" class="pb-nav prev" data-pb="-1" aria-label="Previous page">‹</button>
+            <div class="pbook" id="pbook"><div class="pb-page pb-cover"><div class="pb-emb">🌊</div><b>TSUNAMI TEAM</b><span>PASSPORT</span></div></div>
+            <button type="button" class="pb-nav next" data-pb="1" aria-label="Next page">›</button>
+          </div>
+          <div class="pb-dots" id="pb-dots"></div>
+          <p class="vote-hint pb-hint">Swipe the pages. On the visa pages, tap a meeting you lived to stamp it.</p>
         </div>
 
         <div class="pp" data-pp="bd" data-label="🎂 Crew birthdays">
@@ -485,10 +492,6 @@
           <p class="vote-hint" style="margin-top:0">Holidays, trips, events: share where you will be and the map shows the updated distances.</p>
           <div id="cm-stay" class="cm-stay"></div>
           <div id="cm-stays" class="cm-stays"></div>
-        </div>
-
-        <div class="pp" data-pp="bg" data-label="🏅 Badges">
-          <div class="badges" id="badges"></div>
         </div>
 
         <div class="pp" data-pp="cr" data-label="⭐ Crew XP">
@@ -565,6 +568,15 @@
       </div>
     </section>
 
+    <section id="badgebook" aria-labelledby="bb-heading">
+      <div class="container">
+        <div class="section-label">How to earn them</div>
+        <h2 id="bb-heading">Badges <span>&amp; levels</span></h2>
+        <p class="intro">Every badge, what it takes and your progress. Each badge level gives XP: 🥉 10 · 🥈 25 · 🥇 50 · 💎 100. Tap a badge for details.</p>
+        <div class="badges" id="badges"></div>
+      </div>
+    </section>
+
     <section class="join" id="join">
       <div class="container">
         <div class="section-label">The connection is yours</div>
@@ -612,6 +624,7 @@
     <button type="button" data-v="statute"><i>📜</i>Our Statute</button>
     <button type="button" data-v="blog"><i>📖</i>Blog</button>
     <button type="button" data-v="activity"><i>📋</i>Activity Log</button>
+    <button type="button" data-v="badgebook"><i>🏅</i>Badges &amp; levels</button>
     <a href="#" data-guide="1"><i>🧭</i>Site guide</a>
     <button type="button" data-v="join"><i>✉️</i>Join Us</button>
     <hr>
@@ -627,26 +640,27 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/js/map.js?v=20261023-011515"></script>
+  <script src="assets/js/map.js?v=20261023-062616"></script>
 
-  <script src="assets/js/home-scroll.js?v=20261023-011515"></script>
-  <script src="assets/js/ui.js?v=20261023-011515"></script>
-  <script src="assets/js/vote.js?v=20261023-011515"></script>
-  <script src="assets/js/blog.js?v=20261023-011515"></script>
-  <script src="assets/js/when.js?v=20261023-011515"></script>
-  <script src="assets/js/memorabilia.js?v=20261023-011515"></script>
-  <script src="assets/js/community.js?v=20261023-011515"></script>
-  <script src="assets/js/nav.js?v=20261023-011515"></script>
-  <script src="assets/js/profile.js?v=20261023-011515"></script>
-  <script src="assets/js/crewmap.js?v=20261023-011515"></script>
-  <script src="assets/js/founders.js?v=20261023-011515"></script>
-  <script src="assets/js/home.js?v=20261023-011515"></script>
-  <script src="assets/js/birthday.js?v=20261023-011515"></script>
-  <script src="assets/js/journey.js?v=20261023-011515"></script>
-  <script src="assets/js/trip.js?v=20261023-011515"></script>
-  <script src="assets/js/capsule.js?v=20261023-011515"></script>
-  <script src="assets/js/wrapped.js?v=20261023-011515"></script>
-<link rel="stylesheet" href="assets/css/gate.css?v=20261023-011515">
+  <script src="assets/js/home-scroll.js?v=20261023-062616"></script>
+  <script src="assets/js/ui.js?v=20261023-062616"></script>
+  <script src="assets/js/vote.js?v=20261023-062616"></script>
+  <script src="assets/js/blog.js?v=20261023-062616"></script>
+  <script src="assets/js/when.js?v=20261023-062616"></script>
+  <script src="assets/js/memorabilia.js?v=20261023-062616"></script>
+  <script src="assets/js/community.js?v=20261023-062616"></script>
+  <script src="assets/js/nav.js?v=20261023-062616"></script>
+  <script src="assets/js/profile.js?v=20261023-062616"></script>
+  <script src="assets/js/crewmap.js?v=20261023-062616"></script>
+  <script src="assets/js/passbook.js?v=20261023-062616"></script>
+  <script src="assets/js/founders.js?v=20261023-062616"></script>
+  <script src="assets/js/home.js?v=20261023-062616"></script>
+  <script src="assets/js/birthday.js?v=20261023-062616"></script>
+  <script src="assets/js/journey.js?v=20261023-062616"></script>
+  <script src="assets/js/trip.js?v=20261023-062616"></script>
+  <script src="assets/js/capsule.js?v=20261023-062616"></script>
+  <script src="assets/js/wrapped.js?v=20261023-062616"></script>
+<link rel="stylesheet" href="assets/css/gate.css?v=20261023-062616">
 <div id="cs-gate"><div class="box">
   <h2>Welcome aboard 🌊</h2>
   <p class="cs-who" id="cs-who"></p>
@@ -667,13 +681,13 @@
   </div>
   <div id="cs-msg"></div>
 </div></div>
-<script src="assets/js/gate.js?v=20261023-011515"></script>
+<script src="assets/js/gate.js?v=20261023-062616"></script>
 
-<script src="assets/js/booster.js?v=20261023-011515"></script>
-<script src="assets/js/onthisday.js?v=20261023-011515"></script>
-<script src="assets/js/mobile.js?v=20261023-011515"></script>
-<script src="assets/js/update.js?v=20261023-011515"></script>
-<script src="assets/js/push.js?v=20261023-011515"></script>
-<script src="assets/js/setup.js?v=20261023-011515"></script>
+<script src="assets/js/booster.js?v=20261023-062616"></script>
+<script src="assets/js/onthisday.js?v=20261023-062616"></script>
+<script src="assets/js/mobile.js?v=20261023-062616"></script>
+<script src="assets/js/update.js?v=20261023-062616"></script>
+<script src="assets/js/push.js?v=20261023-062616"></script>
+<script src="assets/js/setup.js?v=20261023-062616"></script>
 </body>
 </html>

@@ -31,7 +31,7 @@
           ['🎂', 'Save your birthday', 'Passport → Birthdays. Your crew will celebrate with you.'],
           ['🗳', 'Vote the next city', 'Meetings → Vote city. Votes are public, with call signs.'],
           ['📅', 'Mark your free dates', 'Meetings → Dates. Find the days that work for everyone.'],
-          ['🛂', 'Collect your stamps', 'Passport → Stamps. Tap the meetings you lived.'],
+          ['🛂', 'Collect your stamps', 'Passport → My passport. Swipe to the visa pages and tap the meetings you lived.'],
           ['📸', 'Add photos to the galleries', 'Meetings → Map. Tap a pin to open that meeting’s gallery: add photos, react with emojis and comment.'],
           ['🎂', 'Birthday waves', 'On a member’s birthday, tap an emoji on the home page: the crew fills their energy bar and unlocks their Birthday Boost.'],
           ['🌅', 'Open your Daily Booster', 'Tap the logo on the home page every day: a quote to start your day, and badges to earn.'],
@@ -47,7 +47,8 @@
           ['🎽', 'Memorabilia', 'Pieces and merch of the team: add yours too.'],
           ['📖', 'Blog', 'Post stories, photos and memories; comment and react.'],
           ['💬', 'Lagoon', 'The team chat.'],
-          ['🛂', 'Passport', 'Stamps, crew birthdays, the Crew map with everyone’s distances, badges and the Crew XP ranking.'],
+          ['🛂', 'Passport', 'Your passport (photo, birthday, city, level, badges and meeting stamps), crew birthdays, the Crew map and the Crew XP ranking.'],
+          ['🏅', 'Badges & levels', 'More → Badges & levels: every badge, how to earn it and your progress.'],
           ['📋', 'Activity Log', 'Everything that happens, in order: transparency for all.'],
           ['🌅', 'Daily Booster', 'Tap the logo on the home page: one quote a day. Read it daily to earn badges!']
         ]],
@@ -102,7 +103,7 @@
       }
       const TOUR = [
         { ic: '🎂', t: 'Your birthday', d: 'Choose day and month, then tap Save. Your crew will celebrate with you!', go: 'passport', tab: 'birthdays', sel: '.bday-form', done: () => /Saved/.test(($('bd-msg') || {}).textContent || ''), ok: '✓ Birthday saved' },
-        { ic: '🛂', t: 'Your stamps', d: 'Tap the Tsunami Meetings you lived: each one stamps your passport.', go: 'passport', tab: 'Stamps', sel: '#stamps', done: () => !!document.querySelector('#stamps .stamp.on'), ok: '✓ You have at least one stamp' },
+        { ic: '🛂', t: 'Your stamps', d: 'Tap the Tsunami Meetings you lived: each one stamps your passport.', go: 'passport', tab: 'passport', sel: '#pbook', done: () => !!document.querySelector('#pbook .stamp.on'), ok: '✓ You have at least one stamp' },
         { ic: '📍', t: 'Where: vote the city', d: 'Vote the city for the next Tsunami Meeting. Votes are public, with call signs.', go: 'meetings', tab: 'Vote city', sel: '#meetings .vote-box' },
         { ic: '📅', t: 'When: your free dates', d: 'Mark the days you are free, so we can find the best dates for everyone.', go: 'meetings', tab: 'Dates', sel: '#meetings .when-box' },
         { ic: '📸', t: 'Meeting galleries', d: 'Tap a pin on the map to open the gallery of that Tsunami Meeting: add your photos, react with an emoji and comment.', go: 'meetings', tab: 'Map', sel: '#world-map', nofocus: true },
@@ -472,16 +473,6 @@
         const mo = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         $('bd-d').innerHTML = Array.from({ length: 31 }, (_, i) => '<option>' + (i + 1) + '</option>').join('');
         $('bd-m').innerHTML = mo.map((x, i) => '<option value="' + (i + 1) + '">' + x + '</option>').join('');
-        $('stamps').addEventListener('click', async function (e) {
-          const b = e.target.closest('.stamp'); if (!b || !email) return;
-          const k = b.dataset.k, has = att.some(a => a.email === email && a.meeting === k);
-          b.disabled = true;
-          try {
-            if (has) await fetch(R + 'attendance?email=eq.' + encodeURIComponent(email) + '&meeting=eq.' + k, { method: 'DELETE', headers: H });
-            else await fetch(R + 'attendance?on_conflict=email,meeting', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, HJ), body: JSON.stringify({ email: email, meeting: k }) });
-          } catch (err) {}
-          loadPass();
-        });
         loadPass();
         setInterval(function () { if (!document.hidden) loadPass(); }, 180000);
       }
@@ -499,8 +490,7 @@
           get('birthday_waves?select=bday_email,year,email,emoji,created_at&limit=5000')
         ]);
         att = a[0]; photos = a[1] || [];
-        if (att === null) { $('stamps').innerHTML = '<p class="vote-hint">Passport could not be loaded right now. It will retry shortly.</p>'; att = []; }
-        else renderStamps();
+        const attOk = att !== null; if (!attOk) att = [];
         DATA = { att: att, photos: photos, posts: a[2] || [], mem: a[3] || [], comments: a[4] || [], chat: a[5] || [], votes: a[6] || [], days: a[7] || [], bd: a[8] || [], reactions: a[9] || [], boost: a[10] || [], pr: a[11] || [], pc: a[12] || [], waves: a[13] || [] };
         if (email) {
           myM = metricsFor(email, DATA);
@@ -519,14 +509,12 @@
             localStorage.setItem(key, JSON.stringify(now));
           } catch (x) {}
           renderBadges();
+          const sc = scoreOf(myM), got = BADGES.map(b => ({ b: b, l: lvlOf(b, myM) })).filter(x => x.l > 0 && x.b.id !== 'top');
+          TT.set('passport', { ok: attOk, email: email, nick: nickOf(email), att: att, bd: DATA.bd.find(x => x.email === email) || null,
+            xp: sc.xp, level: LEVELS[sc.L], next: LEVELS[sc.L + 1] || null,
+            badges: got.map(x => ({ ic: x.b.ic, n: x.b.n, tier: x.b.t.length > 1 ? TI[x.l - 1 + (4 - x.b.t.length)] : '' })) });
         }
         renderCrew();
-      }
-      function renderStamps() {
-        $('stamps').innerHTML = MEETINGS.map(m => {
-          const on = att.some(a => a.email === email && a.meeting === m.key);
-          return '<button class="stamp' + (on ? ' on' : '') + '" data-k="' + m.key + '"><img src="assets/images/pins/' + m.key + '.png" alt="' + m.name + ' pin"><b>' + m.icon + ' ' + m.name + ' <em style="font-style:normal;color:var(--yellow)">' + m.year + '</em></b><span>' + (on ? 'Stamped ✓' : 'Tap to stamp') + '</span></button>';
-        }).join('');
       }
       /* ---------------- BADGES / LEVELS ---------------- */
       const FOUNDERS = ['Toro Loco', 'Biageo', 'Carlitos', 'The Boss', 'Frankie', 'Tronco', 'Jack Hammer', 'Uncle Peter', 'Rino', 'Kraken', 'Alaaf Kia', 'Don Simon', 'Tres Tess'];
