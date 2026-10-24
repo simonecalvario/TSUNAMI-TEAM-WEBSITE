@@ -77,7 +77,7 @@
         g.innerHTML = photos.length ? photos.map(p => {
           const n = ncm(p.id), t = 'p' + p.id;
           return '<div class="cell" data-ph="' + esc(p.id) + '"><img src="' + esc(p.image_url) + '" alt="Photo" loading="lazy">' + (p.email === email ? '<button data-del="' + esc(p.id) + '" title="Delete">✕</button>' : '') +
-            '<div class="by">by <b>' + esc(nameOf(p.email)) + '</b>' + (tagsOf(p.id).length ? ' · 🏷 ' + tagsOf(p.id).length : '') + '</div>' +
+            '<div class="by">by <b>' + esc(nameOf(p.email)) + '</b>' + (tagsOf(p.id).length ? ' · 🏷 ' + tagsOf(p.id).length : '') + (p.place ? ' · 📍' : '') + '</div>' +
             rxLine(t, cmOK ? '<span class="sum" data-open="1">💬 ' + n + '</span>' : '') + '</div>';
         }).join('') : '<p class="empty">No photos yet. Be the first to add one!</p>';
       }
@@ -93,6 +93,7 @@
           (tg.length ? tg.map(t => '<span class="tg">' + esc(nameOf(t.email)) + ((t.tagged_by === email || t.email === email || p.email === email) ? '<button type="button" data-untag="' + esc(t.email) + '" aria-label="Remove tag">✕</button>' : '') + '</span>').join('') : '<span class="tg-n">nobody tagged yet</span>') +
           '<button type="button" class="tg-add" data-tagging="1">' + (tagging ? 'Done' : '＋ Tag someone') + '</button></div>' +
           (tagging ? '<div class="tg-pick">' + Object.keys(nicks).filter(e => !tagged.has(e)).sort((a, b) => nameOf(a).localeCompare(nameOf(b))).map(e => '<button type="button" data-tag="' + esc(e) + '">' + esc(nameOf(e)) + (e === email ? ' (me)' : '') + '</button>').join('') + '</div>' : '');
+        $('lbplace').innerHTML = TT.place.html('ph:' + p.id, p, p.email === email);
         const list = cm.filter(c => String(c.photo_id) === String(p.id));
         $('lbcm').innerHTML = cmOK ? (list.length ? list.map(c => '<div class="cmt">' + (c.email === email ? '<button class="del" data-delc="' + c.id + '" title="Delete">✕</button>' : '') +
           '<small><b>' + esc(nameOf(c.email)) + '</b> · ' + ago(c.created_at) + '</small><p>' + esc(c.body) + '</p>' + rxLine('c' + c.id) + '</div>').join('') : '<div class="lbn">No comments yet. Say something!</div>') : '<div class="lbn">Comments are not available yet.</div>';
@@ -127,6 +128,15 @@
       pk.addEventListener('click', function (e) { const b = e.target.closest('[data-em]'); if (!b) return; e.stopPropagation(); pk.classList.remove('open'); if (pkT) react(pkT, b.dataset.em); });
       document.addEventListener('click', function (e) { if (!pk.classList.contains('open')) return; if (e.target.closest('#pk') || e.target.closest('[data-pick]')) return; pk.classList.remove('open'); });
 
+      // The place of the photo, set by whoever posted it.
+      TT.place.register('ph', {
+        save: async function (id, v) {
+          const r = await fetch(T + '?id=eq.' + enc(id) + '&email=eq.' + enc(email), { method: 'PATCH', headers: Object.assign({ Prefer: 'return=minimal' }, HJ), body: JSON.stringify(v) });
+          if (!r.ok) throw 0;
+          const p = (photos || []).find(x => String(x.id) === String(id)); if (p) Object.assign(p, v);
+        },
+        rerender: refresh
+      });
       async function tag(who, on) {
         if (!email || openId == null) return;
         if (on) {
