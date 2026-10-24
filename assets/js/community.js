@@ -39,13 +39,13 @@
           ['📍', 'Find the Team', 'More → Find the Team: everyone on the map with the distances. Add where you will be on holidays or trips.']
         ]],
         ['What’s where', [
-          ['📖', 'Blog', 'More → Blog: post stories, photos and memories; comment, react with emojis and tag someone with @.'],
+          ['📖', 'Blog', 'Blog tab: post stories, photos and memories; comment, react with emojis and tag someone with @.'],
           ['👥', 'Founders', 'More → Founders: the 13 founders of the team.'],
           ['🌊', 'Philosophy & Statute', 'More → Philosophy & Statute: what we believe, the experiences we share and our founding words.'],
           ['📍', 'Meetings', 'Map of our meetings, city vote and dates. Tap a pin for its gallery: add photos, react and comment.'],
           ['🧳', 'Trip room', 'Meetings → Trip: say if you are coming, your arrival, the checklist, shared expenses and the time capsule.'],
           ['🧭', 'Our journey', 'More → Our journey: every Tsunami Meeting so far, with the team, photos and souvenirs, and your yearly Wrapped.'],
-          ['🎽', 'Memorabilia', 'Pieces and merch of the team: add yours too.'],
+          ['🎽', 'Memorabilia', 'More → Memorabilia: pieces and merch of the team, add yours too.'],
           ['💬', 'Lagoon', 'The team chat.'],
           ['🛂', 'Passport', 'My passport: photo, birthday, city, level, badges and meeting stamps. Team passports: open the passport of any member (read only).'],
           ['📍', 'Find the Team', 'More → Find the Team: where everyone is today and how far apart we are. Tap a name for the distances from them.'],
