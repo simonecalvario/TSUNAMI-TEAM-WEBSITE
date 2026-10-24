@@ -32,7 +32,7 @@
           ['🗳', 'Vote the next city', 'Meetings → Vote city. Votes are public, with call signs.'],
           ['📅', 'Mark your free dates', 'Meetings → Dates. Find the days that work for everyone.'],
           ['🛂', 'Collect your stamps', 'Passport → My passport. Swipe to the visa pages and tap the meetings you lived.'],
-          ['📸', 'Add photos to the galleries', 'Meetings → Map. Tap a pin to open that meeting’s gallery: add photos, react with emojis and comment.'],
+          ['📸', 'Add photos to the galleries', 'Meetings → Map. Tap a pin to open that meeting’s gallery: add photos, tag who is in them, react with emojis and comment.'],
           ['🎂', 'Birthday waves', 'On a member’s birthday, tap an emoji on the home page: the team fills their energy bar and unlocks their Birthday Boost (at 21:00 it opens anyway, with every wave and message).'],
           ['🌅', 'Open your Daily Booster', 'Tap the logo on the home page every day: a quote to start your day, and badges to earn.'],
           ['💬', 'Say hi in the Lagoon', 'Use @callsign to tag someone, and reply to messages.'],
@@ -819,7 +819,7 @@
 
         async function check() {
           const e = encodeURIComponent(email);
-          const [cs, ps, chat, myVote, myDays, myBd, ups, lastPosts] = await Promise.all([
+          const [cs, ps, chat, myVote, myDays, myBd, ups, lastPosts, myTags] = await Promise.all([
             get('comments?select=id,post_id,parent_id,email,author,body,created_at&order=created_at.desc&limit=300'),
             get('posts?select=id,title,email&email=eq.' + e),
             get('chat_messages?select=*&order=id.desc&limit=100'),
@@ -827,11 +827,14 @@
             get('meeting_days?select=email&email=eq.' + e + '&limit=1'),
             get('birthdays?select=email&email=eq.' + e + '&limit=1'),
             get('site_updates?select=title,body,url,created_at&order=id.desc&limit=3'),
-            get('posts?select=id,title,body,email,author,created_at&order=created_at.desc&limit=50')
+            get('posts?select=id,title,body,email,author,created_at&order=created_at.desc&limit=50'),
+            get('photo_tags?select=photo_id,tagged_by,meeting,created_at&email=eq.' + e + '&order=created_at.desc&limit=10')
           ]);
           // What's new on the site: the latest updates, highlighted until the bell is opened.
           const news = (ups || []).filter(u => Date.now() - new Date(u.created_at).getTime() < 30 * 864e5).map(u => ({ t: new Date(u.created_at).getTime(), u: u }));
           const items = [];
+          // Tagged in a gallery photo by someone else.
+          (myTags || []).filter(t => t.tagged_by !== email).forEach(t => items.push({ t: new Date(t.created_at).getTime(), href: 'gallery.html?m=' + encodeURIComponent(t.meeting || '') + '&p=' + encodeURIComponent(t.photo_id), who: nickOf(t.tagged_by) || 'A member', txt: 'tagged you in a photo 🏷', at: t.created_at }));
           if (cs) {
             const myC = new Set(cs.filter(c => c.email === email).map(c => c.id)), myP = new Set((ps || []).map(p => p.id));
             const title = {}; (ps || []).forEach(p => title[p.id] = p.title);

@@ -56,3 +56,13 @@
     .g-mem figure { margin: 0; }
     .g-mem img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); display: block; }
     .g-mem figcaption { font-size: .8rem; color: var(--grey); margin-top: 4px; text-align: center; }
+    /* Tags: who is in the photo */
+    #lbtags { margin: 8px 0 4px; }
+    .tg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .85rem; }
+    .tg-l { color: var(--grey); }
+    .tg-n { color: var(--grey); font-style: italic; }
+    .tg { display: inline-flex; align-items: center; gap: 2px; padding: 4px 4px 4px 10px; border-radius: 999px; background: rgba(245,210,27,.12); border: 1px solid rgba(245,210,27,.4); color: var(--yellow); font-weight: 700; }
+    .tg button { width: 22px; height: 22px; border: 0; background: none; color: var(--grey); cursor: pointer; font-size: .8rem; }
+    .tg-add { padding: 5px 12px; border-radius: 999px; border: 1px dashed var(--line); background: none; color: var(--white); font: inherit; font-size: .85rem; cursor: pointer; }
+    .tg-pick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; padding: 10px; border-radius: 10px; background: var(--dark); border: 1px solid var(--line); }
+    .tg-pick button { padding: 6px 12px; border-radius: 16px; border: 1px solid var(--line); background: none; color: var(--white); font: inherit; font-size: .85rem; cursor: pointer; }

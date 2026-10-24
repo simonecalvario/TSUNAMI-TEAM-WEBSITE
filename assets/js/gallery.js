@@ -6,12 +6,13 @@
       const JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5a29mbnlod3VzZ2hmb3dmeGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjUwOTQsImV4cCI6MjEwNzY0MTA5NH0.wLS75UXlm2evHg1mlvjvrlJASDP9KRaE_b8fhnJ8htI';
       const H = { apikey: JWT, Authorization: 'Bearer ' + JWT };
       const HJ = Object.assign({ 'Content-Type': 'application/json' }, H);
-      const T = BASE + '/rest/v1/meeting_photos', TR = BASE + '/rest/v1/photo_reactions', TC = BASE + '/rest/v1/photo_comments';
+      const T = BASE + '/rest/v1/meeting_photos', TR = BASE + '/rest/v1/photo_reactions', TC = BASE + '/rest/v1/photo_comments', TG = BASE + '/rest/v1/photo_tags';
       const EM = ['👍', '❤️', '😂', '😮', '😢', '😡'];
       const $ = id => document.getElementById(id);
       const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
       const enc = encodeURIComponent;
-      let email = null, photos = [], nicks = {}, rx = [], cm = [], rxOK = true, cmOK = true, openId = null;
+      let email = null, photos = [], nicks = {}, rx = [], cm = [], tags = [], rxOK = true, cmOK = true, tgOK = true, openId = null, tagging = false;
+      const deep = new URLSearchParams(location.search).get('p');
 
       fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' })
         .then(r => r.ok ? r.json() : {})
@@ -41,11 +42,15 @@
         } catch (e) { photos = null; }
         await loadSocial();
         refresh();
+        // Opened from a notification ("tagged you in a photo"): show that photo.
+        if (deep && !load.done) { load.done = true; if ((photos || []).some(x => String(x.id) === deep)) openLb(deep); }
       }
       async function loadSocial() {
         try { const r = await fetch(TR + '?select=target,email,emoji&limit=20000', { headers: H }); if (r.ok) { rx = await r.json(); rxOK = true; } else { rxOK = false; rx = []; } } catch (e) { rxOK = false; }
         try { const r = await fetch(TC + '?select=*&order=created_at.asc&limit=5000', { headers: H }); if (r.ok) { cm = await r.json(); cmOK = true; } else { cmOK = false; cm = []; } } catch (e) { cmOK = false; }
+        try { const r = await fetch(TG + '?select=photo_id,email,tagged_by&meeting=eq.' + KEY_M, { headers: H }); if (r.ok) { tags = await r.json(); tgOK = true; } else { tgOK = false; tags = []; } } catch (e) { tgOK = false; }
       }
+      const tagsOf = id => tags.filter(t => String(t.photo_id) === String(id));
       const nameOf = e => nicks[e] || 'a member';
       function ago(t) {
         const s = Math.max(1, Math.round((Date.now() - new Date(t).getTime()) / 1000));
@@ -72,7 +77,7 @@
         g.innerHTML = photos.length ? photos.map(p => {
           const n = ncm(p.id), t = 'p' + p.id;
           return '<div class="cell" data-ph="' + esc(p.id) + '"><img src="' + esc(p.image_url) + '" alt="Photo" loading="lazy">' + (p.email === email ? '<button data-del="' + esc(p.id) + '" title="Delete">✕</button>' : '') +
-            '<div class="by">by <b>' + esc(nameOf(p.email)) + '</b></div>' +
+            '<div class="by">by <b>' + esc(nameOf(p.email)) + '</b>' + (tagsOf(p.id).length ? ' · 🏷 ' + tagsOf(p.id).length : '') + '</div>' +
             rxLine(t, cmOK ? '<span class="sum" data-open="1">💬 ' + n + '</span>' : '') + '</div>';
         }).join('') : '<p class="empty">No photos yet. Be the first to add one!</p>';
       }
@@ -82,6 +87,12 @@
         $('lbimg').src = p.image_url;
         const i = rxInfo('p' + p.id);
         $('lbbar').innerHTML = rxOK ? EM.map(e => '<button type="button" data-em="' + e + '" class="' + (i.mine === e ? 'on' : '') + '"><span>' + e + '</span>' + (i.c[e] || 0) + '</button>').join('') : '';
+        // Who is in the photo: tap "Tag someone" and pick call signs; ✕ removes a tag (yours, about you, or on your photo).
+        const tg = tagsOf(p.id), tagged = new Set(tg.map(t => t.email));
+        $('lbtags').innerHTML = !tgOK ? '' : '<div class="tg-row"><span class="tg-l">🏷 In this photo:</span>' +
+          (tg.length ? tg.map(t => '<span class="tg">' + esc(nameOf(t.email)) + ((t.tagged_by === email || t.email === email || p.email === email) ? '<button type="button" data-untag="' + esc(t.email) + '" aria-label="Remove tag">✕</button>' : '') + '</span>').join('') : '<span class="tg-n">nobody tagged yet</span>') +
+          '<button type="button" class="tg-add" data-tagging="1">' + (tagging ? 'Done' : '＋ Tag someone') + '</button></div>' +
+          (tagging ? '<div class="tg-pick">' + Object.keys(nicks).filter(e => !tagged.has(e)).sort((a, b) => nameOf(a).localeCompare(nameOf(b))).map(e => '<button type="button" data-tag="' + esc(e) + '">' + esc(nameOf(e)) + (e === email ? ' (me)' : '') + '</button>').join('') + '</div>' : '');
         const list = cm.filter(c => String(c.photo_id) === String(p.id));
         $('lbcm').innerHTML = cmOK ? (list.length ? list.map(c => '<div class="cmt">' + (c.email === email ? '<button class="del" data-delc="' + c.id + '" title="Delete">✕</button>' : '') +
           '<small><b>' + esc(nameOf(c.email)) + '</b> · ' + ago(c.created_at) + '</small><p>' + esc(c.body) + '</p>' + rxLine('c' + c.id) + '</div>').join('') : '<div class="lbn">No comments yet. Say something!</div>') : '<div class="lbn">Comments are not available yet.</div>';
@@ -116,7 +127,18 @@
       pk.addEventListener('click', function (e) { const b = e.target.closest('[data-em]'); if (!b) return; e.stopPropagation(); pk.classList.remove('open'); if (pkT) react(pkT, b.dataset.em); });
       document.addEventListener('click', function (e) { if (!pk.classList.contains('open')) return; if (e.target.closest('#pk') || e.target.closest('[data-pick]')) return; pk.classList.remove('open'); });
 
-      function openLb(id) { openId = id; $('lb').classList.add('open'); document.body.style.overflow = 'hidden'; $('lb').scrollTop = 0; renderLb(); }
+      async function tag(who, on) {
+        if (!email || openId == null) return;
+        if (on) {
+          tags.push({ photo_id: String(openId), email: who, tagged_by: email }); renderLb(); renderGrid();
+          const r = await fetch(TG, { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, HJ), body: JSON.stringify({ photo_id: String(openId), email: who, tagged_by: email, meeting: KEY_M }) }).catch(() => null);
+          if (!r || !r.ok) { alert('The tag could not be saved. Please try again.'); await loadSocial(); refresh(); }
+        } else {
+          tags = tags.filter(t => !(String(t.photo_id) === String(openId) && t.email === who)); renderLb(); renderGrid();
+          await fetch(TG + '?photo_id=eq.' + enc(openId) + '&email=eq.' + enc(who), { method: 'DELETE', headers: H }).catch(() => null);
+        }
+      }
+      function openLb(id) { openId = id; tagging = false; $('lb').classList.add('open'); document.body.style.overflow = 'hidden'; $('lb').scrollTop = 0; renderLb(); }
       function closeLb() { openId = null; $('lb').classList.remove('open'); document.body.style.overflow = ''; pk.classList.remove('open'); }
 
       $('grid').addEventListener('click', async function (e) {
@@ -137,6 +159,9 @@
       $('lb').addEventListener('click', async function (e) {
         if (e.target === this || e.target.closest('.lbx')) { closeLb(); return; }
         const em = e.target.closest('#lbbar [data-em]'); if (em) { react('p' + openId, em.dataset.em); return; }
+        if (e.target.closest('[data-tagging]')) { tagging = !tagging; renderLb(); return; }
+        const tg = e.target.closest('[data-tag]'); if (tg) { tag(tg.dataset.tag, true); return; }
+        const ut = e.target.closest('[data-untag]'); if (ut) { tag(ut.dataset.untag, false); return; }
         const pb = e.target.closest('[data-pick]'); if (pb) { e.stopPropagation(); openPicker(pb, pb.dataset.pick); return; }
         const dc = e.target.closest('[data-delc]');
         if (dc && confirm('Delete this comment?')) {
