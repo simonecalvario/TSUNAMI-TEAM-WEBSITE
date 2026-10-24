@@ -5,6 +5,9 @@ const esc = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // Public VAPID key used by the site (assets/js/push.js).
 const PUB = "BIZygphZe69F81urAeiXeObdY3I781Loy8UN4T6THbGQlNu_bbLDmF86rIvnKqPwBeB5tOWcyvi0_9W6dM1KhM0";
 const boostNeed = (others: number) => Math.max(1, Math.ceil(others * 2 / 3));
+// Members tagged with @Call sign in a text.
+const mentioned = (text: string, nicks: { email: string; nickname: string }[]) =>
+  nicks.filter((n) => n.nickname && new RegExp("@" + esc(n.nickname) + "(?![\\p{L}\\p{N}])", "iu").test(text || "")).map((n) => n.email);
 
 Deno.serve(async (req) => {
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
@@ -46,11 +49,17 @@ Deno.serve(async (req) => {
       target = p?.email ?? null;
     }
     if (target && target !== record.email) to.set(target, { title: record.author + " " + what, body: clip(record.body), url: "/#blog" });
+    const { data: nicks } = await sb.from("nicknames").select("email,nickname");
+    for (const e of mentioned(record.body, nicks || [])) if (e !== record.email && !to.has(e))
+      to.set(e, { title: record.author + " mentioned you in a comment", body: clip(record.body), url: "/#blog" });
   } else if (table === "posts") {
     // A new Blog post: everyone but the author.
-    const { data: nicks } = await sb.from("nicknames").select("email");
+    const { data: nicks } = await sb.from("nicknames").select("email,nickname");
+    const tagged = mentioned((record.title || "") + " " + (record.body || ""), nicks || []);
     for (const n of nicks || []) if (n.email !== record.email)
-      to.set(n.email, { title: "📖 New on the Blog: " + clip(record.title || "a new post"), body: (record.author || "A member") + " published a new post. Read it, react and comment.", url: "/#blog" });
+      to.set(n.email, tagged.includes(n.email)
+        ? { title: "📣 " + (record.author || "A member") + " mentioned you in a post", body: clip(record.title || record.body), url: "/#blog" }
+        : { title: "📖 New on the Blog: " + clip(record.title || "a new post"), body: (record.author || "A member") + " published a new post. Read it, react and comment.", url: "/#blog" });
   } else if (table === "site_updates") {
     // Something new on the site (a section, a feature): the whole team.
     const { data: nicks } = await sb.from("nicknames").select("email");

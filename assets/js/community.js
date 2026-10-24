@@ -39,7 +39,7 @@
           ['📍', 'Find the Team', 'More → Find the Team: everyone on the map with the distances. Add where you will be on holidays or trips.']
         ]],
         ['What’s where', [
-          ['📖', 'Blog', 'More → Blog: post stories, photos and memories; comment and react.'],
+          ['📖', 'Blog', 'More → Blog: post stories, photos and memories; comment, react with emojis and tag someone with @.'],
           ['👥', 'Founders', 'More → Founders: the 13 founders of the team.'],
           ['🌊', 'Philosophy & Statute', 'More → Philosophy & Statute: what we believe, the experiences we share and our founding words.'],
           ['📍', 'Meetings', 'Map of our meetings, city vote and dates. Tap a pin for its gallery: add photos, react and comment.'],
@@ -819,14 +819,15 @@
 
         async function check() {
           const e = encodeURIComponent(email);
-          const [cs, ps, chat, myVote, myDays, myBd, ups] = await Promise.all([
-            get('comments?select=id,post_id,parent_id,email,author,created_at&order=created_at.desc&limit=300'),
+          const [cs, ps, chat, myVote, myDays, myBd, ups, lastPosts] = await Promise.all([
+            get('comments?select=id,post_id,parent_id,email,author,body,created_at&order=created_at.desc&limit=300'),
             get('posts?select=id,title,email&email=eq.' + e),
             get('chat_messages?select=*&order=id.desc&limit=100'),
             get('meeting_votes?select=email&email=eq.' + e + '&limit=1'),
             get('meeting_days?select=email&email=eq.' + e + '&limit=1'),
             get('birthdays?select=email&email=eq.' + e + '&limit=1'),
-            get('site_updates?select=title,body,url,created_at&order=id.desc&limit=3')
+            get('site_updates?select=title,body,url,created_at&order=id.desc&limit=3'),
+            get('posts?select=id,title,body,email,author,created_at&order=created_at.desc&limit=50')
           ]);
           // What's new on the site: the latest updates, highlighted until the bell is opened.
           const news = (ups || []).filter(u => Date.now() - new Date(u.created_at).getTime() < 30 * 864e5).map(u => ({ t: new Date(u.created_at).getTime(), u: u }));
@@ -835,7 +836,15 @@
             const myC = new Set(cs.filter(c => c.email === email).map(c => c.id)), myP = new Set((ps || []).map(p => p.id));
             const title = {}; (ps || []).forEach(p => title[p.id] = p.title);
             cs.filter(c => c.email !== email && ((c.parent_id && myC.has(c.parent_id)) || (!c.parent_id && myP.has(c.post_id)))).slice(0, 15).forEach(c =>
-              items.push({ t: new Date(c.created_at).getTime(), href: '#blog', who: c.author, txt: c.parent_id ? 'replied to your comment' : 'commented on your post “' + (title[c.post_id] || '') + '”', at: c.created_at }));
+              items.push({ cid: c.id, t: new Date(c.created_at).getTime(), href: '#blog', who: c.author, txt: c.parent_id ? 'replied to your comment' : 'commented on your post “' + (title[c.post_id] || '') + '”', at: c.created_at }));
+          }
+          // @mentions in the Blog (posts and comments), unless already listed as a reply.
+          const bre = nick ? new RegExp('@' + nick.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'iu') : null;
+          if (bre) {
+            (cs || []).filter(c => c.email !== email && bre.test(c.body || '') && !items.some(i => i.cid === c.id)).slice(0, 10).forEach(c =>
+              items.push({ t: new Date(c.created_at).getTime(), href: '#blog', who: c.author, txt: 'mentioned you in a comment', at: c.created_at }));
+            (lastPosts || []).filter(p => p.email !== email && bre.test((p.title || '') + ' ' + (p.body || ''))).slice(0, 10).forEach(p =>
+              items.push({ t: new Date(p.created_at).getTime(), href: '#blog', who: p.author, txt: 'mentioned you in the post “' + (p.title || '') + '”', at: p.created_at }));
           }
           let chatNew = 0, chatHot = 0;
           if (chat && chat.length) {

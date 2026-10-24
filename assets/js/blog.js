@@ -7,6 +7,17 @@
       const $ = id => document.getElementById(id);
       const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
       let nick = null, email = null, posts = [], comments = [], reacts = [], drafts = {}, open = {}, replyTo = null, broken = false, limit = 30;
+      // Reactions: the same emojis as the meeting galleries, one per member on each post or comment.
+      const PAL = ['👍', '❤️', '😂', '😮', '😢', '😡'];
+      let names = [];
+      TT.nicks().then(n => { names = Array.from(new Set((n || []).map(x => x.nickname).filter(Boolean))).sort((a, b) => b.length - a.length); render(); });
+      const reEsc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Text with @Call sign mentions highlighted (only real call signs).
+      function fmt(t) {
+        let h = esc(t);
+        if (names.length) h = h.replace(new RegExp('@(' + names.map(n => reEsc(esc(n))).join('|') + ')(?![\\p{L}\\p{N}])', 'giu'), '<span class="mention">@$1</span>');
+        return h;
+      }
 
 
       fetch('/cdn-cgi/access/get-identity', { credentials: 'same-origin' })
@@ -86,18 +97,21 @@
         render();
       }
 
-      const cnt = (t, v) => reacts.filter(x => x.target === t && x.value === v).length;
+      const emo = x => x.emoji || (x.value > 0 ? '👍' : null);
+      const cnt = (t, e) => reacts.filter(x => x.target === t && emo(x) === e).length;
       const mine = t => reacts.find(x => x.target === t && x.email === email);
       const day = d => new Date(d).toLocaleDateString();
 
       function rbtns(t) {
-        const m = mine(t);
-        return '<button data-act="react" class="' + (m && m.value === 1 ? 'on' : '') + '" data-t="' + t + '" data-v="1">👍 ' + cnt(t, 1) + '</button>' +
-               '<button data-act="react" class="' + (m && m.value === -1 ? 'on' : '') + '" data-t="' + t + '" data-v="-1">👎 ' + cnt(t, -1) + '</button>';
+        const m = mine(t), me = m && emo(m);
+        return '<span class="b-rx">' + PAL.map(function (e) {
+          const n = cnt(t, e);
+          return '<button data-act="react" class="rx' + (me === e ? ' on' : '') + (n ? '' : ' zero') + '" data-t="' + t + '" data-e="' + e + '" aria-label="React ' + e + '">' + e + (n ? '<i>' + n + '</i>' : '') + '</button>';
+        }).join('') + '</span>';
       }
 
       function box(k, p, c) {
-        return '<div class="cbox"><textarea rows="2" maxlength="2000" data-k="' + k + '" placeholder="' + (c ? 'Write your reply…' : 'Write a comment…') + '">' + esc(drafts[k] || '') + '</textarea>' +
+        return '<div class="cbox"><textarea rows="2" maxlength="2000" data-k="' + k + '" placeholder="' + (c ? 'Write your reply… (@ to mention)' : 'Write a comment… (@ to mention)') + '">' + esc(drafts[k] || '') + '</textarea>' +
           (c ? '<label><input type="checkbox" class="qchk"> Quote the comment I am replying to</label>' : '') +
           '<div class="b-actions"><button data-act="send" data-p="' + p + '" data-c="' + (c || '') + '">Send</button>' +
           (c ? '<button data-act="cancel">Cancel</button>' : '') + '</div></div>';
@@ -108,7 +122,7 @@
         const par = d > 3 ? comments.find(x => x.id === c.parent_id) : null;
         return '<div class="comment" data-aid="c' + c.id + '"><div class="blog-meta"><strong>' + esc(c.author) + '</strong> · ' + day(c.created_at) + (par ? ' · ↩ @' + esc(par.author) : '') + '</div>' +
           (c.quote_text ? '<blockquote><strong>' + esc(c.quote_author || '') + '</strong>: ' + esc(c.quote_text) + '</blockquote>' : '') +
-          '<div class="blog-text">' + esc(c.body) + '</div>' +
+          '<div class="blog-text">' + fmt(c.body) + '</div>' +
           '<div class="b-actions">' + rbtns('c' + c.id) + '<button data-act="reply" data-c="' + c.id + '">↩ Reply</button>' +
           (email && c.email === email ? '<button data-act="del-c" data-c="' + c.id + '">Delete</button>' : '') + '</div>' +
           (replyTo === c.id ? box('c' + c.id, c.post_id, c.id) : '') +
@@ -152,7 +166,7 @@
             return '<article class="blog-post" data-aid="p' + p.id + '"><h3>' + esc(p.title) + '</h3>' +
               '<div class="blog-meta"><strong>' + esc(p.author) + '</strong> · ' + day(p.created_at) + '</div>' +
               (p.image_url ? '<img src="' + esc(p.image_url) + '" alt="" loading="lazy">' : '') +
-              '<div class="blog-text">' + esc(p.body) + '</div>' +
+              '<div class="blog-text">' + fmt(p.body) + '</div>' +
               '<div class="b-actions">' + rbtns('p' + p.id) +
               '<button data-act="toggle" data-p="' + p.id + '">💬 ' + cs.length + (cs.length === 1 ? ' comment' : ' comments') + (open[p.id] ? ' ▲' : ' ▼') + '</button>' +
               (email && p.email === email ? '<button data-act="del-p" data-id="' + p.id + '">Delete</button>' : '') + '</div>' +
@@ -162,16 +176,17 @@
           (posts.length >= limit ? '<button class="more" data-act="more">Show older posts</button>' : '');
       }
 
-      async function react(t, v) {
+      // Tap an emoji to react, another one to change it, the same one again to remove it.
+      async function react(t, e) {
         if (!who()) return;
-        const m = mine(t);
+        const m = mine(t), same = m && emo(m) === e;
         reacts = reacts.filter(x => !(x.target === t && x.email === email));
-        if (!m || m.value !== v) reacts.push({ target: t, email: email, value: v });
+        if (!same) reacts.push({ target: t, email: email, value: 1, emoji: e });
         render();
         try {
-          const r = (m && m.value === v)
+          const r = same
             ? await fetch(R + 'reactions?target=eq.' + encodeURIComponent(t) + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: H })
-            : await fetch(R + 'reactions?on_conflict=target,email', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, HJ), body: JSON.stringify({ target: t, email: email, value: v }) });
+            : await fetch(R + 'reactions?on_conflict=target,email', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, HJ), body: JSON.stringify({ target: t, email: email, value: 1, emoji: e }) });
           if (!r.ok) throw new Error('fail');
         } catch (e) { toast('Could not save your vote. The database may not be set up yet.'); load(); }
       }
@@ -208,7 +223,7 @@
         if (!b || !b.dataset.act) return;
         const a = b.dataset.act;
         if (a === 'more') { limit += 30; load(); }
-        else if (a === 'react') react(b.dataset.t, +b.dataset.v);
+        else if (a === 'react') react(b.dataset.t, b.dataset.e);
         else if (a === 'toggle') { open[+b.dataset.p] = !open[+b.dataset.p]; render(); }
         else if (a === 'cancel') { replyTo = null; render(); }
         else if (a === 'send') sendComment(b);
@@ -229,6 +244,32 @@
       });
 
       $('blog-search').addEventListener('input', render);
+
+      /* ---- @ mentions: type @ in a post or comment and pick a call sign ---- */
+      const sug = document.createElement('div'); sug.className = 'b-sug';
+      let sugFor = null;
+      function suggest(ta) {
+        const before = ta.value.slice(0, ta.selectionStart || ta.value.length), mt = before.match(/(?:^|\s)@([^@\s][^@\n]{0,23}|)$/u);
+        const q = mt ? mt[1].toLowerCase() : null;
+        const list = q === null ? [] : names.filter(n => n !== nick && n.toLowerCase().indexOf(q) === 0).slice(0, 8);
+        if (!list.length) { sug.remove(); sugFor = null; return; }
+        sug.innerHTML = list.map(n => '<button type="button" data-n="' + esc(n) + '">@' + esc(n) + '</button>').join('');
+        sugFor = ta; ta.insertAdjacentElement('afterend', sug);
+      }
+      document.addEventListener('input', function (e) {
+        const ta = e.target;
+        if (ta.tagName === 'TEXTAREA' && (ta.id === 'blog-body' || (ta.dataset && ta.dataset.k))) suggest(ta);
+      });
+      sug.addEventListener('mousedown', function (e) { e.preventDefault(); }); // keep the keyboard open
+      sug.addEventListener('click', function (e) {
+        const b = e.target.closest('[data-n]'); if (!b || !sugFor) return;
+        e.stopPropagation();
+        const ta = sugFor, pos = ta.selectionStart || ta.value.length, before = ta.value.slice(0, pos).replace(/@[^@\n]{0,24}$/u, '');
+        ta.value = before + '@' + b.dataset.n + ' ' + ta.value.slice(pos);
+        const c = (before + '@' + b.dataset.n + ' ').length; ta.setSelectionRange(c, c);
+        if (ta.dataset.k) drafts[ta.dataset.k] = ta.value;
+        sug.remove(); sugFor = null; ta.focus();
+      });
 
       $('blog-form').addEventListener('submit', async function (e) {
         e.preventDefault();

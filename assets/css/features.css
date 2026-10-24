@@ -379,3 +379,12 @@ body.m #tx-toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
 .mem-info .mem-ed-t, .mem-info .mem-ed-d { width: 100%; padding: 9px 11px; margin: 4px 0; border-radius: 8px; border: 1px solid var(--line); background: var(--black); color: var(--white); font: inherit; font-size: 16px; }
 .mem-info .mem-ed-t { font-weight: 700; }
 .mem-info .mem-ed-d { resize: vertical; }
+/* Blog: emoji reactions and @ mentions */
+.b-rx { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.b-actions .b-rx button.rx { padding: 4px 8px; border-radius: 999px; font-size: .95rem; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; }
+.b-actions .b-rx button.rx i { font-style: normal; font-size: .78rem; font-weight: 700; }
+.b-actions .b-rx button.rx.zero { opacity: .55; border-color: transparent; }
+.b-actions .b-rx button.rx.on { opacity: 1; background: rgba(245,210,27,.18); color: var(--white); border-color: var(--yellow); }
+.blog-text .mention { color: var(--yellow); font-weight: 700; }
+.b-sug { display: flex; flex-wrap: wrap; gap: 6px; margin: -2px 0 6px; }
+.b-sug button { padding: 6px 12px; font: inherit; font-size: .85rem; color: var(--yellow); background: rgba(245,210,27,.1); border: 1px solid rgba(245,210,27,.4); border-radius: 16px; cursor: pointer; }
