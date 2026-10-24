@@ -399,3 +399,16 @@ body.m #tx-toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
 .blog-post .tg-pick button { padding: 6px 12px; border-radius: 16px; border: 1px solid var(--line); background: none; color: var(--white); font: inherit; font-size: .85rem; cursor: pointer; }
 .blog-post.b-flash { animation: bflash 1.8s ease; }
 @keyframes bflash { 0%, 60% { box-shadow: 0 0 0 2px var(--yellow); } 100% { box-shadow: none; } }
+
+    /* Place of a photo */
+    .pl-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 2px 0 12px; font-size: .88rem; color: var(--grey); }
+    .pl-row a { color: var(--yellow); font-weight: 700; text-decoration: none; }
+    .pl-edit { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: none; cursor: pointer; font-size: 12px; }
+    .pl-add { padding: 5px 12px; border-radius: 999px; border: 1px dashed var(--line); background: none; color: var(--white); font: inherit; font-size: .85rem; cursor: pointer; }
+    .pl-ed { margin: 2px 0 12px; }
+    .pl-ed .pl-q { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--black); color: var(--white); font: inherit; font-size: 16px; }
+    .pl-res { list-style: none; margin: 0; padding: 0; }
+    .pl-res li { padding: 9px 12px; background: var(--dark); border: 1px solid var(--line); border-top: 0; color: var(--grey); cursor: pointer; font-size: .9rem; }
+    .pl-res li:hover { color: var(--yellow); }
+    .pl-b { display: flex; gap: 6px; margin-top: 6px; }
+    .pl-b button { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line); background: none; color: var(--grey); font: inherit; font-size: .82rem; cursor: pointer; }

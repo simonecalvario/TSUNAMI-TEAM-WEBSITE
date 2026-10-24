@@ -145,6 +145,15 @@
           '<button type="button" class="tg-add" data-act="tagging" data-p="' + p.id + '">' + (tagPost === p.id ? 'Done' : '＋ Tag someone') + '</button></div>' +
           (tagPost === p.id ? '<div class="tg-pick">' + nk.filter(n => !has.has(n.email)).sort((a, b) => String(a.nickname).localeCompare(String(b.nickname))).map(n => '<button type="button" data-act="tag" data-p="' + p.id + '" data-e="' + esc(n.email) + '">' + esc(n.nickname) + (n.email === email ? ' (me)' : '') + '</button>').join('') + '</div>' : '');
       }
+      // The place of the post's photo, set by its author.
+      TT.place.register('post', {
+        save: async function (id, v) {
+          const r = await fetch(R + 'posts?id=eq.' + id + '&email=eq.' + encodeURIComponent(email), { method: 'PATCH', headers: Object.assign({ Prefer: 'return=minimal' }, HJ), body: JSON.stringify(v) });
+          if (!r.ok) throw 0;
+          const p = posts.find(x => String(x.id) === String(id)); if (p) Object.assign(p, v);
+        },
+        rerender: render
+      });
       async function tag(pid, who, on) {
         if (!who || !email) return;
         if (on) ptags.push({ post_id: pid, email: who, tagged_by: email }); else ptags = ptags.filter(t => !(t.post_id === pid && t.email === who));
@@ -193,7 +202,7 @@
             const cs = comments.filter(c => c.post_id === p.id);
             return '<article class="blog-post" data-aid="p' + p.id + '"><h3>' + esc(p.title) + '</h3>' +
               '<div class="blog-meta"><strong>' + esc(p.author) + '</strong> · ' + day(p.created_at) + '</div>' +
-              (p.image_url ? '<img src="' + esc(p.image_url) + '" alt="" loading="lazy">' + tagRow(p) : '') +
+              (p.image_url ? '<img src="' + esc(p.image_url) + '" alt="" loading="lazy">' + tagRow(p) + TT.place.html('post:' + p.id, p, p.email === email) : '') +
               '<div class="blog-text">' + fmt(p.body) + '</div>' +
               '<div class="b-actions">' + rbtns('p' + p.id) +
               '<button data-act="toggle" data-p="' + p.id + '">💬 ' + cs.length + (cs.length === 1 ? ' comment' : ' comments') + (open[p.id] ? ' ▲' : ' ▼') + '</button>' +
