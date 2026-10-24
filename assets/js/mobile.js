@@ -1,7 +1,7 @@
 (function () {
   const mq = window.matchMedia('(max-width: 700px)');
   const secs = Array.prototype.slice.call(document.querySelectorAll('main > section'));
-  const MAIN = ['home', 'meetings', 'lagoon', 'memorabilia', 'passport'];
+  const MAIN = ['home', 'meetings', 'lagoon', 'blog', 'passport'];
   const bar = document.getElementById('tabbar'), sheet = document.getElementById('m-sheet'), footer = document.querySelector('footer');
   // Sections shown together on phones: the Statute lives under Philosophy.
   const GROUP = { statute: 'philosophy' }, WITH = { philosophy: ['statute'] };
