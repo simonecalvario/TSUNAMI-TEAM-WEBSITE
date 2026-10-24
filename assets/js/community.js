@@ -268,7 +268,8 @@
         const mt = before.match(/(?:^|\s)@([^@\s][^@]{0,23}|)$/u);
         if (!mt) { box.style.display = 'none'; return; }
         const q = mt[1].toLowerCase();
-        const names = Array.from(new Set(nicks.map(x => x.nickname))).filter(n => n && n !== nick && n.toLowerCase().indexOf(q) === 0).slice(0, 8);
+        // Every member (no limit), alphabetical; "@ham" also finds "Jack Hammer".
+        const names = Array.from(new Set(nicks.map(x => x.nickname))).filter(n => n && n !== nick && (' ' + n.toLowerCase()).indexOf(' ' + q) > -1).sort((a, b) => a.localeCompare(b));
         if (!names.length) { box.style.display = 'none'; return; }
         box.innerHTML = names.map(n => '<button type="button" data-n="' + esc(n) + '">@' + esc(n) + '</button>').join('');
         box.style.display = 'flex';
