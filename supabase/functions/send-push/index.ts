@@ -72,6 +72,14 @@ Deno.serve(async (req) => {
       const m = String(record.meeting || "");
       to.set(record.email, { title: "🏷 " + by + " tagged you in a photo", body: "Open it in the " + (m ? m.charAt(0).toUpperCase() + m.slice(1) + " " : "") + "gallery, react and comment.", url: "/gallery.html?m=" + encodeURIComponent(m) + "&p=" + encodeURIComponent(record.photo_id) });
     }
+  } else if (table === "post_tags") {
+    // Tagged in the photo of a Blog post (not when you tag yourself).
+    if (record.email !== record.tagged_by) {
+      const { data: nicks } = await sb.from("nicknames").select("email,nickname");
+      const by = (nicks || []).find((n) => n.email === record.tagged_by)?.nickname || "A member";
+      const { data: p } = await sb.from("posts").select("title").eq("id", record.post_id).maybeSingle();
+      to.set(record.email, { title: "🏷 " + by + " tagged you in a photo", body: "On the Blog: " + clip(p?.title || "a post") + ". React and comment.", url: "/?post=" + record.post_id + "#blog" });
+    }
   } else if (table === "birthday_waves") {
     // Tell the birthday member when the team has filled the energy bar (two thirds of the others), and again if everyone joined.
     // From 21:00 the Boost is already open: later waves only show inside it, no more pushes.

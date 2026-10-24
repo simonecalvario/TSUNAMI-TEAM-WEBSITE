@@ -388,3 +388,14 @@ body.m #tx-toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
 .blog-text .mention { color: var(--yellow); font-weight: 700; }
 .b-sug { display: flex; flex-wrap: wrap; gap: 6px; margin: -2px 0 6px; }
 .b-sug button { padding: 6px 12px; font: inherit; font-size: .85rem; color: var(--yellow); background: rgba(245,210,27,.1); border: 1px solid rgba(245,210,27,.4); border-radius: 16px; cursor: pointer; }
+/* Blog: who is in the post's photo */
+.blog-post .tg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .85rem; margin: -6px 0 12px; }
+.blog-post .tg-l, .blog-post .tg-n { color: var(--grey); }
+.blog-post .tg-n { font-style: italic; }
+.blog-post .tg { display: inline-flex; align-items: center; gap: 2px; padding: 4px 4px 4px 10px; border-radius: 999px; background: rgba(245,210,27,.12); border: 1px solid rgba(245,210,27,.4); color: var(--yellow); font-weight: 700; }
+.blog-post .tg button { width: 22px; height: 22px; border: 0; background: none; color: var(--grey); cursor: pointer; font-size: .8rem; }
+.blog-post .tg-add { padding: 5px 12px; border-radius: 999px; border: 1px dashed var(--line); background: none; color: var(--white); font: inherit; font-size: .85rem; cursor: pointer; }
+.blog-post .tg-pick { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 12px; padding: 10px; border-radius: 10px; background: rgba(0,0,0,.2); border: 1px solid var(--line); }
+.blog-post .tg-pick button { padding: 6px 12px; border-radius: 16px; border: 1px solid var(--line); background: none; color: var(--white); font: inherit; font-size: .85rem; cursor: pointer; }
+.blog-post.b-flash { animation: bflash 1.8s ease; }
+@keyframes bflash { 0%, 60% { box-shadow: 0 0 0 2px var(--yellow); } 100% { box-shadow: none; } }
