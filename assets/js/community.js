@@ -819,7 +819,7 @@
 
         async function check() {
           const e = encodeURIComponent(email);
-          const [cs, ps, chat, myVote, myDays, myBd, ups, lastPosts, myTags] = await Promise.all([
+          const [cs, ps, chat, myVote, myDays, myBd, ups, lastPosts, myTags, myPostTags] = await Promise.all([
             get('comments?select=id,post_id,parent_id,email,author,body,created_at&order=created_at.desc&limit=300'),
             get('posts?select=id,title,email&email=eq.' + e),
             get('chat_messages?select=*&order=id.desc&limit=100'),
@@ -828,12 +828,14 @@
             get('birthdays?select=email&email=eq.' + e + '&limit=1'),
             get('site_updates?select=title,body,url,created_at&order=id.desc&limit=3'),
             get('posts?select=id,title,body,email,author,created_at&order=created_at.desc&limit=50'),
-            get('photo_tags?select=photo_id,tagged_by,meeting,created_at&email=eq.' + e + '&order=created_at.desc&limit=10')
+            get('photo_tags?select=photo_id,tagged_by,meeting,created_at&email=eq.' + e + '&order=created_at.desc&limit=10'),
+            get('post_tags?select=post_id,tagged_by,created_at&email=eq.' + e + '&order=created_at.desc&limit=10')
           ]);
           // What's new on the site: the latest updates, highlighted until the bell is opened.
           const news = (ups || []).filter(u => Date.now() - new Date(u.created_at).getTime() < 30 * 864e5).map(u => ({ t: new Date(u.created_at).getTime(), u: u }));
           const items = [];
           // Tagged in a gallery photo by someone else.
+          (myPostTags || []).filter(t => t.tagged_by !== email).forEach(t => items.push({ t: new Date(t.created_at).getTime(), href: '?post=' + t.post_id + '#blog', who: nickOf(t.tagged_by) || 'A member', txt: 'tagged you in a Blog photo 🏷', at: t.created_at }));
           (myTags || []).filter(t => t.tagged_by !== email).forEach(t => items.push({ t: new Date(t.created_at).getTime(), href: 'gallery.html?m=' + encodeURIComponent(t.meeting || '') + '&p=' + encodeURIComponent(t.photo_id), who: nickOf(t.tagged_by) || 'A member', txt: 'tagged you in a photo 🏷', at: t.created_at }));
           if (cs) {
             const myC = new Set(cs.filter(c => c.email === email).map(c => c.id)), myP = new Set((ps || []).map(p => p.id));

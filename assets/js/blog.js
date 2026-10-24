@@ -9,8 +9,10 @@
       let nick = null, email = null, posts = [], comments = [], reacts = [], drafts = {}, open = {}, replyTo = null, broken = false, limit = 30;
       // Reactions: the same emojis as the meeting galleries, one per member on each post or comment.
       const PAL = ['👍', '❤️', '😂', '😮', '😢', '😡'];
-      let names = [];
-      TT.nicks().then(n => { names = Array.from(new Set((n || []).map(x => x.nickname).filter(Boolean))).sort((a, b) => b.length - a.length); render(); });
+      let names = [], nk = [], ptags = [], tagPost = null;
+      const deepPost = +(new URLSearchParams(location.search).get('post') || 0);
+      const nameOfE = e => (nk.find(x => x.email === e) || {}).nickname || 'A member';
+      TT.nicks().then(n => { nk = n || []; names = Array.from(new Set((n || []).map(x => x.nickname).filter(Boolean))).sort((a, b) => b.length - a.length); render(); });
       const reEsc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       // Text with @Call sign mentions highlighted (only real call signs).
       function fmt(t) {
@@ -90,11 +92,17 @@
         const a = await Promise.all([
           get('posts?select=*&order=created_at.desc&limit=' + limit),
           get('comments?select=*&order=created_at.asc'),
-          get('reactions?select=*')
+          get('reactions?select=*'),
+          get('post_tags?select=post_id,email,tagged_by')
         ]);
-        posts = a[0] || []; comments = a[1] || []; reacts = a[2] || [];
+        posts = a[0] || []; comments = a[1] || []; reacts = a[2] || []; ptags = a[3] || [];
         broken = a[1] === null || a[2] === null;
         render();
+        // Opened from a notification (?post=…#blog): bring that post into view once.
+        if (deepPost && !load.done) {
+          load.done = true;
+          setTimeout(function () { const el = document.querySelector('#blog-list [data-aid="p' + deepPost + '"]'); if (el) { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); el.classList.add('b-flash'); } }, 400);
+        }
       }
 
       const emo = x => x.emoji || (x.value > 0 ? '👍' : null);
@@ -127,6 +135,26 @@
           (email && c.email === email ? '<button data-act="del-c" data-c="' + c.id + '">Delete</button>' : '') + '</div>' +
           (replyTo === c.id ? box('c' + c.id, c.post_id, c.id) : '') +
           (kids.length ? '<div class="' + (d < 3 ? 'c-children' : 'c-flat') + '">' + kids.map(k => commentHtml(k, d + 1)).join('') + '</div>' : '') + '</div>';
+      }
+
+      // Who is in the post's photo: "Tag someone" picks call signs; ✕ removes a tag (yours, about you, or on your post).
+      function tagRow(p) {
+        const tg = ptags.filter(t => t.post_id === p.id), has = new Set(tg.map(t => t.email));
+        return '<div class="tg-row b-tags"><span class="tg-l">🏷 In this photo:</span>' +
+          (tg.length ? tg.map(t => '<span class="tg">' + esc(nameOfE(t.email)) + ((t.tagged_by === email || t.email === email || p.email === email) ? '<button type="button" data-act="untag" data-p="' + p.id + '" data-e="' + esc(t.email) + '" aria-label="Remove tag">✕</button>' : '') + '</span>').join('') : '<span class="tg-n">nobody tagged yet</span>') +
+          '<button type="button" class="tg-add" data-act="tagging" data-p="' + p.id + '">' + (tagPost === p.id ? 'Done' : '＋ Tag someone') + '</button></div>' +
+          (tagPost === p.id ? '<div class="tg-pick">' + nk.filter(n => !has.has(n.email)).sort((a, b) => String(a.nickname).localeCompare(String(b.nickname))).map(n => '<button type="button" data-act="tag" data-p="' + p.id + '" data-e="' + esc(n.email) + '">' + esc(n.nickname) + (n.email === email ? ' (me)' : '') + '</button>').join('') + '</div>' : '');
+      }
+      async function tag(pid, who, on) {
+        if (!who || !email) return;
+        if (on) ptags.push({ post_id: pid, email: who, tagged_by: email }); else ptags = ptags.filter(t => !(t.post_id === pid && t.email === who));
+        render();
+        try {
+          const r = on
+            ? await fetch(R + 'post_tags', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, HJ), body: JSON.stringify({ post_id: pid, email: who, tagged_by: email }) })
+            : await fetch(R + 'post_tags?post_id=eq.' + pid + '&email=eq.' + encodeURIComponent(who), { method: 'DELETE', headers: H });
+          if (!r.ok) throw 0;
+        } catch (x) { toast('The tag could not be saved. Please try again.'); load(); }
       }
 
       function anchor() {
@@ -165,7 +193,7 @@
             const cs = comments.filter(c => c.post_id === p.id);
             return '<article class="blog-post" data-aid="p' + p.id + '"><h3>' + esc(p.title) + '</h3>' +
               '<div class="blog-meta"><strong>' + esc(p.author) + '</strong> · ' + day(p.created_at) + '</div>' +
-              (p.image_url ? '<img src="' + esc(p.image_url) + '" alt="" loading="lazy">' : '') +
+              (p.image_url ? '<img src="' + esc(p.image_url) + '" alt="" loading="lazy">' + tagRow(p) : '') +
               '<div class="blog-text">' + fmt(p.body) + '</div>' +
               '<div class="b-actions">' + rbtns('p' + p.id) +
               '<button data-act="toggle" data-p="' + p.id + '">💬 ' + cs.length + (cs.length === 1 ? ' comment' : ' comments') + (open[p.id] ? ' ▲' : ' ▼') + '</button>' +
@@ -224,6 +252,9 @@
         const a = b.dataset.act;
         if (a === 'more') { limit += 30; load(); }
         else if (a === 'react') react(b.dataset.t, b.dataset.e);
+        else if (a === 'tagging') { tagPost = tagPost === +b.dataset.p ? null : +b.dataset.p; render(); }
+        else if (a === 'tag') tag(+b.dataset.p, b.dataset.e, true);
+        else if (a === 'untag') tag(+b.dataset.p, b.dataset.e, false);
         else if (a === 'toggle') { open[+b.dataset.p] = !open[+b.dataset.p]; render(); }
         else if (a === 'cancel') { replyTo = null; render(); }
         else if (a === 'send') sendComment(b);
