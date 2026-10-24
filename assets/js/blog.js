@@ -291,7 +291,8 @@
       function suggest(ta) {
         const before = ta.value.slice(0, ta.selectionStart || ta.value.length), mt = before.match(/(?:^|\s)@([^@\s][^@\n]{0,23}|)$/u);
         const q = mt ? mt[1].toLowerCase() : null;
-        const list = q === null ? [] : names.filter(n => n !== nick && n.toLowerCase().indexOf(q) === 0).slice(0, 8);
+        // Every member (no limit), alphabetical; "@ham" also finds "Jack Hammer".
+        const list = q === null ? [] : names.filter(n => n !== nick && (' ' + n.toLowerCase()).indexOf(' ' + q) > -1).sort((a, b) => a.localeCompare(b));
         if (!list.length) { sug.remove(); sugFor = null; return; }
         sug.innerHTML = list.map(n => '<button type="button" data-n="' + esc(n) + '">@' + esc(n) + '</button>').join('');
         sugFor = ta; ta.insertAdjacentElement('afterend', sug);
